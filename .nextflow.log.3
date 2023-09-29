@@ -1,0 +1,88 @@
+Sep-29 10:50:26.179 [main] DEBUG nextflow.cli.Launcher - $> nextflow run .
+Sep-29 10:50:26.217 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.04.1
+Sep-29 10:50:26.235 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/jquinn/.nextflow/plugins; core-plugins: nf-amazon@1.16.2,nf-azure@1.0.1,nf-codecommit@0.1.4,nf-console@1.0.5,nf-ga4gh@1.0.5,nf-google@1.7.3,nf-tower@1.5.12,nf-wave@0.8.2
+Sep-29 10:50:26.241 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Sep-29 10:50:26.241 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Sep-29 10:50:26.243 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Sep-29 10:50:26.249 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Sep-29 10:50:26.759 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
+Sep-29 10:50:26.759 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
+Sep-29 10:50:26.769 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Sep-29 10:50:27.411 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
+Sep-29 10:50:27.421 [main] INFO  nextflow.cli.CmdRun - Launching `./main.nf` [nauseous_meucci] DSL2 - revision: bb96675fea
+Sep-29 10:50:27.422 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins declared=[nf-validation]
+Sep-29 10:50:27.422 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Sep-29 10:50:27.422 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[nf-validation]
+Sep-29 10:50:27.422 [main] DEBUG nextflow.plugin.PluginUpdater - Installing plugin nf-validation version: latest
+Sep-29 10:50:27.564 [main] INFO  nextflow.plugin.PluginUpdater - Downloading plugin nf-validation@0.3.2
+Sep-29 10:50:29.001 [main] INFO  org.pf4j.util.FileUtils - Expanded plugin zip 'nf-validation-0.3.2.zip' in 'nf-validation-0.3.2'
+Sep-29 10:50:29.009 [main] INFO  org.pf4j.AbstractPluginManager - Plugin 'nf-validation@0.3.2' resolved
+Sep-29 10:50:29.009 [main] INFO  org.pf4j.AbstractPluginManager - Start plugin 'nf-validation@0.3.2'
+Sep-29 10:50:29.012 [main] DEBUG nextflow.plugin.BasePlugin - Plugin started nf-validation@0.3.2
+Sep-29 10:50:29.017 [main] DEBUG nextflow.secret.LocalSecretsProvider - Secrets store: /Users/jquinn/.nextflow/secrets/store.json
+Sep-29 10:50:29.018 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@5c448ef] - activable => nextflow.secret.LocalSecretsProvider@5c448ef
+Sep-29 10:50:29.052 [main] DEBUG nextflow.Session - Session UUID: dfcf8a3a-38f4-47de-9342-e554f4f6150a
+Sep-29 10:50:29.053 [main] DEBUG nextflow.Session - Run name: nauseous_meucci
+Sep-29 10:50:29.053 [main] DEBUG nextflow.Session - Executor pool size: 8
+Sep-29 10:50:29.058 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=24; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Sep-29 10:50:29.161 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 23.04.1 build 5866
+  Created: 15-04-2023 06:51 UTC (02:51 EDT)
+  System: Mac OS X 13.5
+  Runtime: Groovy 3.0.16 on OpenJDK 64-Bit Server VM 20+36-2344
+  Encoding: UTF-8 (UTF-8)
+  Process: 21494@LBST0162 [192.168.10.131]
+  CPUs: 8 - Mem: 16 GB (68.6 MB) - Swap: 5 GB (1.4 GB)
+Sep-29 10:50:29.174 [main] DEBUG nextflow.Session - Work-dir: /Users/jquinn/Code/btc-spatial-pipelines/work [Mac OS X]
+Sep-29 10:50:29.185 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Sep-29 10:50:29.190 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Sep-29 10:50:29.232 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Sep-29 10:50:29.238 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 9; maxThreads: 1000
+Sep-29 10:50:29.288 [main] DEBUG nextflow.Session - Session start
+Sep-29 10:50:29.290 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /Users/jquinn/Code/btc-spatial-pipelines/null/pipeline_info/execution_trace_2023-09-29_10-50-27.txt
+Sep-29 10:50:29.461 [main] DEBUG nextflow.Session - Using default localLib path: /Users/jquinn/Code/btc-spatial-pipelines/lib
+Sep-29 10:50:29.463 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib
+Sep-29 10:50:29.464 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib/nfcore_external_java_deps.jar
+Sep-29 10:50:29.666 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Sep-29 10:50:29.677 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters, paramsHelp:paramsHelp]; plugin Id: nf-validation
+Sep-29 10:50:29.685 [main] DEBUG nextflow.validation.SchemaValidator - Starting parameters validation
+Sep-29 10:50:29.708 [main] WARN  nextflow.script.ScriptBinding - Access to undefined parameter `fasta` -- Initialise it to a default value eg. `params.fasta = some_value`
+Sep-29 10:50:29.746 [main] ERROR nextflow.validation.SchemaValidator - ERROR: Validation of pipeline parameters failed!
+Sep-29 10:50:29.750 [main] DEBUG nextflow.Session - Session aborted -- Cause: [0;31mThe following invalid input values have been detected:
+
+* Missing required parameter: --input
+* Missing required parameter: --outdir
+[0m
+
+Sep-29 10:50:29.755 [main] DEBUG nextflow.cli.Launcher - Operation aborted
+nextflow.validation.SchemaValidationException: [0;31mThe following invalid input values have been detected:
+
+* Missing required parameter: --input
+* Missing required parameter: --outdir
+[0m
+
+	at nextflow.validation.SchemaValidator.validateParameters(SchemaValidator.groovy:374)
+	at nextflow.validation.SchemaValidator.validateParameters(SchemaValidator.groovy)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at nextflow.script.FunctionDef.invoke_a(FunctionDef.groovy:64)
+	at nextflow.script.ComponentDef.invoke_o(ComponentDef.groovy:40)
+	at nextflow.script.WorkflowBinding.invokeMethod(WorkflowBinding.groovy:102)
+	at groovy.lang.GroovyObject$invokeMethod.call(Unknown Source)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCall(CallSiteArray.java:47)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:125)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:148)
+	at nextflow.script.BaseScript.invokeMethod(BaseScript.groovy:141)
+	at org.codehaus.groovy.runtime.callsite.PogoMetaClassSite.callCurrent(PogoMetaClassSite.java:68)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallCurrent(CallSiteArray.java:51)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:171)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:176)
+	at Script_96e177fa.runScript(Script_96e177fa:32)
+	at nextflow.script.BaseScript.run0(BaseScript.groovy:145)
+	at nextflow.script.BaseScript.run(BaseScript.groovy:192)
+	at nextflow.script.ScriptParser.runScript(ScriptParser.groovy:229)
+	at nextflow.script.ScriptRunner.run(ScriptRunner.groovy:224)
+	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:130)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:368)
+	at nextflow.cli.Launcher.run(Launcher.groovy:494)
+	at nextflow.cli.Launcher.main(Launcher.groovy:653)
