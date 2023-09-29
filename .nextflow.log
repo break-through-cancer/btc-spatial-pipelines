@@ -1,51 +1,51 @@
-Sep-29 11:11:40.123 [main] DEBUG nextflow.cli.Launcher - $> nextflow run . --input /Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard --outdir /tmp/test
-Sep-29 11:11:40.170 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.04.1
-Sep-29 11:11:40.181 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/jquinn/.nextflow/plugins; core-plugins: nf-amazon@1.16.2,nf-azure@1.0.1,nf-codecommit@0.1.4,nf-console@1.0.5,nf-ga4gh@1.0.5,nf-google@1.7.3,nf-tower@1.5.12,nf-wave@0.8.2
-Sep-29 11:11:40.186 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
-Sep-29 11:11:40.187 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
-Sep-29 11:11:40.188 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
-Sep-29 11:11:40.197 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
-Sep-29 11:11:40.679 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
-Sep-29 11:11:40.680 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
-Sep-29 11:11:40.688 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
-Sep-29 11:11:40.922 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
-Sep-29 11:11:40.932 [main] INFO  nextflow.cli.CmdRun - Launching `./main.nf` [lethal_maxwell] DSL2 - revision: 12cd95eaee
-Sep-29 11:11:40.933 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins declared=[nf-validation]
-Sep-29 11:11:40.933 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
-Sep-29 11:11:40.933 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[nf-validation]
-Sep-29 11:11:40.933 [main] DEBUG nextflow.plugin.PluginUpdater - Installing plugin nf-validation version: latest
-Sep-29 11:11:41.200 [main] INFO  org.pf4j.AbstractPluginManager - Plugin 'nf-validation@0.3.2' resolved
-Sep-29 11:11:41.200 [main] INFO  org.pf4j.AbstractPluginManager - Start plugin 'nf-validation@0.3.2'
-Sep-29 11:11:41.207 [main] DEBUG nextflow.plugin.BasePlugin - Plugin started nf-validation@0.3.2
-Sep-29 11:11:41.217 [main] DEBUG nextflow.secret.LocalSecretsProvider - Secrets store: /Users/jquinn/.nextflow/secrets/store.json
-Sep-29 11:11:41.219 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@6282b9f5] - activable => nextflow.secret.LocalSecretsProvider@6282b9f5
-Sep-29 11:11:41.253 [main] DEBUG nextflow.Session - Session UUID: a07e4021-8b6b-4be6-9ec0-694cf86632b8
-Sep-29 11:11:41.253 [main] DEBUG nextflow.Session - Run name: lethal_maxwell
-Sep-29 11:11:41.254 [main] DEBUG nextflow.Session - Executor pool size: 8
-Sep-29 11:11:41.259 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=24; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
-Sep-29 11:11:41.278 [main] DEBUG nextflow.cli.CmdRun - 
+Sep-29 11:23:22.983 [main] DEBUG nextflow.cli.Launcher - $> nextflow run . --input /tmp/test.csv --outdir /tmp/results
+Sep-29 11:23:23.029 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.04.1
+Sep-29 11:23:23.040 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/jquinn/.nextflow/plugins; core-plugins: nf-amazon@1.16.2,nf-azure@1.0.1,nf-codecommit@0.1.4,nf-console@1.0.5,nf-ga4gh@1.0.5,nf-google@1.7.3,nf-tower@1.5.12,nf-wave@0.8.2
+Sep-29 11:23:23.046 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Sep-29 11:23:23.046 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Sep-29 11:23:23.048 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Sep-29 11:23:23.054 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Sep-29 11:23:23.554 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
+Sep-29 11:23:23.554 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
+Sep-29 11:23:23.561 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Sep-29 11:23:23.800 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
+Sep-29 11:23:23.811 [main] INFO  nextflow.cli.CmdRun - Launching `./main.nf` [nostalgic_cuvier] DSL2 - revision: 12cd95eaee
+Sep-29 11:23:23.811 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins declared=[nf-validation]
+Sep-29 11:23:23.812 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Sep-29 11:23:23.812 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[nf-validation]
+Sep-29 11:23:23.812 [main] DEBUG nextflow.plugin.PluginUpdater - Installing plugin nf-validation version: latest
+Sep-29 11:23:24.049 [main] INFO  org.pf4j.AbstractPluginManager - Plugin 'nf-validation@0.3.2' resolved
+Sep-29 11:23:24.049 [main] INFO  org.pf4j.AbstractPluginManager - Start plugin 'nf-validation@0.3.2'
+Sep-29 11:23:24.056 [main] DEBUG nextflow.plugin.BasePlugin - Plugin started nf-validation@0.3.2
+Sep-29 11:23:24.064 [main] DEBUG nextflow.secret.LocalSecretsProvider - Secrets store: /Users/jquinn/.nextflow/secrets/store.json
+Sep-29 11:23:24.066 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@11c78080] - activable => nextflow.secret.LocalSecretsProvider@11c78080
+Sep-29 11:23:24.102 [main] DEBUG nextflow.Session - Session UUID: f5ca4787-56bc-49c3-8f99-b50d943d3fc5
+Sep-29 11:23:24.102 [main] DEBUG nextflow.Session - Run name: nostalgic_cuvier
+Sep-29 11:23:24.102 [main] DEBUG nextflow.Session - Executor pool size: 8
+Sep-29 11:23:24.108 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=24; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Sep-29 11:23:24.125 [main] DEBUG nextflow.cli.CmdRun - 
   Version: 23.04.1 build 5866
   Created: 15-04-2023 06:51 UTC (02:51 EDT)
   System: Mac OS X 13.5
   Runtime: Groovy 3.0.16 on OpenJDK 64-Bit Server VM 20+36-2344
   Encoding: UTF-8 (UTF-8)
-  Process: 23423@LBST0162 [192.168.10.131]
-  CPUs: 8 - Mem: 16 GB (69.4 MB) - Swap: 5 GB (1.3 GB)
-Sep-29 11:11:41.287 [main] DEBUG nextflow.Session - Work-dir: /Users/jquinn/Code/btc-spatial-pipelines/work [Mac OS X]
-Sep-29 11:11:41.306 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
-Sep-29 11:11:41.311 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
-Sep-29 11:11:41.346 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
-Sep-29 11:11:41.351 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 9; maxThreads: 1000
-Sep-29 11:11:41.392 [main] DEBUG nextflow.Session - Session start
-Sep-29 11:11:41.393 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /tmp/test/pipeline_info/execution_trace_2023-09-29_11-11-40.txt
-Sep-29 11:11:41.400 [main] DEBUG nextflow.Session - Using default localLib path: /Users/jquinn/Code/btc-spatial-pipelines/lib
-Sep-29 11:11:41.402 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib
-Sep-29 11:11:41.403 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib/nfcore_external_java_deps.jar
-Sep-29 11:11:41.626 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
-Sep-29 11:11:41.635 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters, paramsHelp:paramsHelp]; plugin Id: nf-validation
-Sep-29 11:11:41.644 [main] DEBUG nextflow.validation.SchemaValidator - Starting parameters validation
-Sep-29 11:11:41.712 [main] DEBUG nextflow.validation.SchemaValidator - Finishing parameters validation
-Sep-29 11:11:41.715 [main] WARN  nextflow.Nextflow - [btc/spatial] You are attempting to run the pipeline without any custom configuration!
+  Process: 24369@LBST0162 [192.168.10.131]
+  CPUs: 8 - Mem: 16 GB (75.5 MB) - Swap: 5 GB (1.2 GB)
+Sep-29 11:23:24.134 [main] DEBUG nextflow.Session - Work-dir: /Users/jquinn/Code/btc-spatial-pipelines/work [Mac OS X]
+Sep-29 11:23:24.146 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Sep-29 11:23:24.151 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Sep-29 11:23:24.187 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Sep-29 11:23:24.194 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 9; maxThreads: 1000
+Sep-29 11:23:24.231 [main] DEBUG nextflow.Session - Session start
+Sep-29 11:23:24.233 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /tmp/results/pipeline_info/execution_trace_2023-09-29_11-23-23.txt
+Sep-29 11:23:24.241 [main] DEBUG nextflow.Session - Using default localLib path: /Users/jquinn/Code/btc-spatial-pipelines/lib
+Sep-29 11:23:24.243 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib
+Sep-29 11:23:24.243 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib/nfcore_external_java_deps.jar
+Sep-29 11:23:24.497 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Sep-29 11:23:24.505 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters, paramsHelp:paramsHelp]; plugin Id: nf-validation
+Sep-29 11:23:24.513 [main] DEBUG nextflow.validation.SchemaValidator - Starting parameters validation
+Sep-29 11:23:24.585 [main] DEBUG nextflow.validation.SchemaValidator - Finishing parameters validation
+Sep-29 11:23:24.588 [main] WARN  nextflow.Nextflow - [btc/spatial] You are attempting to run the pipeline without any custom configuration!
 
 This will be dependent on your local compute environment but can be achieved via one or more of the following:
    (1) Using an existing pipeline profile e.g. `-profile docker` or `-profile singularity`
@@ -54,14 +54,14 @@ This will be dependent on your local compute environment but can be achieved via
 
 Please refer to the quick start section and usage docs for the pipeline.
  
-Sep-29 11:11:41.811 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryLog:paramsSummaryLog, paramsSummaryMap:paramsSummaryMap]; plugin Id: nf-validation
-Sep-29 11:11:41.818 [main] INFO  nextflow.Nextflow - 
+Sep-29 11:23:24.684 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryLog:paramsSummaryLog, paramsSummaryMap:paramsSummaryMap]; plugin Id: nf-validation
+Sep-29 11:23:24.690 [main] INFO  nextflow.Nextflow - 
 
 -[2m----------------------------------------------------[0m-
 [0;35m  btc/spatial v1.0dev[0m
 -[2m----------------------------------------------------[0m-
 [1mCore Nextflow options[0m
-  [0;34mrunName    : [0;32mlethal_maxwell[0m
+  [0;34mrunName    : [0;32mnostalgic_cuvier[0m
   [0;34mlaunchDir  : [0;32m/Users/jquinn/Code/btc-spatial-pipelines[0m
   [0;34mworkDir    : [0;32m/Users/jquinn/Code/btc-spatial-pipelines/work[0m
   [0;34mprojectDir : [0;32m/Users/jquinn/Code/btc-spatial-pipelines[0m
@@ -70,8 +70,8 @@ Sep-29 11:11:41.818 [main] INFO  nextflow.Nextflow -
   [0;34mconfigFiles: [0;32m[0m
 
 [1mInput/output options[0m
-  [0;34minput      : [0;32m/Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard[0m
-  [0;34moutdir     : [0;32m/tmp/test[0m
+  [0;34minput      : [0;32m/tmp/test.csv[0m
+  [0;34moutdir     : [0;32m/tmp/results[0m
 
 !! Only displaying parameters that differ from the pipeline defaults !!
 -[2m----------------------------------------------------[0m-
@@ -83,90 +83,222 @@ If you use btc/spatial for your analysis please cite:
 * Software dependencies
   https://github.com/btc/spatial/blob/master/CITATIONS.md
 
-Sep-29 11:11:42.114 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK
-Sep-29 11:11:42.114 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:SAMPLESHEET_CHECK` matches process BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK
-Sep-29 11:11:42.117 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
-Sep-29 11:11:42.117 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Sep-29 11:11:42.121 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
-Sep-29 11:11:42.124 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=8; memory=16 GB; capacity=8; pollInterval=100ms; dumpInterval=5m
-Sep-29 11:11:42.190 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name BTC_SPATIAL:SPATIAL:FASTQC
-Sep-29 11:11:42.191 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:FASTQC` matches process BTC_SPATIAL:SPATIAL:FASTQC
-Sep-29 11:11:42.192 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
-Sep-29 11:11:42.192 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Sep-29 11:11:42.212 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name BTC_SPATIAL:SPATIAL:CUSTOM_DUMPSOFTWAREVERSIONS
-Sep-29 11:11:42.213 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:CUSTOM_DUMPSOFTWAREVERSIONS` matches process BTC_SPATIAL:SPATIAL:CUSTOM_DUMPSOFTWAREVERSIONS
-Sep-29 11:11:42.213 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
-Sep-29 11:11:42.213 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Sep-29 11:11:42.239 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name BTC_SPATIAL:SPATIAL:MULTIQC
-Sep-29 11:11:42.239 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:MULTIQC` matches process BTC_SPATIAL:SPATIAL:MULTIQC
-Sep-29 11:11:42.239 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
-Sep-29 11:11:42.239 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Sep-29 11:11:42.242 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: FASTQC, BTC_SPATIAL:SPATIAL:CUSTOM_DUMPSOFTWAREVERSIONS, BTC_SPATIAL:SPATIAL:FASTQC, SAMPLESHEET_CHECK, BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK, MULTIQC, CUSTOM_DUMPSOFTWAREVERSIONS, BTC_SPATIAL:SPATIAL:MULTIQC
-Sep-29 11:11:42.245 [main] DEBUG nextflow.Session - Igniting dataflow network (11)
-Sep-29 11:11:42.249 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK
-Sep-29 11:11:42.250 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > BTC_SPATIAL:SPATIAL:FASTQC
-Sep-29 11:11:42.250 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > BTC_SPATIAL:SPATIAL:CUSTOM_DUMPSOFTWAREVERSIONS
-Sep-29 11:11:42.250 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > BTC_SPATIAL:SPATIAL:MULTIQC
-Sep-29 11:11:42.250 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
-Sep-29 11:11:42.250 [main] DEBUG nextflow.Session - Session await
-Sep-29 11:11:42.318 [Actor Thread 8] DEBUG nextflow.sort.BigSort - Sort completed -- entries: 1; slices: 1; internal sort time: 0.003 s; external sort time: 0.008 s; total time: 0.011 s
-Sep-29 11:11:42.319 [Actor Thread 4] DEBUG nextflow.sort.BigSort - Sort completed -- entries: 1; slices: 1; internal sort time: 0.001 s; external sort time: 0.011 s; total time: 0.012 s
-Sep-29 11:11:42.323 [Actor Thread 4] DEBUG nextflow.file.FileCollector - Saved collect-files list to: /Users/jquinn/Code/btc-spatial-pipelines/work/collect-file/6a4558499f589ff2be82631c3344a8df
-Sep-29 11:11:42.323 [Actor Thread 8] DEBUG nextflow.file.FileCollector - Saved collect-files list to: /Users/jquinn/Code/btc-spatial-pipelines/work/collect-file/b0ab5323f81fdd62b8a6fdeb48ef11ab
-Sep-29 11:11:42.330 [Actor Thread 4] DEBUG nextflow.file.FileCollector - Deleting file collector temp dir: /var/folders/yz/w_j_xvpx32xd73qckp6wfb940000gq/T/nxf-4758159512505012227
-Sep-29 11:11:42.330 [Actor Thread 8] DEBUG nextflow.file.FileCollector - Deleting file collector temp dir: /var/folders/yz/w_j_xvpx32xd73qckp6wfb940000gq/T/nxf-13626531671144321151
-Sep-29 11:11:42.339 [Task submitter] WARN  nextflow.executor.BashWrapperBuilder - Task runtime metrics are not reported when using macOS without a container engine
-Sep-29 11:11:42.396 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
-Sep-29 11:11:42.398 [Task submitter] INFO  nextflow.Session - [dc/365a5b] Submitted process > BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)
-Sep-29 11:11:43.293 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard); status: COMPLETED; exit: 2; error: -; workDir: /Users/jquinn/Code/btc-spatial-pipelines/work/dc/365a5b185b18d2ab97fc7b8428606c]
-Sep-29 11:11:43.295 [Task monitor] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
-  task: name=BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard); work-dir=/Users/jquinn/Code/btc-spatial-pipelines/work/dc/365a5b185b18d2ab97fc7b8428606c
-  error [nextflow.exception.ProcessFailedException]: Process `BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)` terminated with an error exit status (2)
-Sep-29 11:11:43.305 [Task monitor] ERROR nextflow.processor.TaskProcessor - Error executing process > 'BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)'
+Sep-29 11:23:24.980 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK
+Sep-29 11:23:24.981 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:SAMPLESHEET_CHECK` matches process BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK
+Sep-29 11:23:24.984 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Sep-29 11:23:24.984 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-29 11:23:24.988 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Sep-29 11:23:24.991 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=8; memory=16 GB; capacity=8; pollInterval=100ms; dumpInterval=5m
+Sep-29 11:23:25.058 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name BTC_SPATIAL:SPATIAL:FASTQC
+Sep-29 11:23:25.059 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:FASTQC` matches process BTC_SPATIAL:SPATIAL:FASTQC
+Sep-29 11:23:25.060 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Sep-29 11:23:25.060 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-29 11:23:25.082 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name BTC_SPATIAL:SPATIAL:CUSTOM_DUMPSOFTWAREVERSIONS
+Sep-29 11:23:25.082 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:CUSTOM_DUMPSOFTWAREVERSIONS` matches process BTC_SPATIAL:SPATIAL:CUSTOM_DUMPSOFTWAREVERSIONS
+Sep-29 11:23:25.082 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Sep-29 11:23:25.082 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-29 11:23:25.108 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name BTC_SPATIAL:SPATIAL:MULTIQC
+Sep-29 11:23:25.108 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:MULTIQC` matches process BTC_SPATIAL:SPATIAL:MULTIQC
+Sep-29 11:23:25.109 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Sep-29 11:23:25.109 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-29 11:23:25.112 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: FASTQC, BTC_SPATIAL:SPATIAL:CUSTOM_DUMPSOFTWAREVERSIONS, BTC_SPATIAL:SPATIAL:FASTQC, SAMPLESHEET_CHECK, BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK, MULTIQC, CUSTOM_DUMPSOFTWAREVERSIONS, BTC_SPATIAL:SPATIAL:MULTIQC
+Sep-29 11:23:25.114 [main] DEBUG nextflow.Session - Igniting dataflow network (11)
+Sep-29 11:23:25.119 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK
+Sep-29 11:23:25.120 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > BTC_SPATIAL:SPATIAL:FASTQC
+Sep-29 11:23:25.120 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > BTC_SPATIAL:SPATIAL:CUSTOM_DUMPSOFTWAREVERSIONS
+Sep-29 11:23:25.120 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > BTC_SPATIAL:SPATIAL:MULTIQC
+Sep-29 11:23:25.120 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Sep-29 11:23:25.120 [main] DEBUG nextflow.Session - Session await
+Sep-29 11:23:25.179 [Actor Thread 9] DEBUG nextflow.sort.BigSort - Sort completed -- entries: 1; slices: 1; internal sort time: 0.001 s; external sort time: 0.008 s; total time: 0.009 s
+Sep-29 11:23:25.179 [Actor Thread 3] DEBUG nextflow.sort.BigSort - Sort completed -- entries: 1; slices: 1; internal sort time: 0.001 s; external sort time: 0.008 s; total time: 0.009 s
+Sep-29 11:23:25.182 [Actor Thread 9] DEBUG nextflow.file.FileCollector - Saved collect-files list to: /Users/jquinn/Code/btc-spatial-pipelines/work/collect-file/df0839da44c1ff7aa40f3e36bc8d2df5
+Sep-29 11:23:25.183 [Actor Thread 3] DEBUG nextflow.file.FileCollector - Saved collect-files list to: /Users/jquinn/Code/btc-spatial-pipelines/work/collect-file/4cac12e66169de417dbaae68f982b483
+Sep-29 11:23:25.192 [Actor Thread 9] DEBUG nextflow.file.FileCollector - Deleting file collector temp dir: /var/folders/yz/w_j_xvpx32xd73qckp6wfb940000gq/T/nxf-16357310674995209460
+Sep-29 11:23:25.192 [Actor Thread 3] DEBUG nextflow.file.FileCollector - Deleting file collector temp dir: /var/folders/yz/w_j_xvpx32xd73qckp6wfb940000gq/T/nxf-11308186040643821474
+Sep-29 11:23:25.204 [Task submitter] WARN  nextflow.executor.BashWrapperBuilder - Task runtime metrics are not reported when using macOS without a container engine
+Sep-29 11:23:25.208 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-29 11:23:25.216 [Task submitter] INFO  nextflow.Session - [1a/33ff75] Submitted process > BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (test.csv)
+Sep-29 11:23:25.552 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (test.csv); status: COMPLETED; exit: 0; error: -; workDir: /Users/jquinn/Code/btc-spatial-pipelines/work/1a/33ff75b20e00e400a3c744820e80e5]
+Sep-29 11:23:25.568 [Task monitor] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'PublishDir' minSize=10; maxSize=24; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Sep-29 11:23:25.572 [Actor Thread 8] DEBUG nextflow.processor.TaskRun - Unable to evaluate `tag` property for task: BTC_SPATIAL:SPATIAL:FASTQC (3)
+groovy.lang.MissingPropertyException: No such property: id for class: java.lang.String
+	at org.codehaus.groovy.runtime.ScriptBytecodeAdapter.unwrap(ScriptBytecodeAdapter.java:65)
+	at org.codehaus.groovy.runtime.callsite.GetEffectivePojoPropertySite.getProperty(GetEffectivePojoPropertySite.java:65)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callGetProperty(AbstractCallSite.java:329)
+	at Script_fc9baaca$_runScript_closure1$_closure4.doCall(Script_fc9baaca:2)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:274)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1035)
+	at groovy.lang.Closure.call(Closure.java:412)
+	at groovy.lang.Closure.call(Closure.java:406)
+	at groovy.lang.GString.writeTo(GString.java:192)
+	at groovy.lang.GString.toString(GString.java:157)
+	at nextflow.processor.LazyMap.resolveImpl(TaskConfig.groovy:621)
+	at nextflow.processor.LazyMap.resolveImpl(TaskConfig.groovy)
+	at nextflow.processor.LazyMap.resolve(TaskConfig.groovy:573)
+	at nextflow.processor.LazyMap.getValue(TaskConfig.groovy:640)
+	at nextflow.processor.LazyMap.get(TaskConfig.groovy:635)
+	at nextflow.processor.TaskConfig.get(TaskConfig.groovy:151)
+	at nextflow.processor.TaskConfig.getProperty(TaskConfig.groovy:130)
+	at org.codehaus.groovy.runtime.callsite.PogoGetPropertySite.getProperty(PogoGetPropertySite.java:49)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callGetProperty(AbstractCallSite.java:329)
+	at nextflow.processor.TaskRun.getName(TaskRun.groovy:368)
+	at nextflow.processor.TaskRun.resolve(TaskRun.groovy:741)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at org.codehaus.groovy.runtime.callsite.PlainObjectMetaMethodSite.doInvoke(PlainObjectMetaMethodSite.java:48)
+	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite$PogoCachedMethodSiteNoUnwrapNoCoerce.invoke(PogoMetaMethodSite.java:189)
+	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite.call(PogoMetaMethodSite.java:69)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:139)
+	at nextflow.processor.TaskProcessor.invokeTask(TaskProcessor.groovy:609)
+	at nextflow.processor.InvokeTaskAdapter.call(InvokeTaskAdapter.groovy:52)
+	at groovyx.gpars.dataflow.operator.DataflowOperatorActor.startTask(DataflowOperatorActor.java:120)
+	at groovyx.gpars.dataflow.operator.ForkingDataflowOperatorActor.access$001(ForkingDataflowOperatorActor.java:35)
+	at groovyx.gpars.dataflow.operator.ForkingDataflowOperatorActor$1.run(ForkingDataflowOperatorActor.java:58)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1623)
+Sep-29 11:23:25.572 [Actor Thread 2] DEBUG nextflow.processor.TaskRun - Unable to evaluate `tag` property for task: BTC_SPATIAL:SPATIAL:FASTQC (2)
+groovy.lang.MissingPropertyException: No such property: id for class: java.lang.String
+	at org.codehaus.groovy.runtime.ScriptBytecodeAdapter.unwrap(ScriptBytecodeAdapter.java:65)
+	at org.codehaus.groovy.runtime.callsite.GetEffectivePojoPropertySite.getProperty(GetEffectivePojoPropertySite.java:65)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callGetProperty(AbstractCallSite.java:329)
+	at Script_fc9baaca$_runScript_closure1$_closure4.doCall(Script_fc9baaca:2)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:274)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1035)
+	at groovy.lang.Closure.call(Closure.java:412)
+	at groovy.lang.Closure.call(Closure.java:406)
+	at groovy.lang.GString.writeTo(GString.java:192)
+	at groovy.lang.GString.toString(GString.java:157)
+	at nextflow.processor.LazyMap.resolveImpl(TaskConfig.groovy:621)
+	at nextflow.processor.LazyMap.resolveImpl(TaskConfig.groovy)
+	at nextflow.processor.LazyMap.resolve(TaskConfig.groovy:573)
+	at nextflow.processor.LazyMap.getValue(TaskConfig.groovy:640)
+	at nextflow.processor.LazyMap.get(TaskConfig.groovy:635)
+	at nextflow.processor.TaskConfig.get(TaskConfig.groovy:151)
+	at nextflow.processor.TaskConfig.getProperty(TaskConfig.groovy:130)
+	at org.codehaus.groovy.runtime.callsite.PogoGetPropertySite.getProperty(PogoGetPropertySite.java:49)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callGetProperty(AbstractCallSite.java:329)
+	at nextflow.processor.TaskRun.getName(TaskRun.groovy:368)
+	at nextflow.processor.TaskRun.resolve(TaskRun.groovy:741)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at org.codehaus.groovy.runtime.callsite.PlainObjectMetaMethodSite.doInvoke(PlainObjectMetaMethodSite.java:48)
+	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite$PogoCachedMethodSiteNoUnwrapNoCoerce.invoke(PogoMetaMethodSite.java:189)
+	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite.call(PogoMetaMethodSite.java:69)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:139)
+	at nextflow.processor.TaskProcessor.invokeTask(TaskProcessor.groovy:609)
+	at nextflow.processor.InvokeTaskAdapter.call(InvokeTaskAdapter.groovy:52)
+	at groovyx.gpars.dataflow.operator.DataflowOperatorActor.startTask(DataflowOperatorActor.java:120)
+	at groovyx.gpars.dataflow.operator.ForkingDataflowOperatorActor.access$001(ForkingDataflowOperatorActor.java:35)
+	at groovyx.gpars.dataflow.operator.ForkingDataflowOperatorActor$1.run(ForkingDataflowOperatorActor.java:58)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1623)
+Sep-29 11:23:25.572 [Actor Thread 3] DEBUG nextflow.processor.TaskRun - Unable to evaluate `tag` property for task: BTC_SPATIAL:SPATIAL:FASTQC (1)
+groovy.lang.MissingPropertyException: No such property: id for class: java.lang.String
+	at org.codehaus.groovy.runtime.ScriptBytecodeAdapter.unwrap(ScriptBytecodeAdapter.java:65)
+	at org.codehaus.groovy.runtime.callsite.GetEffectivePojoPropertySite.getProperty(GetEffectivePojoPropertySite.java:65)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callGetProperty(AbstractCallSite.java:329)
+	at Script_fc9baaca$_runScript_closure1$_closure4.doCall(Script_fc9baaca:2)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:274)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1035)
+	at groovy.lang.Closure.call(Closure.java:412)
+	at groovy.lang.Closure.call(Closure.java:406)
+	at groovy.lang.GString.writeTo(GString.java:192)
+	at groovy.lang.GString.toString(GString.java:157)
+	at nextflow.processor.LazyMap.resolveImpl(TaskConfig.groovy:621)
+	at nextflow.processor.LazyMap.resolveImpl(TaskConfig.groovy)
+	at nextflow.processor.LazyMap.resolve(TaskConfig.groovy:573)
+	at nextflow.processor.LazyMap.getValue(TaskConfig.groovy:640)
+	at nextflow.processor.LazyMap.get(TaskConfig.groovy:635)
+	at nextflow.processor.TaskConfig.get(TaskConfig.groovy:151)
+	at nextflow.processor.TaskConfig.getProperty(TaskConfig.groovy:130)
+	at org.codehaus.groovy.runtime.callsite.PogoGetPropertySite.getProperty(PogoGetPropertySite.java:49)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callGetProperty(AbstractCallSite.java:329)
+	at nextflow.processor.TaskRun.getName(TaskRun.groovy:368)
+	at nextflow.processor.TaskRun.resolve(TaskRun.groovy:741)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at org.codehaus.groovy.runtime.callsite.PlainObjectMetaMethodSite.doInvoke(PlainObjectMetaMethodSite.java:48)
+	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite$PogoCachedMethodSiteNoUnwrapNoCoerce.invoke(PogoMetaMethodSite.java:189)
+	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite.call(PogoMetaMethodSite.java:69)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:139)
+	at nextflow.processor.TaskProcessor.invokeTask(TaskProcessor.groovy:609)
+	at nextflow.processor.InvokeTaskAdapter.call(InvokeTaskAdapter.groovy:52)
+	at groovyx.gpars.dataflow.operator.DataflowOperatorActor.startTask(DataflowOperatorActor.java:120)
+	at groovyx.gpars.dataflow.operator.ForkingDataflowOperatorActor.access$001(ForkingDataflowOperatorActor.java:35)
+	at groovyx.gpars.dataflow.operator.ForkingDataflowOperatorActor$1.run(ForkingDataflowOperatorActor.java:58)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1623)
+Sep-29 11:23:25.575 [Actor Thread 8] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=BTC_SPATIAL:SPATIAL:FASTQC (3); work-dir=null
+  error [nextflow.exception.ProcessUnrecoverableException]: Process `BTC_SPATIAL:SPATIAL:FASTQC (3)` script contains error(s)
+Sep-29 11:23:25.584 [Actor Thread 8] ERROR nextflow.processor.TaskProcessor - Error executing process > 'BTC_SPATIAL:SPATIAL:FASTQC (3)'
 
 Caused by:
-  Process `BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)` terminated with an error exit status (2)
+  No such variable: id -- Check script './workflows/../modules/nf-core/fastqc/main.nf' at line: 23
 
-Command executed:
-
-  check_samplesheet.py \
-      human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard \
-      samplesheet.valid.csv
+Source block:
+  def args = task.ext.args ?: ''
+  def prefix = task.ext.prefix ?: "${meta.id}"
+  def old_new_pairs = reads instanceof Path || reads.size() == 1 ? [[ reads, "${prefix}.${reads.extension}" ]] : reads.withIndex().collect { entry, index -> [ entry, "${prefix}_${index + 1}.${entry.extension}" ] }
+  def rename_to = old_new_pairs*.join(' ').join(' ')
+  def renamed_files = old_new_pairs.collect{ old_name, new_name -> new_name }.join(' ')
+  """
+      printf "%s %s\\n" $rename_to | while read old_name new_name; do
+          [ -f "\${new_name}" ] || ln -s \$old_name \$new_name
+      done
   
-  cat <<-END_VERSIONS > versions.yml
-  "BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK":
-      python: $(python --version | sed 's/Python //g')
-  END_VERSIONS
+      fastqc \\
+          $args \\
+          --threads $task.cpus \\
+          $renamed_files
+  
+      cat <<-END_VERSIONS > versions.yml
+      "${task.process}":
+          fastqc: \$( fastqc --version | sed -e "s/FastQC v//g" )
+      END_VERSIONS
+      """
 
-Command exit status:
-  2
-
-Command output:
-  (empty)
-
-Command error:
-  [ERROR] The given input file human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard was not found!
-
-Work dir:
-  /Users/jquinn/Code/btc-spatial-pipelines/work/dc/365a5b185b18d2ab97fc7b8428606c
-
-Tip: you can replicate the issue by changing to the process work dir and entering the command `bash .command.run`
-Sep-29 11:11:43.309 [Actor Thread 6] DEBUG nextflow.file.SortFileCollector - FileCollector temp dir not removed: null
-Sep-29 11:11:43.315 [Task monitor] INFO  nextflow.Session - Execution cancelled -- Finishing pending tasks before exit
-Sep-29 11:11:43.317 [main] DEBUG nextflow.Session - Session await > all processes finished
-Sep-29 11:11:43.317 [main] DEBUG nextflow.Session - Session await > all barriers passed
-Sep-29 11:11:43.318 [Actor Thread 7] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
-  task: name=BTC_SPATIAL:SPATIAL:MULTIQC; work-dir=null
+Tip: you can try to figure out what's wrong by changing to the process work dir and showing the script file named `.command.sh`
+Sep-29 11:23:25.586 [Actor Thread 8] INFO  nextflow.Session - Execution cancelled -- Finishing pending tasks before exit
+Sep-29 11:23:25.588 [main] DEBUG nextflow.Session - Session await > all processes finished
+Sep-29 11:23:25.588 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Sep-29 11:23:25.590 [Actor Thread 7] DEBUG nextflow.sort.BigSort - Sort completed -- entries: 1; slices: 1; internal sort time: 0.0 s; external sort time: 0.001 s; total time: 0.001 s
+Sep-29 11:23:25.591 [Actor Thread 7] DEBUG nextflow.file.FileCollector - Saved collect-files list to: /Users/jquinn/Code/btc-spatial-pipelines/work/collect-file/7a7b1a4220fac9d2b421a7588e52a102
+Sep-29 11:23:25.592 [Actor Thread 5] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=BTC_SPATIAL:SPATIAL:FASTQC; work-dir=null
   error [java.lang.InterruptedException]: java.lang.InterruptedException
-Sep-29 11:11:43.325 [main] INFO  nextflow.Nextflow - -[0;35m[btc/spatial][0;31m Pipeline completed with errors[0m-
-Sep-29 11:11:43.329 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=1; ignoredCount=0; cachedCount=0; pendingCount=1; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=0ms; failedDuration=851ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=1; peakMemory=6 GB; ]
-Sep-29 11:11:43.329 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow completed -- saving trace file
-Sep-29 11:11:43.330 [main] DEBUG nextflow.trace.ReportObserver - Workflow completed -- rendering execution report
-Sep-29 11:11:43.341 [main] DEBUG nextflow.trace.ReportObserver - Execution report summary data:
-  [{"cpuUsage":null,"process":"SAMPLESHEET_CHECK","mem":null,"memUsage":null,"timeUsage":{"mean":0.01,"min":0.01,"q1":0.01,"q2":0.01,"q3":0.01,"max":0.01,"minLabel":"BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)","maxLabel":"BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)","q1Label":"BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)","q2Label":"BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)","q3Label":"BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)"},"vmem":null,"reads":null,"cpu":null,"time":{"mean":851,"min":851,"q1":851,"q2":851,"q3":851,"max":851,"minLabel":"BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)","maxLabel":"BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)","q1Label":"BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)","q2Label":"BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)","q3Label":"BTC_SPATIAL:SPATIAL:INPUT_CHECK:SAMPLESHEET_CHECK (human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)"},"writes":null}]
-Sep-29 11:11:44.292 [main] DEBUG nextflow.trace.TimelineObserver - Workflow completed -- rendering execution timeline
-Sep-29 11:11:44.597 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
-Sep-29 11:11:44.597 [main] INFO  org.pf4j.AbstractPluginManager - Stop plugin 'nf-validation@0.3.2'
-Sep-29 11:11:44.597 [main] DEBUG nextflow.plugin.BasePlugin - Plugin stopped nf-validation
-Sep-29 11:11:44.618 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'FileTransfer' shutdown completed (hard=false)
-Sep-29 11:11:44.619 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye
+Sep-29 11:23:25.592 [Actor Thread 3] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=BTC_SPATIAL:SPATIAL:FASTQC (1); work-dir=null
+  error [nextflow.exception.ProcessUnrecoverableException]: Process `BTC_SPATIAL:SPATIAL:FASTQC (1)` script contains error(s)
+Sep-29 11:23:25.592 [Actor Thread 2] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=BTC_SPATIAL:SPATIAL:FASTQC (2); work-dir=null
+  error [nextflow.exception.ProcessUnrecoverableException]: Process `BTC_SPATIAL:SPATIAL:FASTQC (2)` script contains error(s)
+Sep-29 11:23:25.594 [Actor Thread 7] DEBUG nextflow.file.FileCollector - Deleting file collector temp dir: /var/folders/yz/w_j_xvpx32xd73qckp6wfb940000gq/T/nxf-9829161419356908364
+Sep-29 11:23:25.596 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'PublishDir' shutdown completed (hard=false)
+Sep-29 11:23:25.602 [main] INFO  nextflow.Nextflow - -[0;35m[btc/spatial][0;31m Pipeline completed with errors[0m-
+Sep-29 11:23:25.606 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=1; failedCount=0; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=0ms; failedDuration=0ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=1; peakMemory=6 GB; ]
+Sep-29 11:23:25.606 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow completed -- saving trace file
+Sep-29 11:23:25.607 [main] DEBUG nextflow.trace.ReportObserver - Workflow completed -- rendering execution report
+Sep-29 11:23:25.618 [main] DEBUG nextflow.trace.ReportObserver - Execution report summary data:
+  [{"cpuUsage":null,"process":"SAMPLESHEET_CHECK","mem":null,"memUsage":null,"timeUsage":null,"vmem":null,"reads":null,"cpu":null,"time":null,"writes":null}]
+Sep-29 11:23:26.553 [main] DEBUG nextflow.trace.TimelineObserver - Workflow completed -- rendering execution timeline
+Sep-29 11:23:26.843 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Sep-29 11:23:26.844 [main] INFO  org.pf4j.AbstractPluginManager - Stop plugin 'nf-validation@0.3.2'
+Sep-29 11:23:26.844 [main] DEBUG nextflow.plugin.BasePlugin - Plugin stopped nf-validation
+Sep-29 11:23:26.858 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'FileTransfer' shutdown completed (hard=false)
+Sep-29 11:23:26.859 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye
