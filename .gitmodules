@@ -1,0 +1,3 @@
+[submodule "modules/bayestme"]
+	path = modules/bayestme
+	url = https://github.com/tansey-lab/bayestme.git
