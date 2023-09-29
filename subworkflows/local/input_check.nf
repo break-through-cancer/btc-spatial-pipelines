@@ -2,16 +2,16 @@ include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
 
 workflow INPUT_CHECK {
     take:
-    samplesheet // file: /path/to/samplesheet.csv
+        samplesheet // file: /path/to/samplesheet.csv
 
     main:
         SAMPLESHEET_CHECK(samplesheet)
             .csv
             .splitCsv(header:true, sep:',')
-            .map{ row -> tuple row.sample, row.data_directory }
-            .set{ reads }
+            .map{ row -> [sample_name: row.sample, data_directory: row.data_directory] }
+            .set{ datasets }
+
 
     emit:
-        reads                                     // channel: [ val(meta), [ reads ] ]
-        versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
+        datasets
 }

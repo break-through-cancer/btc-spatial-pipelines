@@ -64,9 +64,10 @@ workflow SPATIAL {
     INPUT_CHECK (
         file(params.input)
     )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
-
+    BAYESTME(
+        INPUT_CHECK.out.datasets.map { it.data_directory }
+    )
 }
 
 /*
