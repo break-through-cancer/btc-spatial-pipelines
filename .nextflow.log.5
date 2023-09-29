@@ -1,444 +1,84 @@
-Sep-29 10:48:57.924 [main] DEBUG nextflow.cli.Launcher - $> nextflow run .
-Sep-29 10:48:57.958 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.04.1
-Sep-29 10:48:57.973 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/jquinn/.nextflow/plugins; core-plugins: nf-amazon@1.16.2,nf-azure@1.0.1,nf-codecommit@0.1.4,nf-console@1.0.5,nf-ga4gh@1.0.5,nf-google@1.7.3,nf-tower@1.5.12,nf-wave@0.8.2
-Sep-29 10:48:57.981 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
-Sep-29 10:48:57.981 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
-Sep-29 10:48:57.983 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
-Sep-29 10:48:57.989 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
-Sep-29 10:48:58.498 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
-Sep-29 10:48:58.499 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
-Sep-29 10:48:58.507 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
-Sep-29 10:48:59.215 [main] DEBUG nextflow.config.ConfigBuilder - In the following config snippet the attribute `params.igenomes_ignore` is empty:
-  input=null
-  outdir=null
-  publish_dir_mode='copy'
-  email=null
-  email_on_fail=null
-  plaintext_email=false
-  monochrome_logs=false
-  hook_url=null
-  help=false
-  version=false
-  config_profile_name=null
-  config_profile_description=null
-  custom_config_version='master'
-  custom_config_base=https://raw.githubusercontent.com/nf-core/configs/master
-  config_profile_contact=null
-  config_profile_url=null
-  max_memory='128.GB'
-  max_cpus=16
-  max_time='240.h'
-  validationFailUnrecognisedParams=false
-  validationLenientMode=false
-  validationSchemaIgnoreParams='genomes,igenomes_base'
-  validationShowHiddenParams=false
-  validate_params=true
-  genomesfasta=[:]/Homo_sapiens/Ensembl/GRCh37/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Homo_sapiens/Ensembl/GRCh37/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Homo_sapiens/Ensembl/GRCh37/Sequence/Bowtie2Index/
-  genomesstar=[:]/Homo_sapiens/Ensembl/GRCh37/Sequence/STARIndex/
-  genomesbismark=[:]/Homo_sapiens/Ensembl/GRCh37/Sequence/BismarkIndex/
-  genomesgtf=[:]/Homo_sapiens/Ensembl/GRCh37/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Homo_sapiens/Ensembl/GRCh37/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Homo_sapiens/Ensembl/GRCh37/Annotation/README.txt
-  genomesmito_name='MT'
-  genomesmacs_gsize='2.7e9'
-  genomesblacklist=/Users/jquinn/Code/btc-spatial-pipelines/assets/blacklists/GRCh37-blacklist.bed
-  genomesfasta=[:]/Homo_sapiens/NCBI/GRCh38/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Homo_sapiens/NCBI/GRCh38/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/
-  genomesstar=[:]/Homo_sapiens/NCBI/GRCh38/Sequence/STARIndex/
-  genomesbismark=[:]/Homo_sapiens/NCBI/GRCh38/Sequence/BismarkIndex/
-  genomesgtf=[:]/Homo_sapiens/NCBI/GRCh38/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Homo_sapiens/NCBI/GRCh38/Annotation/Genes/genes.bed
-  genomesmito_name='chrM'
-  genomesmacs_gsize='2.7e9'
-  genomesblacklist=/Users/jquinn/Code/btc-spatial-pipelines/assets/blacklists/hg38-blacklist.bed
-  genomesfasta=[:]/Homo_sapiens/UCSC/CHM13/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Homo_sapiens/UCSC/CHM13/Sequence/BWAIndex/
-  genomesbwamem2=[:]/Homo_sapiens/UCSC/CHM13/Sequence/BWAmem2Index/
-  genomesgtf=[:]/Homo_sapiens/NCBI/CHM13/Annotation/Genes/genes.gtf
-  genomesgff='ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/GCF_009914755.1_T2T-CHM13v2.0_genomic.gff.gz'
-  genomesmito_name='chrM'
-  genomesfasta=[:]/Mus_musculus/Ensembl/GRCm38/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Mus_musculus/Ensembl/GRCm38/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Mus_musculus/Ensembl/GRCm38/Sequence/Bowtie2Index/
-  genomesstar=[:]/Mus_musculus/Ensembl/GRCm38/Sequence/STARIndex/
-  genomesbismark=[:]/Mus_musculus/Ensembl/GRCm38/Sequence/BismarkIndex/
-  genomesgtf=[:]/Mus_musculus/Ensembl/GRCm38/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Mus_musculus/Ensembl/GRCm38/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Mus_musculus/Ensembl/GRCm38/Annotation/README.txt
-  genomesmito_name='MT'
-  genomesmacs_gsize='1.87e9'
-  genomesblacklist=/Users/jquinn/Code/btc-spatial-pipelines/assets/blacklists/GRCm38-blacklist.bed
-  genomesfasta=[:]/Arabidopsis_thaliana/Ensembl/TAIR10/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Arabidopsis_thaliana/Ensembl/TAIR10/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Arabidopsis_thaliana/Ensembl/TAIR10/Sequence/Bowtie2Index/
-  genomesstar=[:]/Arabidopsis_thaliana/Ensembl/TAIR10/Sequence/STARIndex/
-  genomesbismark=[:]/Arabidopsis_thaliana/Ensembl/TAIR10/Sequence/BismarkIndex/
-  genomesgtf=[:]/Arabidopsis_thaliana/Ensembl/TAIR10/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Arabidopsis_thaliana/Ensembl/TAIR10/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Arabidopsis_thaliana/Ensembl/TAIR10/Annotation/README.txt
-  genomesmito_name='Mt'
-  genomesfasta=[:]/Bacillus_subtilis_168/Ensembl/EB2/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Bacillus_subtilis_168/Ensembl/EB2/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Bacillus_subtilis_168/Ensembl/EB2/Sequence/Bowtie2Index/
-  genomesstar=[:]/Bacillus_subtilis_168/Ensembl/EB2/Sequence/STARIndex/
-  genomesbismark=[:]/Bacillus_subtilis_168/Ensembl/EB2/Sequence/BismarkIndex/
-  genomesgtf=[:]/Bacillus_subtilis_168/Ensembl/EB2/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Bacillus_subtilis_168/Ensembl/EB2/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Bacillus_subtilis_168/Ensembl/EB2/Annotation/README.txt
-  genomesfasta=[:]/Bos_taurus/Ensembl/UMD3.1/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Bos_taurus/Ensembl/UMD3.1/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Bos_taurus/Ensembl/UMD3.1/Sequence/Bowtie2Index/
-  genomesstar=[:]/Bos_taurus/Ensembl/UMD3.1/Sequence/STARIndex/
-  genomesbismark=[:]/Bos_taurus/Ensembl/UMD3.1/Sequence/BismarkIndex/
-  genomesgtf=[:]/Bos_taurus/Ensembl/UMD3.1/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Bos_taurus/Ensembl/UMD3.1/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Bos_taurus/Ensembl/UMD3.1/Annotation/README.txt
-  genomesmito_name='MT'
-  genomesfasta=[:]/Caenorhabditis_elegans/Ensembl/WBcel235/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Caenorhabditis_elegans/Ensembl/WBcel235/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Caenorhabditis_elegans/Ensembl/WBcel235/Sequence/Bowtie2Index/
-  genomesstar=[:]/Caenorhabditis_elegans/Ensembl/WBcel235/Sequence/STARIndex/
-  genomesbismark=[:]/Caenorhabditis_elegans/Ensembl/WBcel235/Sequence/BismarkIndex/
-  genomesgtf=[:]/Caenorhabditis_elegans/Ensembl/WBcel235/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Caenorhabditis_elegans/Ensembl/WBcel235/Annotation/Genes/genes.bed
-  genomesmito_name='MtDNA'
-  genomesmacs_gsize='9e7'
-  genomesfasta=[:]/Canis_familiaris/Ensembl/CanFam3.1/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Canis_familiaris/Ensembl/CanFam3.1/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Canis_familiaris/Ensembl/CanFam3.1/Sequence/Bowtie2Index/
-  genomesstar=[:]/Canis_familiaris/Ensembl/CanFam3.1/Sequence/STARIndex/
-  genomesbismark=[:]/Canis_familiaris/Ensembl/CanFam3.1/Sequence/BismarkIndex/
-  genomesgtf=[:]/Canis_familiaris/Ensembl/CanFam3.1/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Canis_familiaris/Ensembl/CanFam3.1/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Canis_familiaris/Ensembl/CanFam3.1/Annotation/README.txt
-  genomesmito_name='MT'
-  genomesfasta=[:]/Danio_rerio/Ensembl/GRCz10/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Danio_rerio/Ensembl/GRCz10/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Danio_rerio/Ensembl/GRCz10/Sequence/Bowtie2Index/
-  genomesstar=[:]/Danio_rerio/Ensembl/GRCz10/Sequence/STARIndex/
-  genomesbismark=[:]/Danio_rerio/Ensembl/GRCz10/Sequence/BismarkIndex/
-  genomesgtf=[:]/Danio_rerio/Ensembl/GRCz10/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Danio_rerio/Ensembl/GRCz10/Annotation/Genes/genes.bed
-  genomesmito_name='MT'
-  genomesfasta=[:]/Drosophila_melanogaster/Ensembl/BDGP6/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Drosophila_melanogaster/Ensembl/BDGP6/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Drosophila_melanogaster/Ensembl/BDGP6/Sequence/Bowtie2Index/
-  genomesstar=[:]/Drosophila_melanogaster/Ensembl/BDGP6/Sequence/STARIndex/
-  genomesbismark=[:]/Drosophila_melanogaster/Ensembl/BDGP6/Sequence/BismarkIndex/
-  genomesgtf=[:]/Drosophila_melanogaster/Ensembl/BDGP6/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Drosophila_melanogaster/Ensembl/BDGP6/Annotation/Genes/genes.bed
-  genomesmito_name='M'
-  genomesmacs_gsize='1.2e8'
-  genomesfasta=[:]/Equus_caballus/Ensembl/EquCab2/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Equus_caballus/Ensembl/EquCab2/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Equus_caballus/Ensembl/EquCab2/Sequence/Bowtie2Index/
-  genomesstar=[:]/Equus_caballus/Ensembl/EquCab2/Sequence/STARIndex/
-  genomesbismark=[:]/Equus_caballus/Ensembl/EquCab2/Sequence/BismarkIndex/
-  genomesgtf=[:]/Equus_caballus/Ensembl/EquCab2/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Equus_caballus/Ensembl/EquCab2/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Equus_caballus/Ensembl/EquCab2/Annotation/README.txt
-  genomesmito_name='MT'
-  genomesfasta=[:]/Escherichia_coli_K_12_DH10B/Ensembl/EB1/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Escherichia_coli_K_12_DH10B/Ensembl/EB1/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Escherichia_coli_K_12_DH10B/Ensembl/EB1/Sequence/Bowtie2Index/
-  genomesstar=[:]/Escherichia_coli_K_12_DH10B/Ensembl/EB1/Sequence/STARIndex/
-  genomesbismark=[:]/Escherichia_coli_K_12_DH10B/Ensembl/EB1/Sequence/BismarkIndex/
-  genomesgtf=[:]/Escherichia_coli_K_12_DH10B/Ensembl/EB1/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Escherichia_coli_K_12_DH10B/Ensembl/EB1/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Escherichia_coli_K_12_DH10B/Ensembl/EB1/Annotation/README.txt
-  genomesfasta=[:]/Gallus_gallus/Ensembl/Galgal4/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Gallus_gallus/Ensembl/Galgal4/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Gallus_gallus/Ensembl/Galgal4/Sequence/Bowtie2Index/
-  genomesstar=[:]/Gallus_gallus/Ensembl/Galgal4/Sequence/STARIndex/
-  genomesbismark=[:]/Gallus_gallus/Ensembl/Galgal4/Sequence/BismarkIndex/
-  genomesgtf=[:]/Gallus_gallus/Ensembl/Galgal4/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Gallus_gallus/Ensembl/Galgal4/Annotation/Genes/genes.bed
-  genomesmito_name='MT'
-  genomesfasta=[:]/Glycine_max/Ensembl/Gm01/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Glycine_max/Ensembl/Gm01/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Glycine_max/Ensembl/Gm01/Sequence/Bowtie2Index/
-  genomesstar=[:]/Glycine_max/Ensembl/Gm01/Sequence/STARIndex/
-  genomesbismark=[:]/Glycine_max/Ensembl/Gm01/Sequence/BismarkIndex/
-  genomesgtf=[:]/Glycine_max/Ensembl/Gm01/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Glycine_max/Ensembl/Gm01/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Glycine_max/Ensembl/Gm01/Annotation/README.txt
-  genomesfasta=[:]/Macaca_mulatta/Ensembl/Mmul_1/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Macaca_mulatta/Ensembl/Mmul_1/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Macaca_mulatta/Ensembl/Mmul_1/Sequence/Bowtie2Index/
-  genomesstar=[:]/Macaca_mulatta/Ensembl/Mmul_1/Sequence/STARIndex/
-  genomesbismark=[:]/Macaca_mulatta/Ensembl/Mmul_1/Sequence/BismarkIndex/
-  genomesgtf=[:]/Macaca_mulatta/Ensembl/Mmul_1/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Macaca_mulatta/Ensembl/Mmul_1/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Macaca_mulatta/Ensembl/Mmul_1/Annotation/README.txt
-  genomesmito_name='MT'
-  genomesfasta=[:]/Oryza_sativa_japonica/Ensembl/IRGSP-1.0/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Oryza_sativa_japonica/Ensembl/IRGSP-1.0/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Oryza_sativa_japonica/Ensembl/IRGSP-1.0/Sequence/Bowtie2Index/
-  genomesstar=[:]/Oryza_sativa_japonica/Ensembl/IRGSP-1.0/Sequence/STARIndex/
-  genomesbismark=[:]/Oryza_sativa_japonica/Ensembl/IRGSP-1.0/Sequence/BismarkIndex/
-  genomesgtf=[:]/Oryza_sativa_japonica/Ensembl/IRGSP-1.0/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Oryza_sativa_japonica/Ensembl/IRGSP-1.0/Annotation/Genes/genes.bed
-  genomesmito_name='Mt'
-  genomesfasta=[:]/Pan_troglodytes/Ensembl/CHIMP2.1.4/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Pan_troglodytes/Ensembl/CHIMP2.1.4/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Pan_troglodytes/Ensembl/CHIMP2.1.4/Sequence/Bowtie2Index/
-  genomesstar=[:]/Pan_troglodytes/Ensembl/CHIMP2.1.4/Sequence/STARIndex/
-  genomesbismark=[:]/Pan_troglodytes/Ensembl/CHIMP2.1.4/Sequence/BismarkIndex/
-  genomesgtf=[:]/Pan_troglodytes/Ensembl/CHIMP2.1.4/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Pan_troglodytes/Ensembl/CHIMP2.1.4/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Pan_troglodytes/Ensembl/CHIMP2.1.4/Annotation/README.txt
-  genomesmito_name='MT'
-  genomesfasta=[:]/Rattus_norvegicus/Ensembl/Rnor_5.0/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Rattus_norvegicus/Ensembl/Rnor_5.0/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Rattus_norvegicus/Ensembl/Rnor_5.0/Sequence/Bowtie2Index/
-  genomesstar=[:]/Rattus_norvegicus/Ensembl/Rnor_5.0/Sequence/STARIndex/
-  genomesbismark=[:]/Rattus_norvegicus/Ensembl/Rnor_5.0/Sequence/BismarkIndex/
-  genomesgtf=[:]/Rattus_norvegicus/Ensembl/Rnor_5.0/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Rattus_norvegicus/Ensembl/Rnor_5.0/Annotation/Genes/genes.bed
-  genomesmito_name='MT'
-  genomesfasta=[:]/Rattus_norvegicus/Ensembl/Rnor_6.0/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Rattus_norvegicus/Ensembl/Rnor_6.0/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Rattus_norvegicus/Ensembl/Rnor_6.0/Sequence/Bowtie2Index/
-  genomesstar=[:]/Rattus_norvegicus/Ensembl/Rnor_6.0/Sequence/STARIndex/
-  genomesbismark=[:]/Rattus_norvegicus/Ensembl/Rnor_6.0/Sequence/BismarkIndex/
-  genomesgtf=[:]/Rattus_norvegicus/Ensembl/Rnor_6.0/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Rattus_norvegicus/Ensembl/Rnor_6.0/Annotation/Genes/genes.bed
-  genomesmito_name='MT'
-  genomesfasta=[:]/Saccharomyces_cerevisiae/Ensembl/R64-1-1/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Saccharomyces_cerevisiae/Ensembl/R64-1-1/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Saccharomyces_cerevisiae/Ensembl/R64-1-1/Sequence/Bowtie2Index/
-  genomesstar=[:]/Saccharomyces_cerevisiae/Ensembl/R64-1-1/Sequence/STARIndex/
-  genomesbismark=[:]/Saccharomyces_cerevisiae/Ensembl/R64-1-1/Sequence/BismarkIndex/
-  genomesgtf=[:]/Saccharomyces_cerevisiae/Ensembl/R64-1-1/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Saccharomyces_cerevisiae/Ensembl/R64-1-1/Annotation/Genes/genes.bed
-  genomesmito_name='MT'
-  genomesmacs_gsize='1.2e7'
-  genomesfasta=[:]/Schizosaccharomyces_pombe/Ensembl/EF2/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Schizosaccharomyces_pombe/Ensembl/EF2/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Schizosaccharomyces_pombe/Ensembl/EF2/Sequence/Bowtie2Index/
-  genomesstar=[:]/Schizosaccharomyces_pombe/Ensembl/EF2/Sequence/STARIndex/
-  genomesbismark=[:]/Schizosaccharomyces_pombe/Ensembl/EF2/Sequence/BismarkIndex/
-  genomesgtf=[:]/Schizosaccharomyces_pombe/Ensembl/EF2/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Schizosaccharomyces_pombe/Ensembl/EF2/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Schizosaccharomyces_pombe/Ensembl/EF2/Annotation/README.txt
-  genomesmito_name='MT'
-  genomesmacs_gsize='1.21e7'
-  genomesfasta=[:]/Sorghum_bicolor/Ensembl/Sbi1/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Sorghum_bicolor/Ensembl/Sbi1/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Sorghum_bicolor/Ensembl/Sbi1/Sequence/Bowtie2Index/
-  genomesstar=[:]/Sorghum_bicolor/Ensembl/Sbi1/Sequence/STARIndex/
-  genomesbismark=[:]/Sorghum_bicolor/Ensembl/Sbi1/Sequence/BismarkIndex/
-  genomesgtf=[:]/Sorghum_bicolor/Ensembl/Sbi1/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Sorghum_bicolor/Ensembl/Sbi1/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Sorghum_bicolor/Ensembl/Sbi1/Annotation/README.txt
-  genomesfasta=[:]/Sus_scrofa/Ensembl/Sscrofa10.2/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Sus_scrofa/Ensembl/Sscrofa10.2/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Sus_scrofa/Ensembl/Sscrofa10.2/Sequence/Bowtie2Index/
-  genomesstar=[:]/Sus_scrofa/Ensembl/Sscrofa10.2/Sequence/STARIndex/
-  genomesbismark=[:]/Sus_scrofa/Ensembl/Sscrofa10.2/Sequence/BismarkIndex/
-  genomesgtf=[:]/Sus_scrofa/Ensembl/Sscrofa10.2/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Sus_scrofa/Ensembl/Sscrofa10.2/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Sus_scrofa/Ensembl/Sscrofa10.2/Annotation/README.txt
-  genomesmito_name='MT'
-  genomesfasta=[:]/Zea_mays/Ensembl/AGPv3/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Zea_mays/Ensembl/AGPv3/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Zea_mays/Ensembl/AGPv3/Sequence/Bowtie2Index/
-  genomesstar=[:]/Zea_mays/Ensembl/AGPv3/Sequence/STARIndex/
-  genomesbismark=[:]/Zea_mays/Ensembl/AGPv3/Sequence/BismarkIndex/
-  genomesgtf=[:]/Zea_mays/Ensembl/AGPv3/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Zea_mays/Ensembl/AGPv3/Annotation/Genes/genes.bed
-  genomesmito_name='Mt'
-  genomesfasta=[:]/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Homo_sapiens/UCSC/hg38/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Index/
-  genomesstar=[:]/Homo_sapiens/UCSC/hg38/Sequence/STARIndex/
-  genomesbismark=[:]/Homo_sapiens/UCSC/hg38/Sequence/BismarkIndex/
-  genomesgtf=[:]/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.bed
-  genomesmito_name='chrM'
-  genomesmacs_gsize='2.7e9'
-  genomesblacklist=/Users/jquinn/Code/btc-spatial-pipelines/assets/blacklists/hg38-blacklist.bed
-  genomesfasta=[:]/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Homo_sapiens/UCSC/hg19/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/
-  genomesstar=[:]/Homo_sapiens/UCSC/hg19/Sequence/STARIndex/
-  genomesbismark=[:]/Homo_sapiens/UCSC/hg19/Sequence/BismarkIndex/
-  genomesgtf=[:]/Homo_sapiens/UCSC/hg19/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Homo_sapiens/UCSC/hg19/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Homo_sapiens/UCSC/hg19/Annotation/README.txt
-  genomesmito_name='chrM'
-  genomesmacs_gsize='2.7e9'
-  genomesblacklist=/Users/jquinn/Code/btc-spatial-pipelines/assets/blacklists/hg19-blacklist.bed
-  genomesfasta=[:]/Mus_musculus/UCSC/mm10/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Mus_musculus/UCSC/mm10/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/
-  genomesstar=[:]/Mus_musculus/UCSC/mm10/Sequence/STARIndex/
-  genomesbismark=[:]/Mus_musculus/UCSC/mm10/Sequence/BismarkIndex/
-  genomesgtf=[:]/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Mus_musculus/UCSC/mm10/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Mus_musculus/UCSC/mm10/Annotation/README.txt
-  genomesmito_name='chrM'
-  genomesmacs_gsize='1.87e9'
-  genomesblacklist=/Users/jquinn/Code/btc-spatial-pipelines/assets/blacklists/mm10-blacklist.bed
-  genomesfasta=[:]/Bos_taurus/UCSC/bosTau8/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Bos_taurus/UCSC/bosTau8/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Bos_taurus/UCSC/bosTau8/Sequence/Bowtie2Index/
-  genomesstar=[:]/Bos_taurus/UCSC/bosTau8/Sequence/STARIndex/
-  genomesbismark=[:]/Bos_taurus/UCSC/bosTau8/Sequence/BismarkIndex/
-  genomesgtf=[:]/Bos_taurus/UCSC/bosTau8/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Bos_taurus/UCSC/bosTau8/Annotation/Genes/genes.bed
-  genomesmito_name='chrM'
-  genomesfasta=[:]/Caenorhabditis_elegans/UCSC/ce10/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Caenorhabditis_elegans/UCSC/ce10/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Caenorhabditis_elegans/UCSC/ce10/Sequence/Bowtie2Index/
-  genomesstar=[:]/Caenorhabditis_elegans/UCSC/ce10/Sequence/STARIndex/
-  genomesbismark=[:]/Caenorhabditis_elegans/UCSC/ce10/Sequence/BismarkIndex/
-  genomesgtf=[:]/Caenorhabditis_elegans/UCSC/ce10/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Caenorhabditis_elegans/UCSC/ce10/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Caenorhabditis_elegans/UCSC/ce10/Annotation/README.txt
-  genomesmito_name='chrM'
-  genomesmacs_gsize='9e7'
-  genomesfasta=[:]/Canis_familiaris/UCSC/canFam3/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Canis_familiaris/UCSC/canFam3/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Canis_familiaris/UCSC/canFam3/Sequence/Bowtie2Index/
-  genomesstar=[:]/Canis_familiaris/UCSC/canFam3/Sequence/STARIndex/
-  genomesbismark=[:]/Canis_familiaris/UCSC/canFam3/Sequence/BismarkIndex/
-  genomesgtf=[:]/Canis_familiaris/UCSC/canFam3/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Canis_familiaris/UCSC/canFam3/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Canis_familiaris/UCSC/canFam3/Annotation/README.txt
-  genomesmito_name='chrM'
-  genomesfasta=[:]/Danio_rerio/UCSC/danRer10/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Danio_rerio/UCSC/danRer10/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Danio_rerio/UCSC/danRer10/Sequence/Bowtie2Index/
-  genomesstar=[:]/Danio_rerio/UCSC/danRer10/Sequence/STARIndex/
-  genomesbismark=[:]/Danio_rerio/UCSC/danRer10/Sequence/BismarkIndex/
-  genomesgtf=[:]/Danio_rerio/UCSC/danRer10/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Danio_rerio/UCSC/danRer10/Annotation/Genes/genes.bed
-  genomesmito_name='chrM'
-  genomesmacs_gsize='1.37e9'
-  genomesfasta=[:]/Drosophila_melanogaster/UCSC/dm6/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Drosophila_melanogaster/UCSC/dm6/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Drosophila_melanogaster/UCSC/dm6/Sequence/Bowtie2Index/
-  genomesstar=[:]/Drosophila_melanogaster/UCSC/dm6/Sequence/STARIndex/
-  genomesbismark=[:]/Drosophila_melanogaster/UCSC/dm6/Sequence/BismarkIndex/
-  genomesgtf=[:]/Drosophila_melanogaster/UCSC/dm6/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Drosophila_melanogaster/UCSC/dm6/Annotation/Genes/genes.bed
-  genomesmito_name='chrM'
-  genomesmacs_gsize='1.2e8'
-  genomesfasta=[:]/Equus_caballus/UCSC/equCab2/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Equus_caballus/UCSC/equCab2/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Equus_caballus/UCSC/equCab2/Sequence/Bowtie2Index/
-  genomesstar=[:]/Equus_caballus/UCSC/equCab2/Sequence/STARIndex/
-  genomesbismark=[:]/Equus_caballus/UCSC/equCab2/Sequence/BismarkIndex/
-  genomesgtf=[:]/Equus_caballus/UCSC/equCab2/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Equus_caballus/UCSC/equCab2/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Equus_caballus/UCSC/equCab2/Annotation/README.txt
-  genomesmito_name='chrM'
-  genomesfasta=[:]/Gallus_gallus/UCSC/galGal4/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Gallus_gallus/UCSC/galGal4/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Gallus_gallus/UCSC/galGal4/Sequence/Bowtie2Index/
-  genomesstar=[:]/Gallus_gallus/UCSC/galGal4/Sequence/STARIndex/
-  genomesbismark=[:]/Gallus_gallus/UCSC/galGal4/Sequence/BismarkIndex/
-  genomesgtf=[:]/Gallus_gallus/UCSC/galGal4/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Gallus_gallus/UCSC/galGal4/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Gallus_gallus/UCSC/galGal4/Annotation/README.txt
-  genomesmito_name='chrM'
-  genomesfasta=[:]/Pan_troglodytes/UCSC/panTro4/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Pan_troglodytes/UCSC/panTro4/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Pan_troglodytes/UCSC/panTro4/Sequence/Bowtie2Index/
-  genomesstar=[:]/Pan_troglodytes/UCSC/panTro4/Sequence/STARIndex/
-  genomesbismark=[:]/Pan_troglodytes/UCSC/panTro4/Sequence/BismarkIndex/
-  genomesgtf=[:]/Pan_troglodytes/UCSC/panTro4/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Pan_troglodytes/UCSC/panTro4/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Pan_troglodytes/UCSC/panTro4/Annotation/README.txt
-  genomesmito_name='chrM'
-  genomesfasta=[:]/Rattus_norvegicus/UCSC/rn6/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Rattus_norvegicus/UCSC/rn6/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Rattus_norvegicus/UCSC/rn6/Sequence/Bowtie2Index/
-  genomesstar=[:]/Rattus_norvegicus/UCSC/rn6/Sequence/STARIndex/
-  genomesbismark=[:]/Rattus_norvegicus/UCSC/rn6/Sequence/BismarkIndex/
-  genomesgtf=[:]/Rattus_norvegicus/UCSC/rn6/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Rattus_norvegicus/UCSC/rn6/Annotation/Genes/genes.bed
-  genomesmito_name='chrM'
-  genomesfasta=[:]/Saccharomyces_cerevisiae/UCSC/sacCer3/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Saccharomyces_cerevisiae/UCSC/sacCer3/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Saccharomyces_cerevisiae/UCSC/sacCer3/Sequence/Bowtie2Index/
-  genomesstar=[:]/Saccharomyces_cerevisiae/UCSC/sacCer3/Sequence/STARIndex/
-  genomesbismark=[:]/Saccharomyces_cerevisiae/UCSC/sacCer3/Sequence/BismarkIndex/
-  genomesreadme=[:]/Saccharomyces_cerevisiae/UCSC/sacCer3/Annotation/README.txt
-  genomesmito_name='chrM'
-  genomesmacs_gsize='1.2e7'
-  genomesfasta=[:]/Sus_scrofa/UCSC/susScr3/Sequence/WholeGenomeFasta/genome.fa
-  genomesbwa=[:]/Sus_scrofa/UCSC/susScr3/Sequence/BWAIndex/version0.6.0/
-  genomesbowtie2=[:]/Sus_scrofa/UCSC/susScr3/Sequence/Bowtie2Index/
-  genomesstar=[:]/Sus_scrofa/UCSC/susScr3/Sequence/STARIndex/
-  genomesbismark=[:]/Sus_scrofa/UCSC/susScr3/Sequence/BismarkIndex/
-  genomesgtf=[:]/Sus_scrofa/UCSC/susScr3/Annotation/Genes/genes.gtf
-  genomesbed12=[:]/Sus_scrofa/UCSC/susScr3/Annotation/Genes/genes.bed
-  genomesreadme=[:]/Sus_scrofa/UCSC/susScr3/Annotation/README.txt
-  genomesmito_name='chrM'
-
-Sep-29 10:48:59.218 [main] ERROR nextflow.cli.Launcher - Unknown config attribute `params.igenomes_ignore` -- check config file: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
-nextflow.exception.ConfigParseException: Unknown config attribute `params.igenomes_ignore` -- check config file: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
-	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:67)
-	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)
-	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:484)
-	at org.codehaus.groovy.reflection.CachedConstructor.invoke(CachedConstructor.java:72)
-	at org.codehaus.groovy.runtime.callsite.ConstructorSite$ConstructorSiteNoUnwrapNoCoerce.callConstructor(ConstructorSite.java:105)
-	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallConstructor(CallSiteArray.java:59)
-	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callConstructor(AbstractCallSite.java:263)
-	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callConstructor(AbstractCallSite.java:277)
-	at nextflow.config.ConfigBuilder.validate(ConfigBuilder.groovy:461)
+Sep-29 10:57:37.934 [main] DEBUG nextflow.cli.Launcher - $> nextflow run . --input /Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard --outdir /tmp/test
+Sep-29 10:57:37.984 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.04.1
+Sep-29 10:57:37.996 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/jquinn/.nextflow/plugins; core-plugins: nf-amazon@1.16.2,nf-azure@1.0.1,nf-codecommit@0.1.4,nf-console@1.0.5,nf-ga4gh@1.0.5,nf-google@1.7.3,nf-tower@1.5.12,nf-wave@0.8.2
+Sep-29 10:57:38.001 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Sep-29 10:57:38.001 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Sep-29 10:57:38.003 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Sep-29 10:57:38.011 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Sep-29 10:57:38.521 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
+Sep-29 10:57:38.521 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
+Sep-29 10:57:38.529 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Sep-29 10:57:39.159 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
+Sep-29 10:57:39.171 [main] INFO  nextflow.cli.CmdRun - Launching `./main.nf` [soggy_solvay] DSL2 - revision: bb96675fea
+Sep-29 10:57:39.171 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins declared=[nf-validation]
+Sep-29 10:57:39.172 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Sep-29 10:57:39.172 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[nf-validation]
+Sep-29 10:57:39.172 [main] DEBUG nextflow.plugin.PluginUpdater - Installing plugin nf-validation version: latest
+Sep-29 10:57:39.251 [main] INFO  org.pf4j.AbstractPluginManager - Plugin 'nf-validation@0.3.2' resolved
+Sep-29 10:57:39.251 [main] INFO  org.pf4j.AbstractPluginManager - Start plugin 'nf-validation@0.3.2'
+Sep-29 10:57:39.258 [main] DEBUG nextflow.plugin.BasePlugin - Plugin started nf-validation@0.3.2
+Sep-29 10:57:39.264 [main] DEBUG nextflow.secret.LocalSecretsProvider - Secrets store: /Users/jquinn/.nextflow/secrets/store.json
+Sep-29 10:57:39.265 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@b022551] - activable => nextflow.secret.LocalSecretsProvider@b022551
+Sep-29 10:57:39.299 [main] DEBUG nextflow.Session - Session UUID: 89468311-2267-4f6c-aad6-92f5146c8b77
+Sep-29 10:57:39.299 [main] DEBUG nextflow.Session - Run name: soggy_solvay
+Sep-29 10:57:39.299 [main] DEBUG nextflow.Session - Executor pool size: 8
+Sep-29 10:57:39.305 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=24; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Sep-29 10:57:39.326 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 23.04.1 build 5866
+  Created: 15-04-2023 06:51 UTC (02:51 EDT)
+  System: Mac OS X 13.5
+  Runtime: Groovy 3.0.16 on OpenJDK 64-Bit Server VM 20+36-2344
+  Encoding: UTF-8 (UTF-8)
+  Process: 21984@LBST0162 [192.168.10.131]
+  CPUs: 8 - Mem: 16 GB (107.6 MB) - Swap: 5 GB (1.3 GB)
+Sep-29 10:57:39.335 [main] DEBUG nextflow.Session - Work-dir: /Users/jquinn/Code/btc-spatial-pipelines/work [Mac OS X]
+Sep-29 10:57:39.348 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Sep-29 10:57:39.353 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Sep-29 10:57:39.393 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Sep-29 10:57:39.399 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 9; maxThreads: 1000
+Sep-29 10:57:39.445 [main] DEBUG nextflow.Session - Session start
+Sep-29 10:57:39.447 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /tmp/test/pipeline_info/execution_trace_2023-09-29_10-57-39.txt
+Sep-29 10:57:39.456 [main] DEBUG nextflow.Session - Using default localLib path: /Users/jquinn/Code/btc-spatial-pipelines/lib
+Sep-29 10:57:39.458 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib
+Sep-29 10:57:39.458 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib/nfcore_external_java_deps.jar
+Sep-29 10:57:39.634 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Sep-29 10:57:39.646 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters, paramsHelp:paramsHelp]; plugin Id: nf-validation
+Sep-29 10:57:39.660 [main] DEBUG nextflow.validation.SchemaValidator - Starting parameters validation
+Sep-29 10:57:39.689 [main] WARN  nextflow.script.ScriptBinding - Access to undefined parameter `fasta` -- Initialise it to a default value eg. `params.fasta = some_value`
+Sep-29 10:57:39.696 [main] DEBUG nextflow.Session - Session aborted -- Cause: JSONObject["multiqc_title"] not found.
+Sep-29 10:57:39.701 [main] ERROR nextflow.cli.Launcher - @unknown
+org.json.JSONException: JSONObject["multiqc_title"] not found.
+	at org.json.JSONObject.get(JSONObject.java:587)
 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
-	at org.codehaus.groovy.runtime.callsite.PlainObjectMetaMethodSite.doInvoke(PlainObjectMetaMethodSite.java:48)
-	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite$PogoCachedMethodSiteNoUnwrapNoCoerce.invoke(PogoMetaMethodSite.java:189)
-	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite.callCurrent(PogoMetaMethodSite.java:57)
-	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallCurrent(CallSiteArray.java:51)
-	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:171)
-	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:212)
-	at nextflow.config.ConfigBuilder.validate(ConfigBuilder.groovy:468)
-	at nextflow.config.ConfigBuilder.validate(ConfigBuilder.groovy:448)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at groovy.lang.MetaClassImpl.getProperty(MetaClassImpl.java:1946)
+	at groovy.lang.MetaClassImpl.getProperty(MetaClassImpl.java:3827)
+	at org.codehaus.groovy.runtime.InvokerHelper.getProperty(InvokerHelper.java:195)
+	at org.codehaus.groovy.runtime.DefaultGroovyMethods.getAt(DefaultGroovyMethods.java:419)
+	at nextflow.validation.SchemaValidator.validateParameters(SchemaValidator.groovy:325)
+	at nextflow.validation.SchemaValidator.validateParameters(SchemaValidator.groovy)
 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
-	at org.codehaus.groovy.runtime.callsite.PlainObjectMetaMethodSite.doInvoke(PlainObjectMetaMethodSite.java:48)
-	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite$PogoCachedMethodSiteNoUnwrapNoCoerce.invoke(PogoMetaMethodSite.java:189)
-	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite.callCurrent(PogoMetaMethodSite.java:57)
+	at nextflow.script.FunctionDef.invoke_a(FunctionDef.groovy:64)
+	at nextflow.script.ComponentDef.invoke_o(ComponentDef.groovy:40)
+	at nextflow.script.WorkflowBinding.invokeMethod(WorkflowBinding.groovy:102)
+	at groovy.lang.GroovyObject$invokeMethod.call(Unknown Source)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCall(CallSiteArray.java:47)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:125)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:148)
+	at nextflow.script.BaseScript.invokeMethod(BaseScript.groovy:141)
+	at org.codehaus.groovy.runtime.callsite.PogoMetaClassSite.callCurrent(PogoMetaClassSite.java:68)
 	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallCurrent(CallSiteArray.java:51)
 	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:171)
-	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:194)
-	at nextflow.config.ConfigBuilder.merge0(ConfigBuilder.groovy:422)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
-	at org.codehaus.groovy.runtime.callsite.PlainObjectMetaMethodSite.doInvoke(PlainObjectMetaMethodSite.java:48)
-	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite$PogoCachedMethodSiteNoUnwrapNoCoerce.invoke(PogoMetaMethodSite.java:189)
-	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite.callCurrent(PogoMetaMethodSite.java:57)
-	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallCurrent(CallSiteArray.java:51)
-	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:171)
-	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:203)
-	at nextflow.config.ConfigBuilder.buildConfig0(ConfigBuilder.groovy:371)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
-	at org.codehaus.groovy.runtime.callsite.PlainObjectMetaMethodSite.doInvoke(PlainObjectMetaMethodSite.java:48)
-	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite$PogoCachedMethodSiteNoUnwrapNoCoerce.invoke(PogoMetaMethodSite.java:189)
-	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite.callCurrent(PogoMetaMethodSite.java:57)
-	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallCurrent(CallSiteArray.java:51)
-	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:171)
-	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:194)
-	at nextflow.config.ConfigBuilder.buildGivenFiles(ConfigBuilder.groovy:316)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
-	at org.codehaus.groovy.runtime.callsite.PlainObjectMetaMethodSite.doInvoke(PlainObjectMetaMethodSite.java:48)
-	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite$PogoCachedMethodSiteNoUnwrapNoCoerce.invoke(PogoMetaMethodSite.java:189)
-	at org.codehaus.groovy.runtime.callsite.PogoMetaMethodSite.callCurrent(PogoMetaMethodSite.java:57)
-	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallCurrent(CallSiteArray.java:51)
-	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:171)
-	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:185)
-	at nextflow.config.ConfigBuilder.buildConfigObject(ConfigBuilder.groovy:803)
-	at nextflow.config.ConfigBuilder.build(ConfigBuilder.groovy:816)
-	at nextflow.cli.CmdRun.run(CmdRun.groovy:321)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:176)
+	at Script_96e177fa.runScript(Script_96e177fa:32)
+	at nextflow.script.BaseScript.run0(BaseScript.groovy:145)
+	at nextflow.script.BaseScript.run(BaseScript.groovy:192)
+	at nextflow.script.ScriptParser.runScript(ScriptParser.groovy:229)
+	at nextflow.script.ScriptRunner.run(ScriptRunner.groovy:224)
+	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:130)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:368)
 	at nextflow.cli.Launcher.run(Launcher.groovy:494)
 	at nextflow.cli.Launcher.main(Launcher.groovy:653)

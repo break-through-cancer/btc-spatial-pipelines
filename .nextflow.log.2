@@ -1,62 +1,64 @@
-Sep-29 10:50:50.645 [main] DEBUG nextflow.cli.Launcher - $> nextflow run . --input /Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard --outdir /tmp/test
-Sep-29 10:50:50.690 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.04.1
-Sep-29 10:50:50.703 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/jquinn/.nextflow/plugins; core-plugins: nf-amazon@1.16.2,nf-azure@1.0.1,nf-codecommit@0.1.4,nf-console@1.0.5,nf-ga4gh@1.0.5,nf-google@1.7.3,nf-tower@1.5.12,nf-wave@0.8.2
-Sep-29 10:50:50.708 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
-Sep-29 10:50:50.709 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
-Sep-29 10:50:50.710 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
-Sep-29 10:50:50.716 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
-Sep-29 10:50:51.212 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
-Sep-29 10:50:51.213 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
-Sep-29 10:50:51.221 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
-Sep-29 10:50:51.842 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
-Sep-29 10:50:51.853 [main] INFO  nextflow.cli.CmdRun - Launching `./main.nf` [nauseous_rosalind] DSL2 - revision: bb96675fea
-Sep-29 10:50:51.854 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins declared=[nf-validation]
-Sep-29 10:50:51.855 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
-Sep-29 10:50:51.855 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[nf-validation]
-Sep-29 10:50:51.855 [main] DEBUG nextflow.plugin.PluginUpdater - Installing plugin nf-validation version: latest
-Sep-29 10:50:51.918 [main] INFO  org.pf4j.AbstractPluginManager - Plugin 'nf-validation@0.3.2' resolved
-Sep-29 10:50:51.918 [main] INFO  org.pf4j.AbstractPluginManager - Start plugin 'nf-validation@0.3.2'
-Sep-29 10:50:51.926 [main] DEBUG nextflow.plugin.BasePlugin - Plugin started nf-validation@0.3.2
-Sep-29 10:50:51.931 [main] DEBUG nextflow.secret.LocalSecretsProvider - Secrets store: /Users/jquinn/.nextflow/secrets/store.json
-Sep-29 10:50:51.933 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@7d37ee0c] - activable => nextflow.secret.LocalSecretsProvider@7d37ee0c
-Sep-29 10:50:51.967 [main] DEBUG nextflow.Session - Session UUID: 217dcef9-03c4-458d-acdc-aa01eac5ac80
-Sep-29 10:50:51.967 [main] DEBUG nextflow.Session - Run name: nauseous_rosalind
-Sep-29 10:50:51.967 [main] DEBUG nextflow.Session - Executor pool size: 8
-Sep-29 10:50:51.974 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=24; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
-Sep-29 10:50:51.988 [main] DEBUG nextflow.cli.CmdRun - 
+Sep-29 11:10:54.266 [main] DEBUG nextflow.cli.Launcher - $> nextflow run . --input /Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard --output /tmp/test
+Sep-29 11:10:54.316 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 23.04.1
+Sep-29 11:10:54.330 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/jquinn/.nextflow/plugins; core-plugins: nf-amazon@1.16.2,nf-azure@1.0.1,nf-codecommit@0.1.4,nf-console@1.0.5,nf-ga4gh@1.0.5,nf-google@1.7.3,nf-tower@1.5.12,nf-wave@0.8.2
+Sep-29 11:10:54.336 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Sep-29 11:10:54.336 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Sep-29 11:10:54.338 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Sep-29 11:10:54.344 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Sep-29 11:10:54.821 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
+Sep-29 11:10:54.822 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/jquinn/Code/btc-spatial-pipelines/nextflow.config
+Sep-29 11:10:54.831 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Sep-29 11:10:55.063 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
+Sep-29 11:10:55.073 [main] INFO  nextflow.cli.CmdRun - Launching `./main.nf` [jovial_swirles] DSL2 - revision: 12cd95eaee
+Sep-29 11:10:55.074 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins declared=[nf-validation]
+Sep-29 11:10:55.074 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Sep-29 11:10:55.074 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[nf-validation]
+Sep-29 11:10:55.074 [main] DEBUG nextflow.plugin.PluginUpdater - Installing plugin nf-validation version: latest
+Sep-29 11:10:55.325 [main] INFO  org.pf4j.AbstractPluginManager - Plugin 'nf-validation@0.3.2' resolved
+Sep-29 11:10:55.325 [main] INFO  org.pf4j.AbstractPluginManager - Start plugin 'nf-validation@0.3.2'
+Sep-29 11:10:55.331 [main] DEBUG nextflow.plugin.BasePlugin - Plugin started nf-validation@0.3.2
+Sep-29 11:10:55.338 [main] DEBUG nextflow.secret.LocalSecretsProvider - Secrets store: /Users/jquinn/.nextflow/secrets/store.json
+Sep-29 11:10:55.340 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@781aff8b] - activable => nextflow.secret.LocalSecretsProvider@781aff8b
+Sep-29 11:10:55.372 [main] DEBUG nextflow.Session - Session UUID: adc0f890-5513-4d8c-8aed-8ba7df0753b8
+Sep-29 11:10:55.372 [main] DEBUG nextflow.Session - Run name: jovial_swirles
+Sep-29 11:10:55.372 [main] DEBUG nextflow.Session - Executor pool size: 8
+Sep-29 11:10:55.378 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=24; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Sep-29 11:10:55.403 [main] DEBUG nextflow.cli.CmdRun - 
   Version: 23.04.1 build 5866
   Created: 15-04-2023 06:51 UTC (02:51 EDT)
   System: Mac OS X 13.5
   Runtime: Groovy 3.0.16 on OpenJDK 64-Bit Server VM 20+36-2344
   Encoding: UTF-8 (UTF-8)
-  Process: 21544@LBST0162 [192.168.10.131]
-  CPUs: 8 - Mem: 16 GB (73.7 MB) - Swap: 5 GB (1.4 GB)
-Sep-29 10:50:51.995 [main] DEBUG nextflow.Session - Work-dir: /Users/jquinn/Code/btc-spatial-pipelines/work [Mac OS X]
-Sep-29 10:50:52.007 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
-Sep-29 10:50:52.012 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
-Sep-29 10:50:52.048 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
-Sep-29 10:50:52.053 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 9; maxThreads: 1000
-Sep-29 10:50:52.099 [main] DEBUG nextflow.Session - Session start
-Sep-29 10:50:52.101 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /tmp/test/pipeline_info/execution_trace_2023-09-29_10-50-51.txt
-Sep-29 10:50:52.108 [main] DEBUG nextflow.Session - Using default localLib path: /Users/jquinn/Code/btc-spatial-pipelines/lib
-Sep-29 10:50:52.110 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib
-Sep-29 10:50:52.111 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib/nfcore_external_java_deps.jar
-Sep-29 10:50:52.282 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
-Sep-29 10:50:52.299 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters, paramsHelp:paramsHelp]; plugin Id: nf-validation
-Sep-29 10:50:52.312 [main] DEBUG nextflow.validation.SchemaValidator - Starting parameters validation
-Sep-29 10:50:52.339 [main] WARN  nextflow.script.ScriptBinding - Access to undefined parameter `fasta` -- Initialise it to a default value eg. `params.fasta = some_value`
-Sep-29 10:50:52.386 [main] ERROR nextflow.validation.SchemaValidator - ERROR: Validation of pipeline parameters failed!
-Sep-29 10:50:52.389 [main] DEBUG nextflow.Session - Session aborted -- Cause: [0;31mThe following invalid input values have been detected:
+  Process: 23301@LBST0162 [192.168.10.131]
+  CPUs: 8 - Mem: 16 GB (64.2 MB) - Swap: 5 GB (1.3 GB)
+Sep-29 11:10:55.412 [main] DEBUG nextflow.Session - Work-dir: /Users/jquinn/Code/btc-spatial-pipelines/work [Mac OS X]
+Sep-29 11:10:55.423 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Sep-29 11:10:55.428 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Sep-29 11:10:55.473 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Sep-29 11:10:55.479 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 9; maxThreads: 1000
+Sep-29 11:10:55.517 [main] DEBUG nextflow.Session - Session start
+Sep-29 11:10:55.520 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /Users/jquinn/Code/btc-spatial-pipelines/null/pipeline_info/execution_trace_2023-09-29_11-10-54.txt
+Sep-29 11:10:55.527 [main] DEBUG nextflow.Session - Using default localLib path: /Users/jquinn/Code/btc-spatial-pipelines/lib
+Sep-29 11:10:55.529 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib
+Sep-29 11:10:55.529 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/jquinn/Code/btc-spatial-pipelines/lib/nfcore_external_java_deps.jar
+Sep-29 11:10:55.778 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Sep-29 11:10:55.786 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters, paramsHelp:paramsHelp]; plugin Id: nf-validation
+Sep-29 11:10:55.796 [main] DEBUG nextflow.validation.SchemaValidator - Starting parameters validation
+Sep-29 11:10:55.852 [main] WARN  nextflow.validation.SchemaValidator - The following invalid input values have been detected:
 
-* --input: string [/Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard] does not match pattern ^\S+\.csv$ (/Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)
-* --input: '/Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard' is not a file, but a directory (/Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)
+* --output: /tmp/test
+
+
+Sep-29 11:10:55.867 [main] ERROR nextflow.validation.SchemaValidator - ERROR: Validation of pipeline parameters failed!
+Sep-29 11:10:55.870 [main] DEBUG nextflow.Session - Session aborted -- Cause: [0;31mThe following invalid input values have been detected:
+
+* Missing required parameter: --outdir
 [0m
 
-Sep-29 10:50:52.395 [main] DEBUG nextflow.cli.Launcher - Operation aborted
+Sep-29 11:10:55.876 [main] DEBUG nextflow.cli.Launcher - Operation aborted
 nextflow.validation.SchemaValidationException: [0;31mThe following invalid input values have been detected:
 
-* --input: string [/Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard] does not match pattern ^\S+\.csv$ (/Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)
-* --input: '/Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard' is not a file, but a directory (/Users/jquinn/Code/btc_spatial_demo/data/human-breast-cancer-visium-fresh-frozen-whole-transcriptome-1-standard)
+* Missing required parameter: --outdir
 [0m
 
 	at nextflow.validation.SchemaValidator.validateParameters(SchemaValidator.groovy:374)
@@ -75,7 +77,7 @@ nextflow.validation.SchemaValidationException: [0;31mThe following invalid inpu
 	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallCurrent(CallSiteArray.java:51)
 	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:171)
 	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:176)
-	at Script_96e177fa.runScript(Script_96e177fa:32)
+	at Script_3860e353.runScript(Script_3860e353:31)
 	at nextflow.script.BaseScript.run0(BaseScript.groovy:145)
 	at nextflow.script.BaseScript.run(BaseScript.groovy:192)
 	at nextflow.script.ScriptParser.runScript(ScriptParser.groovy:229)
