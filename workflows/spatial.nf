@@ -43,7 +43,7 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { BAYESTME                      } from '../modules/bayestme/main'
+include { BAYESTME } from '../modules/bayestme/main' params(outdir: params.outdir)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,15 +58,13 @@ workflow SPATIAL {
 
     ch_versions = Channel.empty()
 
-    //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
     INPUT_CHECK (
         file(params.input)
     )
 
     BAYESTME(
-        INPUT_CHECK.out.datasets.map { it.data_directory }
+        INPUT_CHECK.out.datasets.map { it.data_directory },
+        INPUT_CHECK.out.datasets.map { it.n_components }
     )
 }
 

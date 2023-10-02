@@ -8,7 +8,7 @@ workflow INPUT_CHECK {
         SAMPLESHEET_CHECK(samplesheet)
             .csv
             .splitCsv(header:true, sep:',')
-            .map{ row -> [sample_name: row.sample, data_directory: row.data_directory] }
+            .map{ row -> [sample_name: row.sample, data_directory: row.data_directory, n_components: row.n_components] }
             .set{ datasets }
 
 

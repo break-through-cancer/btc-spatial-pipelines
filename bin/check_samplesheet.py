@@ -44,7 +44,7 @@ def check_samplesheet(file_in, file_out):
         file_out (pathlib.Path): Where the validated samplesheet should be created.
 
     """
-    required_columns = {"sample", "data_directory"}
+    required_columns = {"sample", "data_directory", "n_components"}
 
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle)
