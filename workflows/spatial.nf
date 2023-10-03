@@ -43,7 +43,7 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { BAYESTME } from '../modules/bayestme/main' params(outdir: params.outdir)
+include { BAYESTME } from '../modules/bayestme/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
