@@ -43,7 +43,7 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { BAYESTME } from '../modules/bayestme/main'
+include { BAYESTME_BASIC_VISIUM_ANALYSIS } from '../modules/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,10 +62,9 @@ workflow SPATIAL {
         file(params.input)
     )
 
-    BAYESTME(
-        INPUT_CHECK.out.datasets.map { it.data_directory },
-        INPUT_CHECK.out.datasets.map { it.n_components }
-    )
+    ch_input = INPUT_CHECK.out.datasets.map { tuple([id:it.sample_name, single_end: false], it.data_directory, it.n_components) }
+
+    BAYESTME_BASIC_VISIUM_ANALYSIS( ch_input )
 }
 
 /*

@@ -11,6 +11,8 @@ from pathlib import Path
 logger = logging.getLogger()
 
 
+REQUIRED_COLUMNS = frozenset({"sample", "data_directory", "n_cell_types"})
+
 class RowChecker:
     """
     Define a service that can validate the structure of each given row.
@@ -44,13 +46,12 @@ def check_samplesheet(file_in, file_out):
         file_out (pathlib.Path): Where the validated samplesheet should be created.
 
     """
-    required_columns = {"sample", "data_directory", "n_components"}
 
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle)
         # Validate the existence of the expected header columns.
-        if not required_columns.issubset(reader.fieldnames):
-            req_cols = ", ".join(required_columns)
+        if not REQUIRED_COLUMNS.issubset(reader.fieldnames):
+            req_cols = ", ".join(REQUIRED_COLUMNS)
             logger.critical(f"The sample sheet must contain these column headers: {req_cols}.")
             sys.exit(1)
 
@@ -61,7 +62,7 @@ def check_samplesheet(file_in, file_out):
 
     # Writing rows to the output file.
     with file_out.open(mode="w", newline="") as out_handle:
-        writer = csv.DictWriter(out_handle, required_columns, delimiter=",")
+        writer = csv.DictWriter(out_handle, REQUIRED_COLUMNS, delimiter=",")
         writer.writeheader()
         writer.writerows(checker.rows)
 
