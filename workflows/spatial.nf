@@ -62,7 +62,7 @@ workflow SPATIAL {
         file(params.input)
     )
 
-    ch_input = INPUT_CHECK.out.datasets.map { tuple([id:it.sample_name, single_end: false], it.data_directory, it.n_components) }
+    ch_input = INPUT_CHECK.out.datasets.map { tuple([id:it.sample_name, single_end: false], it.data_directory, it.n_cell_types) }
 
     BAYESTME_BASIC_VISIUM_ANALYSIS( ch_input )
 }
