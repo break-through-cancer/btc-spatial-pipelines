@@ -43,7 +43,10 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { BAYESTME_BASIC_VISIUM_ANALYSIS } from '../modules/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
+include { BAYESTME_LOAD_SPACERANGER,
+          BAYESTME_FILTER_GENES,
+          BAYESTME_BLEEDING_CORRECTION,
+          BAYESTME_DECONVOLUTION  } from '../modules/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,7 +67,26 @@ workflow SPATIAL {
 
     ch_input = INPUT_CHECK.out.datasets.map { tuple([id:it.sample_name, single_end: false], it.data_directory, it.n_cell_types) }
 
-    BAYESTME_BASIC_VISIUM_ANALYSIS( ch_input )
+    BAYESTME_LOAD_SPACERANGER( ch_input.map { tuple(it[0], it[1]) } )
+
+    filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata.map { tuple(
+        it[0],
+        it[1],
+        true,
+        1000,
+        0.9,
+        [])
+    }
+
+    BAYESTME_FILTER_GENES( filter_genes_input )
+
+    BAYESTME_BLEEDING_CORRECTION( BAYESTME_FILTER_GENES.out.adata_filtered )
+
+    deconvolution_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
+        .join( ch_input.map { tuple(it[0], it[2]) } )
+        .map { tuple(it[0], it[1], it[2], 1000.0, []) }
+
+    BAYESTME_DECONVOLUTION( deconvolution_input )
 }
 
 /*
