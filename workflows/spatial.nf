@@ -43,9 +43,9 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { BAYESTME_LOAD_SPACERANGER,
-          BAYESTME_FILTER_GENES,
-          BAYESTME_BLEEDING_CORRECTION,
+include { BAYESTME_LOAD_SPACERANGER;
+          BAYESTME_FILTER_GENES;
+          BAYESTME_BLEEDING_CORRECTION;
           BAYESTME_DECONVOLUTION  } from '../modules/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
 
 /*
