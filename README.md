@@ -1,6 +1,6 @@
 ## Introduction
 
-**btc/spatial** is a bioinformatics pipeline for spatial data. Currently support for spatial transcriptomics (Visium 10x) is supported, but in the future support for other modalities
+**btc/spatial** is a bioinformatics pipeline for spatial data. Currently we only have support for spatial transcriptomics (10X Visium), but in the future support for other modalities
 (Xenium, IMC, etc.) will be integrated into this pipeline as well.
 
 ## Usage
