@@ -11,25 +11,28 @@ to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/i
 with `-profile test` before running the workflow on actual data.
 :::
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
-
 First, prepare a samplesheet with your input data that looks as follows:
 
 `samplesheet.csv`:
 
 ```csv
-sample,data_directory,n_cell_types
-"my_sample","/path/to/spaceranger/dir",5
+sample,data_directory,n_cell_types,bleeding_correction,spatial_transcriptional_programs
+"my_sample","/path/to/spaceranger/dir",5,false,false
 ```
 
-Each row represents a spatial transcriptomics sample, `n_cell_types` controls how many cell types to deconvolve into.
+Each row represents a spatial transcriptomics sample and configuration parameters specific to that sample.
 
--->
+`sample`: A unique identifier for the sample.
+
+`data_directory`: The path to the directory containing the output of the spaceranger pipeline.
+
+`n_cell_types`: This parameter controls how many cell types to deconvolve into.
+
+`bleeding_correction`: set to `true` if you want to enable bleeding correction for that sample.
+
+`spatial_transcriptional_programs`: set to `true` if you want to enable spatial transcriptional programs for that sample.
 
 Now, you can run the pipeline using:
-
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
 ```bash
 nextflow run break-through-cancer/btc-spatial-pipelines \
