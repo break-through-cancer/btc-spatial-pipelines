@@ -14,6 +14,7 @@ workflow INPUT_CHECK {
                 n_cell_types: row.n_cell_types,
                 bleeding_correction: row.bleeding_correction.toBoolean(),
                 spatial_transcriptional_programs: row.spatial_transcriptional_programs.toBoolean(),
+                expression_profile: row.expression_profile == null ? [] : row.expression_profile
             ] }
             .set{ datasets }
 
