@@ -102,7 +102,7 @@ workflow SPATIAL {
         .filter { !it[2] }
         .map { tuple(it[0], it[1]) }
         .join( ch_input.map { tuple(it[0], it[2]) } )
-        .map { tuple(it[0], it[1], it[2], 1000.0) }
+        .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
         .join(expression_profiles)
         .tap { not_bleed_corrected_deconvolution_input }
 
@@ -110,7 +110,7 @@ workflow SPATIAL {
 
     deconvolution_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
         .join( ch_input.map { tuple(it[0], it[2]) } )
-        .map { tuple(it[0], it[1], it[2], 1000.0) }
+        .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
         .join(expression_profiles)
         .concat( not_bleed_corrected_deconvolution_input )
 
