@@ -123,7 +123,7 @@ workflow SPATIAL {
         .map { tuple(it[0], it[1], it[2]) }
         .tap { stp_input }
 
-    BAYESTME_SPATIAL_EXPRESSION( stp_input )
+    stp_input.view()
 }
 
 /*
