@@ -93,13 +93,13 @@ workflow SPATIAL {
 
     BAYESTME_FILTER_GENES.out.adata_filtered
         .join( should_run_bleeding_correction )
-        .filter { it[2] }
+        .filter { it[2] == true }
         .map { tuple(it[0], it[1]) }
         .tap { bleeding_correction_input }
 
     BAYESTME_FILTER_GENES.out.adata_filtered
         .join( should_run_bleeding_correction )
-        .filter { !it[2] }
+        .filter { it[2] == false }
         .map { tuple(it[0], it[1]) }
         .join( ch_input.map { tuple(it[0], it[2]) } )
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
@@ -119,7 +119,7 @@ workflow SPATIAL {
     BAYESTME_DECONVOLUTION.out.adata_deconvolved
         .join( BAYESTME_DECONVOLUTION.out.deconvolution_samples )
         .join( should_run_stp )
-        .filter { it[2] }
+        .filter { it[2] == true }
         .map { tuple(it[0], it[1], it[2]) }
         .tap { stp_input }
 
