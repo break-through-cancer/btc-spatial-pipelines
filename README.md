@@ -16,8 +16,8 @@ First, prepare a samplesheet with your input data that looks as follows:
 `samplesheet.csv`:
 
 ```csv
-sample,data_directory,n_cell_types,bleeding_correction,spatial_transcriptional_programs
-"my_sample","/path/to/spaceranger/dir",5,false,false
+sample,data_directory,n_cell_types,bleeding_correction,spatial_transcriptional_programs,expression_profile
+"my_sample","/path/to/spaceranger/dir",5,false,false,"/path/to/profile.csv"
 ```
 
 Each row represents a spatial transcriptomics sample and configuration parameters specific to that sample.
@@ -31,6 +31,8 @@ Each row represents a spatial transcriptomics sample and configuration parameter
 `bleeding_correction`: set to `true` if you want to enable bleeding correction for that sample.
 
 `spatial_transcriptional_programs`: set to `true` if you want to enable spatial transcriptional programs for that sample.
+
+`expression_profile`: Optional reference expression profiles (leave blank if not using) if you have known cell types in your Visium data (perhaps from matched scRNA). See more info about how to generate this file here: https://bayestme.readthedocs.io/en/latest/fine_mapping_workflow.html
 
 Now, you can run the pipeline using:
 
