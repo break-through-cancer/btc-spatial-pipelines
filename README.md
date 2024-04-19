@@ -26,7 +26,7 @@ Each row represents a spatial transcriptomics sample and configuration parameter
 
 `data_directory`: The path to the directory containing the output of the spaceranger pipeline.
 
-`n_cell_types`: This parameter controls how many cell types to deconvolve into.
+`n_cell_types`: This parameter controls how many cell types to deconvolve into. If you pass `expression_profile` this value will be ignored, we will determine number of cell types from the matched scRNA data.
 
 `bleeding_correction`: set to `true` if you want to enable bleeding correction for that sample.
 
