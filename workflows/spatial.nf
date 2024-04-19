@@ -48,8 +48,6 @@ include { BAYESTME_LOAD_SPACERANGER;
           BAYESTME_BLEEDING_CORRECTION;
           BAYESTME_DECONVOLUTION;
         } from '../modules/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
-include { BAYESTME_SPATIAL_EXPRESSION
-        } from '../modules/bayestme/nextflow/modules/bayestme/bayestme_spatial_expression/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -122,8 +120,6 @@ workflow SPATIAL {
         .filter { it[2] == true }
         .map { tuple(it[0], it[1], it[2]) }
         .tap { stp_input }
-
-    stp_input.view()
 }
 
 /*
