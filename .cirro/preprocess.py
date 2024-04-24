@@ -23,9 +23,13 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
 
     # Clear all nextflow params other than --outdir and --input
     # since the input samplesheet now contains all the information we need.
+    to_remove = []
     for k in ds.params:
         if k != "outdir":
-            ds.remove_param(k)
+            to_remove.append(k)
+
+    for k in to_remove:
+        ds.remove_param(k)
 
     ds.add_param("input", "samplesheet.csv")
 
