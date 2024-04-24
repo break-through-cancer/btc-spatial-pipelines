@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+
+from cirro.helpers.preprocess_dataset import PreprocessDataset
+import pandas as pd
+import numpy as np
+
+SAMPLESHEET_REQUIRED_COLUMNS = ("sample", "data_directory", "n_cell_types", "bleeding_correction", "spatial_transcriptional_programs", "expression_profile")
+
+
+def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
+    samplesheet = pd.DataFrame([ds.params])
+
+    for colname in SAMPLESHEET_REQUIRED_COLUMNS:
+        if colname not in samplesheet.columns:
+            samplesheet[colname] = np.nan
+
+    for colname in samplesheet.columns:
+        if colname not in SAMPLESHEET_REQUIRED_COLUMNS:
+            del samplesheet[colname]
+
+    # Save to a file
+    samplesheet.to_csv("samplesheet.csv", index=None)
+
+    # Clear all nextflow params other than --outdir and --input
+    # since the input samplesheet now contains all the information we need.
+    for k in ds.params:
+        if k != "outdir":
+            ds.remove_param(k)
+
+    ds.add_param("input", "samplesheet.csv")
+
+    # Log the samplesheet
+    ds.logger.info(samplesheet)
+
+
+if __name__ == "__main__":
+    ds = PreprocessDataset.from_running()
+
+    set_params_as_samplesheet(ds)
+
+    # log
+    ds.logger.info(ds.params)
