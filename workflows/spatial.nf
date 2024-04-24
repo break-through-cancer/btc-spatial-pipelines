@@ -48,8 +48,6 @@ include { BAYESTME_LOAD_SPACERANGER;
           BAYESTME_BLEEDING_CORRECTION;
           BAYESTME_DECONVOLUTION;
         } from '../modules/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
-include { BAYESTME_SPATIAL_EXPRESSION
-        } from '../modules/bayestme/nextflow/modules/bayestme/bayestme_spatial_expression/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -71,11 +69,13 @@ workflow SPATIAL {
         it.data_directory,
         it.n_cell_types,
         it.bleeding_correction,
-        it.spatial_transcriptional_programs
+        it.spatial_transcriptional_programs,
+        it.expression_profile
     ) }
 
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
     ch_input.map { tuple(it[0], it[4]) }.tap { should_run_stp }
+    ch_input.map { tuple(it[0], it[5]) }.tap { expression_profiles }
 
     BAYESTME_LOAD_SPACERANGER( ch_input.map { tuple(it[0], it[1]) } )
 
@@ -84,31 +84,32 @@ workflow SPATIAL {
         it[1],
         true,
         1000,
-        0.9,
-        [])
-    }
+        0.9)
+    }.join(expression_profiles)
 
     BAYESTME_FILTER_GENES( filter_genes_input )
 
     BAYESTME_FILTER_GENES.out.adata_filtered
         .join( should_run_bleeding_correction )
-        .filter { it[2] }
+        .filter { it[2] == true }
         .map { tuple(it[0], it[1]) }
         .tap { bleeding_correction_input }
 
     BAYESTME_FILTER_GENES.out.adata_filtered
         .join( should_run_bleeding_correction )
-        .filter { !it[2] }
+        .filter { it[2] == false }
         .map { tuple(it[0], it[1]) }
         .join( ch_input.map { tuple(it[0], it[2]) } )
-        .map { tuple(it[0], it[1], it[2], 1000.0, []) }
+        .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
+        .join(expression_profiles)
         .tap { not_bleed_corrected_deconvolution_input }
 
     BAYESTME_BLEEDING_CORRECTION( bleeding_correction_input )
 
     deconvolution_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
         .join( ch_input.map { tuple(it[0], it[2]) } )
-        .map { tuple(it[0], it[1], it[2], 1000.0, []) }
+        .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
+        .join(expression_profiles)
         .concat( not_bleed_corrected_deconvolution_input )
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
@@ -116,11 +117,9 @@ workflow SPATIAL {
     BAYESTME_DECONVOLUTION.out.adata_deconvolved
         .join( BAYESTME_DECONVOLUTION.out.deconvolution_samples )
         .join( should_run_stp )
-        .filter { it[2] }
+        .filter { it[2] == true }
         .map { tuple(it[0], it[1], it[2]) }
         .tap { stp_input }
-
-    BAYESTME_SPATIAL_EXPRESSION( stp_input )
 }
 
 /*
