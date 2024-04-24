@@ -33,10 +33,14 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.logger.info(samplesheet)
 
 
-if __name__ == "__main__":
+def main():
     ds = PreprocessDataset.from_running()
 
     set_params_as_samplesheet(ds)
 
     # log
     ds.logger.info(ds.params)
+
+
+if __name__ == "__main__":
+    main()
