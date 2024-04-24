@@ -1,0 +1,27 @@
+{
+    "ui": {},
+    "form": {
+        "title": "BTC 10X Visium Pipeline",
+        "type": "object",
+        "properties": {
+            "pipeline_parameters": {
+                "title": "Pipeline parameters",
+                "type": "object",
+                "properties": {
+                    "bleeding_correction": {
+                        "type": "boolean",
+                        "title": "Enable Bleeding Correction"
+                    },
+                    "spatial_transcriptional_programs": {
+                        "type": "boolean",
+                        "title": "Enable Spatial Transcriptional Programs"
+                    },
+                    "n_cell_types": {
+                        "type": "integer",
+                        "title": "Number of Cell Types"
+                    }
+                }
+            }
+        }
+    }
+}
