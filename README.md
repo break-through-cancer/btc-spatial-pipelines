@@ -43,11 +43,14 @@ nextflow run break-through-cancer/btc-spatial-pipelines \
    --outdir <OUTDIR>
 ```
 
-:::warning
+[!WARNING]
 Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
 provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
 see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
-:::
+
+
+[!IMPORTANT]
+`export NXF_SINGULARITY_HOME_MOUNT=true` in order to allos matplotlib to write its logs (and avoid related error).
 
 ## Contributions and Support
 
