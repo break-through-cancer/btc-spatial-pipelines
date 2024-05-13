@@ -70,7 +70,6 @@ workflow SPATIAL {
         it.data_directory,
         it.n_cell_types,
         it.bleeding_correction,
-        it.spatial_transcriptional_programs,
         it.expression_profile
     ) }
 
