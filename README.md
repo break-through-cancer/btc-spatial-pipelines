@@ -16,8 +16,8 @@ First, prepare a samplesheet with your input data that looks as follows:
 `samplesheet.csv`:
 
 ```csv
-sample,data_directory,n_cell_types,bleeding_correction,spatial_transcriptional_programs,expression_profile
-"my_sample","/path/to/spaceranger/dir",5,false,false,"/path/to/profile.csv"
+sample,data_directory,n_cell_types,bleeding_correction,expression_profile
+"my_sample","/path/to/spaceranger/dir",5,false,"/path/to/profile.csv"
 ```
 
 Each row represents a spatial transcriptomics sample and configuration parameters specific to that sample.

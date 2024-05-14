@@ -47,6 +47,7 @@ include { BAYESTME_LOAD_SPACERANGER;
           BAYESTME_FILTER_GENES;
           BAYESTME_BLEEDING_CORRECTION;
           BAYESTME_DECONVOLUTION;
+          BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS;
         } from '../modules/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,13 +70,11 @@ workflow SPATIAL {
         it.data_directory,
         it.n_cell_types,
         it.bleeding_correction,
-        it.spatial_transcriptional_programs,
         it.expression_profile
     ) }
 
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
-    ch_input.map { tuple(it[0], it[4]) }.tap { should_run_stp }
-    ch_input.map { tuple(it[0], it[5]) }.tap { expression_profiles }
+    ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
 
     BAYESTME_LOAD_SPACERANGER( ch_input.map { tuple(it[0], it[1]) } )
 
@@ -114,12 +113,11 @@ workflow SPATIAL {
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
 
-    BAYESTME_DECONVOLUTION.out.adata_deconvolved
-        .join( BAYESTME_DECONVOLUTION.out.deconvolution_samples )
-        .join( should_run_stp )
-        .filter { it[2] == true }
-        .map { tuple(it[0], it[1], it[2]) }
+    BAYESTME_DECONVOLUTION.out.adata_deconvolved.join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
+        .map { tuple(it[0], it[1], it[2], []) }
         .tap { stp_input }
+
+    BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
 }
 
 /*
