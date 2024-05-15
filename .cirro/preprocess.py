@@ -4,7 +4,7 @@ from cirro.helpers.preprocess_dataset import PreprocessDataset
 import pandas as pd
 import numpy as np
 
-SAMPLESHEET_REQUIRED_COLUMNS = ("sample", "data_directory", "n_cell_types", "bleeding_correction", "spatial_transcriptional_programs", "expression_profile")
+SAMPLESHEET_REQUIRED_COLUMNS = ("sample", "data_directory", "n_cell_types", "bleeding_correction", "expression_profile")
 
 
 def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
