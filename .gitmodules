@@ -3,3 +3,6 @@
 	url = https://github.com/tansey-lab/bayestme.git
 [submodule "bayestme"]
 	url = git@github.com:tansey-lab/bayestme.git
+[submodule "modules/jhu-spatial"]
+	path = modules/jhu-spatial
+	url = https://github.com/FertigLab/spatial-pipeline
