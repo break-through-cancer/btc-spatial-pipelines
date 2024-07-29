@@ -79,7 +79,7 @@ workflow SPATIAL {
 
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
     ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
-    ch_inpit.map { tuple(it[0], it[1]) }.tap { data_directory }
+    ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
 
     BAYESTME_LOAD_SPACERANGER( ch_input.map { tuple(it[0], it[1]) } )
 
