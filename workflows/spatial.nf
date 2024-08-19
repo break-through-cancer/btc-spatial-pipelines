@@ -42,9 +42,9 @@ include { BAYESTME_LOAD_SPACERANGER;
           BAYESTME_BLEEDING_CORRECTION;
           BAYESTME_DECONVOLUTION;
           BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS;
-        } from '../modules/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
+        } from '../modules/local/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
         
-include { SPACEMARKERS } from '../modules/jhu-spatial/modules/local/spacemarkers'
+include { SPACEMARKERS } from '../modules/local/jhu-spatial/modules/local/spacemarkers'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
