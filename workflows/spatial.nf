@@ -46,6 +46,8 @@ include { BAYESTME_LOAD_SPACERANGER;
         
 include { SPACEMARKERS } from '../modules/local/jhu-spatial/modules/local/spacemarkers'
 
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -118,14 +120,24 @@ workflow SPATIAL {
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
 
+    //collect versions - assume all BAYESTME_ modules have the same version
+    ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
 
     SPACEMARKERS( BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory) )
+    
+    //collect versions
+    ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
 
     BAYESTME_DECONVOLUTION.out.adata_deconvolved.join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
         .map { tuple(it[0], it[1], it[2], []) }
         .tap { stp_input }
 
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
+
+    //collate versions
+    version_yaml = Channel.empty()
+    version_yaml = softwareVersionsToYAML(versions)
+            .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
 }
 
 /*
