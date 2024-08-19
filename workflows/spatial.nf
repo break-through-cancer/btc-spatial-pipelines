@@ -136,7 +136,7 @@ workflow SPATIAL {
 
     //collate versions
     version_yaml = Channel.empty()
-    version_yaml = softwareVersionsToYAML(versions)
+    version_yaml = softwareVersionsToYAML(ch_versions)
             .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
 }
 
