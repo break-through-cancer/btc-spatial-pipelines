@@ -70,7 +70,6 @@ workflow SPATIAL {
     INPUT_CHECK (
         file(params.input)
     )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     ch_input = INPUT_CHECK.out.datasets.map { tuple(
         [id:it.sample_name, single_end: false],
