@@ -46,7 +46,6 @@ include { BAYESTME_LOAD_SPACERANGER;
         
 include { SPACEMARKERS } from '../modules/local/jhu-spatial/modules/local/spacemarkers'
 
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,6 +53,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,6 +70,7 @@ workflow SPATIAL {
     INPUT_CHECK (
         file(params.input)
     )
+    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     ch_input = INPUT_CHECK.out.datasets.map { tuple(
         [id:it.sample_name, single_end: false],
@@ -84,6 +85,7 @@ workflow SPATIAL {
     ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
 
     BAYESTME_LOAD_SPACERANGER( ch_input.map { tuple(it[0], it[1]) } )
+    ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
 
     filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata.map { tuple(
         it[0],
@@ -93,7 +95,9 @@ workflow SPATIAL {
         0.9)
     }.join(expression_profiles)
 
+
     BAYESTME_FILTER_GENES( filter_genes_input )
+    ch_versions = ch_versions.mix(BAYESTME_FILTER_GENES.out.versions)
 
     BAYESTME_FILTER_GENES.out.adata_filtered
         .join( should_run_bleeding_correction )
@@ -110,7 +114,9 @@ workflow SPATIAL {
         .join(expression_profiles)
         .tap { not_bleed_corrected_deconvolution_input }
 
+
     BAYESTME_BLEEDING_CORRECTION( bleeding_correction_input )
+    ch_versions = ch_versions.mix(BAYESTME_BLEEDING_CORRECTION.out.versions)
 
     deconvolution_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
         .join( ch_input.map { tuple(it[0], it[2]) } )
@@ -119,20 +125,18 @@ workflow SPATIAL {
         .concat( not_bleed_corrected_deconvolution_input )
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
-
-    //collect versions - assume all BAYESTME_ modules have the same version
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
 
     SPACEMARKERS( BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory) )
-    
-    //collect versions
     ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
 
     BAYESTME_DECONVOLUTION.out.adata_deconvolved.join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
         .map { tuple(it[0], it[1], it[2], []) }
         .tap { stp_input }
+    ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
 
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
+    ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
 
     //collate versions
     version_yaml = Channel.empty()
