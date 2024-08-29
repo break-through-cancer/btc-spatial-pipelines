@@ -54,6 +54,7 @@ include { SPACEMARKERS } from '../modules/local/jhu-spatial/modules/local/spacem
 */
 
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { MULTIQC } from '../modules/nf-core/multiqc'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,10 +62,12 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Info required for completion email and summary
-def multiqc_report = []
 
 workflow SPATIAL {
+
+    //gather all QC reports for MultiQC
+    ch_multiqc_files = Channel.empty()
+    multiqc_report   = Channel.empty()
     ch_versions = Channel.empty()
 
     INPUT_CHECK (
@@ -82,6 +85,15 @@ workflow SPATIAL {
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
     ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
     ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
+
+    // A new channel that contains *.html spaceranger reports for multiqc
+    ch_sr_reports = data_directory.flatMap { item ->
+        def meta = item[0]
+        def data_path = item[1]
+        def html_files = file(data_path).listFiles().findAll { it.name.endsWith('.html') }
+        html_files.collect { file -> [meta: meta, sr_report: file] }
+    }
+    ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
 
     BAYESTME_LOAD_SPACERANGER( ch_input.map { tuple(it[0], it[1]) } )
     ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
@@ -126,9 +138,6 @@ workflow SPATIAL {
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
 
-    SPACEMARKERS( BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory) )
-    ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
-
     BAYESTME_DECONVOLUTION.out.adata_deconvolved.join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
         .map { tuple(it[0], it[1], it[2], []) }
         .tap { stp_input }
@@ -137,10 +146,25 @@ workflow SPATIAL {
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
     ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
 
+    //spacemarkers
+    SPACEMARKERS( BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory) )
+    ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
+
     //collate versions
     version_yaml = Channel.empty()
     version_yaml = softwareVersionsToYAML(ch_versions)
             .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
+    ch_multiqc_files = ch_multiqc_files.mix(version_yaml)
+
+    // MultiQC
+    MULTIQC (
+            ch_multiqc_files,[],[],[],[],[]
+        )
+    multiqc_report = MULTIQC.out.report.toList()
+
+
+    emit:
+      multiqc_report // channel: /path/to/multiqc_report.html
 }
 
 /*
