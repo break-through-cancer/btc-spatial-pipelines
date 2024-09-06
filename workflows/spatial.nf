@@ -159,7 +159,7 @@ workflow SPATIAL {
     //spacemarkers - mqc
     SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1]) } )
     ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
-    ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc)
+    ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it.spacemarkers_mqc })
 
     //collate versions
     version_yaml = Channel.empty()
@@ -169,7 +169,7 @@ workflow SPATIAL {
 
     // MultiQC
     MULTIQC (
-            ch_multiqc_files,[],[],[],[],[]
+            ch_multiqc_files.collect(),[],[],[],[],[]
         )
     multiqc_report = MULTIQC.out.report.toList()
 
