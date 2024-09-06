@@ -44,7 +44,9 @@ include { BAYESTME_LOAD_SPACERANGER;
           BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS;
         } from '../modules/local/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
         
-include { SPACEMARKERS } from '../modules/local/jhu-spatial/modules/local/spacemarkers'
+include { SPACEMARKERS; 
+          SPACEMARKERS_MQC;
+          SPACEMARKERS_IMSCORES } from '../modules/local/jhu-spatial/modules/local/spacemarkers'
 
 
 /*
@@ -146,9 +148,18 @@ workflow SPATIAL {
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
     ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
 
-    //spacemarkers
+    //spacemarkers - main
     SPACEMARKERS( BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory) )
     ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
+
+    //spacemarkers - imscores in csv, also part of SpaceMarkers.rds object
+    SPACEMARKERS_IMSCORES( SPACEMARKERS.out.spaceMarkers { tuple(it[0], it[1]) } )
+    ch_versions = ch_versions.mix(SPACEMARKERS_IMSCORES.out.versions)
+
+    //spacemarkers - mqc
+    SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers { tuple(it[0], it[1]) } )
+    ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc)
 
     //collate versions
     version_yaml = Channel.empty()
