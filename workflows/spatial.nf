@@ -153,11 +153,11 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
 
     //spacemarkers - imscores in csv, also part of SpaceMarkers.rds object
-    SPACEMARKERS_IMSCORES( SPACEMARKERS.out.spaceMarkers { tuple(it[0], it[1]) } )
+    SPACEMARKERS_IMSCORES( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1]) } )
     ch_versions = ch_versions.mix(SPACEMARKERS_IMSCORES.out.versions)
 
     //spacemarkers - mqc
-    SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers { tuple(it[0], it[1]) } )
+    SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1]) } )
     ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc)
 
