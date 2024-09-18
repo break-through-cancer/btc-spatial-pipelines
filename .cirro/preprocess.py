@@ -8,6 +8,7 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample", "data_directory", "n_cell_types", "ble
 
 
 def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
+    ds.logger.info([ds.params])
     samplesheet = pd.DataFrame([ds.params]).explode("data_directory")
 
     for colname in SAMPLESHEET_REQUIRED_COLUMNS:
