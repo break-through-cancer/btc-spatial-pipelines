@@ -34,7 +34,7 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.add_param("input", "samplesheet.csv")
 
     # Log the samplesheet
-    ds.logger.info(samplesheet)
+    ds.logger.info(samplesheet.to_dict())
 
 
 def main():
