@@ -9,7 +9,8 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample", "data_directory", "n_cell_types", "ble
 
 def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.logger.info([ds.params])
-    samplesheet = pd.DataFrame([ds.params]).explode("data_directory")
+    
+    samplesheet = df_from_params(ds.params)
 
     for colname in SAMPLESHEET_REQUIRED_COLUMNS:
         if colname not in samplesheet.columns:
@@ -37,6 +38,19 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     # Log the samplesheet
     ds.logger.info(samplesheet.to_dict())
 
+
+def df_from_params(params):
+    pipeline_param_names = ['bleeding_correction','spatial_transcriptional_programs','n_cell_types']
+    pipeline_params = {k: [params[k]] for k in pipeline_param_names}
+
+    data_params = pd.DataFrame({
+        'sample':[x['name'] for x in params['cirro_inputs']],
+        'data_directory': [x['s3'] for x in params['cirro_inputs']]
+        })
+    
+    samplesheet = data_params.join(pd.DataFrame(pipeline_params), how='cross')
+
+    return samplesheet
 
 def main():
     ds = PreprocessDataset.from_running()

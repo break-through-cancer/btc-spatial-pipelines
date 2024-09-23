@@ -1,7 +1,6 @@
 {
-    "sample": "sample",
+    "cirro_input": "$.params.inputs",
     "outdir": "$.params.dataset.s3|/data/",
-    "data_directory": "$.params.inputs",
     "bleeding_correction": "$.params.dataset.paramJson.pipeline_parameters.bleeding_correction",
     "spatial_transcriptional_programs": "$.params.dataset.paramJson.pipeline_parameters.spatial_transcriptional_programs",
     "n_cell_types": "$.params.dataset.paramJson.pipeline_parameters.n_cell_types"
