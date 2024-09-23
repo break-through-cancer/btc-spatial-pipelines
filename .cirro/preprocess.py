@@ -45,7 +45,7 @@ def df_from_params(params):
 
     data_params = pd.DataFrame({
         'sample':[x['name'] for x in params['cirro_input']],
-        'data_directory': [x['s3'] for x in params['cirro_input']]
+        'data_directory': [x['s3']+'/data' for x in params['cirro_input']]
         })
     
     samplesheet = data_params.join(pd.DataFrame(pipeline_params), how='cross')
