@@ -9,7 +9,7 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample", "data_directory", "n_cell_types", "ble
 
 def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.logger.info([ds.params])
-    
+
     samplesheet = df_from_params(ds.params)
 
     for colname in SAMPLESHEET_REQUIRED_COLUMNS:
@@ -40,8 +40,8 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
 
 
 def df_from_params(params):
-    pipeline_param_names = ['bleeding_correction','spatial_transcriptional_programs','n_cell_types']
-    pipeline_params = {k: [params[k]] for k in pipeline_param_names}
+    pipeline_param_names = [c for c in SAMPLESHEET_REQUIRED_COLUMNS] + ['spatial_transcriptional_programs']
+    pipeline_params = { {k: [params[k]]} for k in pipeline_param_names if k in params.keys()}
 
     data_params = pd.DataFrame({
         'sample':[x['name'] for x in params['cirro_inputs']],
