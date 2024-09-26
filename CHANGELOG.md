@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - multiqc report for spacemarkers
 
 ### `Fixed`
+- cirro: not being able to run  on multiple samples
+- cirro: showing 'sample' instead of the proper sample name 
+- spacemarkers returning no interactions in BayesTME results
 
 ### `Dependencies`
 
