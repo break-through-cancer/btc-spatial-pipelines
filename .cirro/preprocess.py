@@ -8,7 +8,9 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample", "data_directory", "n_cell_types", "ble
 
 
 def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
-    samplesheet = pd.DataFrame([ds.params])
+    ds.logger.info([ds.params])
+
+    samplesheet = df_from_params(ds.params)
 
     for colname in SAMPLESHEET_REQUIRED_COLUMNS:
         if colname not in samplesheet.columns:
@@ -34,8 +36,21 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.add_param("input", "samplesheet.csv")
 
     # Log the samplesheet
-    ds.logger.info(samplesheet)
+    ds.logger.info(samplesheet.to_dict())
 
+
+def df_from_params(params):
+    pipeline_param_names = [c for c in SAMPLESHEET_REQUIRED_COLUMNS] + ['spatial_transcriptional_programs']
+    pipeline_params = { k: [params[k]] for k in pipeline_param_names if k in params.keys()}
+
+    data_params = pd.DataFrame({
+        'sample':[x['name'] for x in params['cirro_input']],
+        'data_directory': [x['s3']+'/data' for x in params['cirro_input']]
+        })
+    
+    samplesheet = data_params.join(pd.DataFrame(pipeline_params), how='cross')
+
+    return samplesheet
 
 def main():
     ds = PreprocessDataset.from_running()
