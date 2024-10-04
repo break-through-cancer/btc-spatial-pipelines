@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - cirro: not being able to run  on multiple samples
 - cirro: showing 'sample' instead of the proper sample name 
 - spacemarkers returning no interactions in BayesTME results
+- spacemarkers not running multithreaded
 
 ### `Dependencies`
 
