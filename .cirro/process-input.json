@@ -4,8 +4,9 @@
     "bleeding_correction": "$.params.dataset.paramJson.pipeline_parameters.bleeding_correction",
     "spatial_transcriptional_programs": "$.params.dataset.paramJson.pipeline_parameters.spatial_transcriptional_programs",
     "n_cell_types": "$.params.dataset.paramJson.pipeline_parameters.n_cell_types",
-    "n_deconvolution_genes": "$.params.dataset.paramJson.pipeline_parameters.n_deconvolution_genes",
-    "reference_scrna": "$.params.dataset.paramJson.pipeline_parameters.reference_scrna",
     "reference_scrna_sample_column": "$.params.dataset.paramJson.pipeline_parameters.reference_scrna_sample_column",
-    "reference_scrna_celltype_column": "$.params.dataset.paramJson.pipeline_parameters.reference_scrna_celltype_column"
+    "reference_scrna_celltype_column": "$.params.dataset.paramJson.pipeline_parameters.reference_scrna_celltype_column",
+    "filter_ribosomal_genes": "$.params.dataset.paramJson.pipeline_parameters.filter_ribosomal_genes",
+    "n_deconvolution_genes": "$.params.dataset.paramJson.pipeline_parameters.n_deconvolution_genes",
+    "spot_threshold": "$.params.dataset.paramJson.pipeline_parameters.spot_threshold"
 }
