@@ -43,8 +43,8 @@ include { BAYESTME_LOAD_SPACERANGER;
           BAYESTME_DECONVOLUTION;
           BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS;
         } from '../modules/local/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
-        
-include { SPACEMARKERS; 
+
+include { SPACEMARKERS;
           SPACEMARKERS_MQC;
           SPACEMARKERS_IMSCORES } from '../modules/local/jhu-spatial/modules/local/spacemarkers'
 
@@ -103,11 +103,10 @@ workflow SPATIAL {
     filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata.map { tuple(
         it[0],
         it[1],
-        true,
-        1000,
-        0.9)
+        params.filter_ribosomal_genes.toBoolean(),
+        params.n_deconvolution_genes,
+        params.spot_threshold)
     }.join(expression_profiles)
-
 
     BAYESTME_FILTER_GENES( filter_genes_input )
     ch_versions = ch_versions.mix(BAYESTME_FILTER_GENES.out.versions)

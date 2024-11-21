@@ -3,5 +3,9 @@
     "outdir": "$.params.dataset.s3|/data/",
     "bleeding_correction": "$.params.dataset.paramJson.pipeline_parameters.bleeding_correction",
     "spatial_transcriptional_programs": "$.params.dataset.paramJson.pipeline_parameters.spatial_transcriptional_programs",
-    "n_cell_types": "$.params.dataset.paramJson.pipeline_parameters.n_cell_types"
+    "n_cell_types": "$.params.dataset.paramJson.pipeline_parameters.n_cell_types",
+    "n_deconvolution_genes": "$.params.dataset.paramJson.pipeline_parameters.n_deconvolution_genes",
+    "reference_scrna": "$.params.dataset.paramJson.pipeline_parameters.reference_scrna",
+    "reference_scrna_sample_column": "$.params.dataset.paramJson.pipeline_parameters.reference_scrna_sample_column",
+    "reference_scrna_celltype_column": "$.params.dataset.paramJson.pipeline_parameters.reference_scrna_celltype_column"
 }

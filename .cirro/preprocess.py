@@ -23,12 +23,10 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     # Save to a file
     samplesheet.to_csv("samplesheet.csv", index=None)
 
-    # Clear all nextflow params other than --outdir and --input
-    # since the input samplesheet now contains all the information we need.
+    # Clear all nextflow params that are placed in the samplesheet.
     to_remove = []
-    for k in ds.params:
-        if k != "outdir":
-            to_remove.append(k)
+    for k in SAMPLESHEET_REQUIRED_COLUMNS:
+        to_remove.append(k)
 
     for k in to_remove:
         ds.remove_param(k)
@@ -47,10 +45,11 @@ def df_from_params(params):
         'sample':[x['name'] for x in params['cirro_input']],
         'data_directory': [x['s3']+'/data' for x in params['cirro_input']]
         })
-    
+
     samplesheet = data_params.join(pd.DataFrame(pipeline_params), how='cross')
 
     return samplesheet
+
 
 def main():
     ds = PreprocessDataset.from_running()
