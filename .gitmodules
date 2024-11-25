@@ -2,7 +2,6 @@
 	path = modules/local/bayestme
 	url = https://github.com/tansey-lab/bayestme.git
 	update = merge
-[submodule "modules/jhu-spatial"]
-	path = modules/local/jhu-spatial
-	url = https://github.com/FertigLab/spatial-pipeline
-	update = merge
+[submodule "modules/local/spacemarkers"]
+	path = modules/local/spacemarkers
+	url = https://github.com/DeshpandeLab/SpaceMarkers
