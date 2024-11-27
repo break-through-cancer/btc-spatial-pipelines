@@ -46,7 +46,7 @@ include { BAYESTME_LOAD_SPACERANGER;
         
 include { SPACEMARKERS; 
           SPACEMARKERS_MQC;
-          SPACEMARKERS_IMSCORES } from '../modules/local/jhu-spatial/modules/local/spacemarkers'
+          SPACEMARKERS_IMSCORES } from '../modules/local/spacemarkers/nextflow/main'
 
 
 /*
