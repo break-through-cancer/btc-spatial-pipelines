@@ -48,6 +48,9 @@ include { SPACEMARKERS;
           SPACEMARKERS_MQC;
           SPACEMARKERS_IMSCORES } from '../modules/local/spacemarkers/nextflow/main'
 
+include { COGAPS;
+          PREPROCESS } from '../modules/local/cogaps/nextflow/main'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -147,6 +150,20 @@ workflow SPATIAL {
 
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
     ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
+
+    //cogaps
+    if (params.run_cogaps) {
+        PREPROCESS( data_directory )
+        ch_versions = ch_versions.mix(PREPROCESS.out.versions)
+
+        ch_gaps = PREPROCESS.out.dgCMatrix.map { tuple(it[0], it[1]) }
+        
+        COGAPS(ch_gaps)
+        ch_versions = ch_versions.mix(COGAPS.out.versions)
+    }
+
+    ch_sm_inputs = BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory)
+    ch_sm_inputs.mix(COGAPS.out.gaps.map { tuple(it[0], it[1]) }.join(data_directory))
 
     //spacemarkers - main
     SPACEMARKERS( BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory) )

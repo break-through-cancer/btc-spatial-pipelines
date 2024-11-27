@@ -21,6 +21,16 @@
                         "title": "Number of Cell Types"
                     }
                 }
+            },
+            "cogaps": {
+                "title": "CoGAPS parameters",
+                "type": "object",
+                "properties": {
+                    "run_cogaps": {
+                        "type": "boolean",
+                        "title": "run CoGAPS"
+                    }
+                }
             }
         }
     }
