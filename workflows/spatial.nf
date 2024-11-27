@@ -75,6 +75,9 @@ workflow SPATIAL {
     multiqc_report   = Channel.empty()
     ch_versions = Channel.empty()
 
+    // Optional inputs to SpaceMarkers
+    ch_sm_inputs = Channel.empty()
+
     INPUT_CHECK (
         file(params.input)
     )
@@ -147,6 +150,7 @@ workflow SPATIAL {
         .map { tuple(it[0], it[1], it[2], []) }
         .tap { stp_input }
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
+    ch_sm_inputs = ch_sm_inputs.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory))
 
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
     ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
@@ -160,10 +164,8 @@ workflow SPATIAL {
         
         COGAPS(ch_gaps)
         ch_versions = ch_versions.mix(COGAPS.out.versions)
+        ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.gaps.map { tuple(it[0], it[1]) }.join(data_directory))
     }
-
-    ch_sm_inputs = BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory)
-    ch_sm_inputs.mix(COGAPS.out.gaps.map { tuple(it[0], it[1]) }.join(data_directory))
 
     //spacemarkers - main
     SPACEMARKERS( BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory) )
