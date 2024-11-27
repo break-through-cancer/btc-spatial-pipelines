@@ -19,6 +19,26 @@
                     "n_cell_types": {
                         "type": "integer",
                         "title": "Number of Cell Types"
+                    },
+                    "reference_scrna_sample_column": {
+                        "type": "string",
+                        "title": "Reference scRNA-seq Sample Column"
+                    },
+                    "reference_scrna_celltype_column": {
+                        "type": "string",
+                        "title": "Reference scRNA-seq Cell Type Column"
+                    },
+                    "filter_ribosomal_genes": {
+                        "type": "boolean",
+                        "title": "Filter Ribosomal Genes"
+                    },
+                    "n_deconvolution_genes": {
+                        "type": "integer",
+                        "title": "Number of Deconvolution Genes"
+                    },
+                    "spot_threshold": {
+                        "type": "float",
+                        "title": "Spot Threshold (filter out genes found in more than this percentage of spots)"
                     }
                 }
             }
