@@ -10,7 +10,7 @@ workflow INPUT_CHECK {
             .splitCsv(header:true, sep:',')
             .map{ row -> [
                 sample_name: row.sample,
-                data_directory: row.data_directory,
+                data_directory: file(row.data_directory),
                 n_cell_types: row.n_cell_types,
                 bleeding_correction: row.bleeding_correction.toBoolean(),
                 expression_profile: (row.expression_profile == null || row.expression_profile == "") ? [] : row.expression_profile
