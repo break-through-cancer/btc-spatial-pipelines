@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - spacemarkers tool
 - multiqc report for spaceranger
 - multiqc report for spacemarkers
+- standalone spacemarkers module
+- CoGAPS deconvolution module
 
 ### `Fixed`
 - cirro: not being able to run  on multiple samples
