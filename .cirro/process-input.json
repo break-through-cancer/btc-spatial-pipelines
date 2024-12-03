@@ -2,12 +2,8 @@
     "cirro_input": "$.params.inputs",
     "outdir": "$.params.dataset.s3|/data/",
     "n_cell_types": "$.params.dataset.paramJson.deconvolution.n_cell_types",
-    
-    //bayesTME params
     "run_bayesTME": "$.params.dataset.paramJson.deconvolution.bayestme.run_bayestme",
     "bleeding_correction": "$.params.dataset.paramJson.deconvolution.bayestme.bleeding_correction",
     "spatial_transcriptional_programs": "$.params.dataset.paramJson.deconvolution.bayestme.spatial_transcriptional_programs",
-
-    //cogaps params
     "run_cogaps": "$.params.dataset.paramJson.cogaps.run_cogaps"
 }
