@@ -37,6 +37,14 @@
                             "run_cogaps": {
                                 "type": "boolean",
                                 "title": "run CoGAPS"
+                            },
+                            "cogaps_niterations": {
+                                "type": "integer",
+                                "title": "Number of Iterations"
+                            },
+                            "cogaps_sparse": {
+                                "type": "boolean",
+                                "title": "Enable Sparse Optimization"
                             }
                         }
                     }

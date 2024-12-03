@@ -5,5 +5,7 @@
     "run_bayestme": "$.params.dataset.paramJson.deconvolution.bayestme.run_bayestme",
     "bleeding_correction": "$.params.dataset.paramJson.deconvolution.bayestme.bleeding_correction",
     "spatial_transcriptional_programs": "$.params.dataset.paramJson.deconvolution.bayestme.spatial_transcriptional_programs",
-    "run_cogaps": "$.params.dataset.paramJson.cogaps.run_cogaps"
+    "run_cogaps": "$.params.dataset.paramJson.cogaps.run_cogaps",
+    "cogaps_niterations": "$.params.dataset.paramJson.cogaps.cogaps_niterations",
+    "cogaps_sparse": "$.params.dataset.paramJson.cogaps.cogaps_sparse"
 }
