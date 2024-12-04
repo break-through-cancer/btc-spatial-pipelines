@@ -181,7 +181,7 @@ workflow SPATIAL {
                                            distributed:'null', nsets:1, nthreads:1]) }
         .join(PREPROCESS.out.dgCMatrix.map { tuple(it[0], it[1]) })
         .map { tuple(it[0], it[2], it[1]) }                          // reorder to match cogaps input
-    ch_gaps.view()
+
     COGAPS(ch_gaps)
     
     ch_versions = ch_versions.mix(COGAPS.out.versions)
