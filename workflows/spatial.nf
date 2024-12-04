@@ -92,7 +92,7 @@ workflow SPATIAL {
         it.run_bayestme,
         it.run_cogaps,
         it.cogaps_niterations,
-        it.cogaps_sparse
+        it.cogaps_sparse.toInteger()
     ) }
 
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
@@ -181,7 +181,7 @@ workflow SPATIAL {
                                            distributed:'null', nsets:1, nthreads:1]) }
         .join(PREPROCESS.out.dgCMatrix.map { tuple(it[0], it[1]) })
         .map { tuple(it[0], it[2], it[1]) }                          // reorder to match cogaps input
-
+    ch_gaps.view()
     COGAPS(ch_gaps)
     
     ch_versions = ch_versions.mix(COGAPS.out.versions)
