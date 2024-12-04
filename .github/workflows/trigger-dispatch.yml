@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Send Repository Dispatch
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_PAT: ${{ secrets.ADD_ISSUE_TO_PROJECT }}
         run: |
           curl -X POST -H "Authorization: Bearer $GH_PAT" \
             -H "Accept: application/vnd.github.everest-preview+json" \
