@@ -36,9 +36,9 @@
                         "type": "boolean",
                         "title": "CoGAPS: Enable Sparse Optimization"
                     }
+                }
             }
         }
     }
 }
-
 
