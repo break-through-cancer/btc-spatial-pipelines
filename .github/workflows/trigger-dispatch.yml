@@ -12,7 +12,7 @@ jobs:
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          curl -X POST -H "Authorization: token $GH_PAT" \
+          curl -X POST -H "Authorization: Bearer $GH_PAT" \
             -H "Accept: application/vnd.github.everest-preview+json" \
             -d '{"event_type": "issue_opened", "client_payload": {"repository": "'${{ github.repository }}'", "issue_node_id": "'${{ github.event.issue.node_id }}'"}}' \
             https://api.github.com/repos/break-through-cancer/btc-dev-repo/dispatches
