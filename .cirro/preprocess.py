@@ -6,7 +6,8 @@ import numpy as np
 
 SAMPLESHEET_REQUIRED_COLUMNS = ("sample", 
                                 "data_directory", 
-                                "n_cell_types", "bleeding_correction", 
+                                "n_cell_types", 
+                                "bleeding_correction", 
                                 "expression_profile",
                                 "run_bayestme",
                                 "run_cogaps",

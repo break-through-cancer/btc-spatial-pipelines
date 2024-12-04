@@ -12,44 +12,33 @@
                         "type": "integer",
                         "title": "Number of Cell Types"
                     },
-                    "bayestme":{
-                        "title": "BayesTME",
-                        "type": "object",
-                        "properties": {
-                            "run_bayestme": {
-                                "type": "boolean",
-                                "title": "run BayesTME"
-                            },
-                            "bleeding_correction": {
-                                "type": "boolean",
-                                "title": "Enable Bleeding Correction"
-                            },
-                            "spatial_transcriptional_programs": {
-                                "type": "boolean",
-                                "title": "Enable Spatial Transcriptional Programs"
-                            }
-                        }
+                    "run_bayestme": {
+                        "type": "boolean",
+                        "title": "run BayesTME"
                     },
-                    "cogaps": {
-                        "title": "CoGAPS",
-                        "type": "object",
-                        "properties": {
-                            "run_cogaps": {
-                                "type": "boolean",
-                                "title": "run CoGAPS"
-                            },
-                            "cogaps_niterations": {
-                                "type": "integer",
-                                "title": "Number of Iterations"
-                            },
-                            "cogaps_sparse": {
-                                "type": "boolean",
-                                "title": "Enable Sparse Optimization"
-                            }
-                        }
+                    "bleeding_correction": {
+                        "type": "boolean",
+                        "title": "BayesTME: Enable Bleeding Correction"
+                    },
+                    "spatial_transcriptional_programs": {
+                        "type": "boolean",
+                        "title": "BayesTME: Enable Spatial Transcriptional Programs"
+                    },
+                    "run_cogaps": {
+                        "type": "boolean",
+                        "title": "run CoGAPS"
+                    },
+                    "cogaps_niterations": {
+                        "type": "integer",
+                        "title": "CoGAPS: Number of Iterations"
+                    },
+                    "cogaps_sparse": {
+                        "type": "boolean",
+                        "title": "CoGAPS: Enable Sparse Optimization"
                     }
-                }
             }
         }
     }
 }
+
+
