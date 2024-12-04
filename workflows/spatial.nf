@@ -210,15 +210,15 @@ workflow SPATIAL {
                    .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
     ch_multiqc_files = ch_multiqc_files.mix(ch_versions)
 
-    // // MultiQC
-    // MULTIQC (
-    //         ch_multiqc_files.collect(),[],[],[],[],[]
-    //     )
-    // multiqc_report = MULTIQC.out.report.toList()
+    // MultiQC
+    MULTIQC (
+            ch_multiqc_files.collect(),[],[],[],[],[]
+        )
+    multiqc_report = MULTIQC.out.report.toList()
 
 
-    // emit:
-    // multiqc_report // channel: /path/to/multiqc_report.html
+    emit:
+    multiqc_report // channel: /path/to/multiqc_report.html
 
 }
 
