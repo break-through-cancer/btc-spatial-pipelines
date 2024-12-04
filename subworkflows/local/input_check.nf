@@ -17,7 +17,7 @@ workflow INPUT_CHECK {
                 run_bayestme: row.run_bayestme.toBoolean(),
                 run_cogaps: row.run_cogaps.toBoolean(),
                 cogaps_niterations: row.cogaps_niterations,
-                cogaps_sparse: row.cogaps_sparse
+                cogaps_sparse: row.cogaps_sparse.toBoolean()
             ] }
             .set{ datasets }
 

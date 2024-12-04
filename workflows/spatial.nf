@@ -92,7 +92,7 @@ workflow SPATIAL {
         it.run_bayestme,
         it.run_cogaps,
         it.cogaps_niterations,
-        it.cogaps_sparse.toInteger()
+        it.cogaps_sparse
     ) }
 
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
