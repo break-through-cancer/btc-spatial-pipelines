@@ -31,10 +31,6 @@
                     "cogaps_niterations": {
                         "type": "integer",
                         "title": "CoGAPS: Number of Iterations"
-                    },
-                    "cogaps_sparse": {
-                        "type": "boolean",
-                        "title": "CoGAPS: Enable Sparse Optimization"
                     }
                 }
             }

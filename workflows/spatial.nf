@@ -91,8 +91,6 @@ workflow SPATIAL {
         it.expression_profile,
         it.run_bayestme,
         it.run_cogaps,
-        it.cogaps_niterations,
-        it.cogaps_sparse
     ) }
 
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
@@ -176,9 +174,11 @@ workflow SPATIAL {
     ch_gaps = INPUT_CHECK.out.datasets
         .filter { it -> it.run_cogaps == true }
         .map { tuple([id:it.sample_name], [niterations:it.cogaps_niterations, 
-                                           npatterns:it.n_cell_types, 
-                                           sparse:it.cogaps_sparse, 
-                                           distributed:'null', nsets:1, nthreads:1]) }
+                                           npatterns:it.n_cell_types,
+                                           sparse:1,
+                                           distributed:'null', 
+                                           nsets:1, 
+                                           nthreads:1]) }
         .join(PREPROCESS.out.dgCMatrix.map { tuple(it[0], it[1]) })
         .map { tuple(it[0], it[2], it[1]) }                          // reorder to match cogaps input
 

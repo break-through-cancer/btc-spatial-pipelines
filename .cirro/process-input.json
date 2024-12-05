@@ -6,6 +6,5 @@
     "bleeding_correction": "$.params.dataset.paramJson.deconvolution.bleeding_correction",
     "spatial_transcriptional_programs": "$.params.dataset.paramJson.deconvolution.spatial_transcriptional_programs",
     "run_cogaps": "$.params.dataset.paramJson.deconvolution.run_cogaps",
-    "cogaps_niterations": "$.params.dataset.paramJson.deconvolution.cogaps_niterations",
-    "cogaps_sparse": "$.params.dataset.paramJson.deconvolution.cogaps_sparse"
+    "cogaps_niterations": "$.params.dataset.paramJson.deconvolution.cogaps_niterations"
 }

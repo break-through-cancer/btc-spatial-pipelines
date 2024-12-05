@@ -16,8 +16,7 @@ workflow INPUT_CHECK {
                 expression_profile: (row.expression_profile == null || row.expression_profile == "") ? [] : row.expression_profile,
                 run_bayestme: row.run_bayestme.toBoolean(),
                 run_cogaps: row.run_cogaps.toBoolean(),
-                cogaps_niterations: row.cogaps_niterations,
-                cogaps_sparse: row.cogaps_sparse.toBoolean()? 1:0 // R receives true instead of TRUE otherwise
+                cogaps_niterations: row.cogaps_niterations
             ] }
             .set{ datasets }
 
