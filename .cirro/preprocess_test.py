@@ -23,8 +23,7 @@ def test_preprocess(mocker):
         "expression_profile": "expression_profile",
         "run_bayestme": True,
         "run_cogaps": True,
-        "cogaps_niterations": 100,
-        "cogaps_sparse": True,
+        "cogaps_niterations": 100
     }
 
     try:

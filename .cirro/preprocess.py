@@ -11,8 +11,7 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample",
                                 "expression_profile",
                                 "run_bayestme",
                                 "run_cogaps",
-                                "cogaps_niterations",
-                                "cogaps_sparse")
+                                "cogaps_niterations")
 
 
 def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
