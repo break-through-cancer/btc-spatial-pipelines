@@ -11,14 +11,8 @@ to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/i
 with `-profile test` before running the workflow on actual data.
 
 
-First, prepare a samplesheet with your input data that looks as follows:
+First, prepare a samplesheet with your input data that looks as follows: [samplesheet.csv](samplesheet.csv):
 
-`samplesheet.csv`:
-
-```csv
-sample,data_directory,n_cell_types,bleeding_correction,expression_profile,spatial_transcriptional_programs
-"my_sample","/path/to/spaceranger/dir",5,false,"/path/to/profile.csv",true
-```
 
 Each row represents a spatial transcriptomics sample and configuration parameters specific to that sample.
 
