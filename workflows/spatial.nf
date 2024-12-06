@@ -48,6 +48,10 @@ include { SPACEMARKERS;
           SPACEMARKERS_MQC;
           SPACEMARKERS_IMSCORES } from '../modules/local/spacemarkers/nextflow/main'
 
+include { COGAPS;
+          PREPROCESS } from '../modules/local/cogaps/nextflow/main'
+
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,21 +76,27 @@ workflow SPATIAL {
     multiqc_report   = Channel.empty()
     ch_versions = Channel.empty()
 
+    // Optional inputs to SpaceMarkers
+    ch_sm_inputs = Channel.empty()
+
     INPUT_CHECK (
         file(params.input)
     )
 
     ch_input = INPUT_CHECK.out.datasets.map { tuple(
-        [id:it.sample_name, single_end: false],
+        id:it.sample_name,
         it.data_directory,
         it.n_cell_types,
         it.bleeding_correction,
-        it.expression_profile
+        it.expression_profile,
+        it.run_bayestme,
+        it.run_cogaps,
     ) }
 
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
     ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
     ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
+    ch_input.map { tuple(it[0], it[2]) }.tap { n_cell_types }
 
     // A new channel that contains *.html spaceranger reports for multiqc
     ch_sr_reports = data_directory.flatMap { item ->
@@ -95,9 +105,11 @@ workflow SPATIAL {
         def html_files = file(data_path).listFiles().findAll { it.name.endsWith('.html') }
         html_files.collect { file -> [meta: meta, sr_report: file] }
     }
+
     ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
 
-    BAYESTME_LOAD_SPACERANGER( ch_input.map { tuple(it[0], it[1]) } )
+    ch_btme = ch_input.filter { it[5] == true }.map { tuple(it[0], it[1]) }
+    BAYESTME_LOAD_SPACERANGER( ch_btme )
     ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
 
     filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata.map { tuple(
@@ -144,28 +156,59 @@ workflow SPATIAL {
         .map { tuple(it[0], it[1], it[2], []) }
         .tap { stp_input }
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
+    ch_sm_inputs = ch_sm_inputs.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }
+        .join(data_directory))
 
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
     ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
 
+
+    //cogaps
+    ch_samplesheet = INPUT_CHECK.out.datasets
+        .filter { it -> it.run_cogaps == true }
+        .map { tuple(meta=[id:it.sample_name], data=file(it.data_directory)) }
+
+    PREPROCESS( ch_samplesheet )
+    ch_versions = ch_versions.mix(PREPROCESS.out.versions)
+
+    ch_gaps = INPUT_CHECK.out.datasets
+        .filter { it -> it.run_cogaps == true }
+        .map { tuple([id:it.sample_name], [niterations:it.cogaps_niterations, 
+                                           npatterns:it.n_cell_types,
+                                           sparse:1,
+                                           distributed:'null', 
+                                           nsets:1, 
+                                           nthreads:1]) }
+        .join(PREPROCESS.out.dgCMatrix.map { tuple(it[0], it[1]) })
+        .map { tuple(it[0], it[2], it[1]) }                          // reorder to match cogaps input
+
+    COGAPS(ch_gaps)
+    
+    ch_versions = ch_versions.mix(COGAPS.out.versions)
+    ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(ch_samplesheet))
+
+
     //spacemarkers - main
-    SPACEMARKERS( BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory) )
+    SPACEMARKERS( ch_sm_inputs )
     ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
 
     //spacemarkers - imscores in csv, also part of SpaceMarkers.rds object
-    SPACEMARKERS_IMSCORES( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1]) } )
+    SPACEMARKERS_IMSCORES( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], //meta
+                                                                     it[1], //path to SpaceMarkers.rds
+                                                                     it[2]  //source - to create a unique path
+    ) } )
     ch_versions = ch_versions.mix(SPACEMARKERS_IMSCORES.out.versions)
 
     //spacemarkers - mqc
-    SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1]) } )
+    SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1], it[2]) } )
     ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
 
     //collate versions
     version_yaml = Channel.empty()
     version_yaml = softwareVersionsToYAML(ch_versions)
-            .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
-    ch_multiqc_files = ch_multiqc_files.mix(version_yaml)
+                   .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
+    ch_multiqc_files = ch_multiqc_files.mix(ch_versions)
 
     // MultiQC
     MULTIQC (
@@ -175,7 +218,8 @@ workflow SPATIAL {
 
 
     emit:
-      multiqc_report // channel: /path/to/multiqc_report.html
+    multiqc_report // channel: /path/to/multiqc_report.html
+
 }
 
 /*

@@ -4,24 +4,37 @@
         "title": "BTC 10X Visium Pipeline",
         "type": "object",
         "properties": {
-            "pipeline_parameters": {
-                "title": "Pipeline parameters",
+            "deconvolution": {
+                "title": "Deconvolution options",
                 "type": "object",
                 "properties": {
-                    "bleeding_correction": {
-                        "type": "boolean",
-                        "title": "Enable Bleeding Correction"
-                    },
-                    "spatial_transcriptional_programs": {
-                        "type": "boolean",
-                        "title": "Enable Spatial Transcriptional Programs"
-                    },
                     "n_cell_types": {
                         "type": "integer",
                         "title": "Number of Cell Types"
+                    },
+                    "run_bayestme": {
+                        "type": "boolean",
+                        "title": "run BayesTME"
+                    },
+                    "bleeding_correction": {
+                        "type": "boolean",
+                        "title": "BayesTME: Enable Bleeding Correction"
+                    },
+                    "spatial_transcriptional_programs": {
+                        "type": "boolean",
+                        "title": "BayesTME: Enable Spatial Transcriptional Programs"
+                    },
+                    "run_cogaps": {
+                        "type": "boolean",
+                        "title": "run CoGAPS"
+                    },
+                    "cogaps_niterations": {
+                        "type": "integer",
+                        "title": "CoGAPS: Number of Iterations"
                     }
                 }
             }
         }
     }
 }
+

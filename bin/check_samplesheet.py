@@ -11,7 +11,15 @@ from pathlib import Path
 logger = logging.getLogger()
 
 
-REQUIRED_COLUMNS = frozenset({"sample", "data_directory", "n_cell_types", "bleeding_correction", "expression_profile"})
+REQUIRED_COLUMNS = frozenset({"sample", 
+                              "data_directory", 
+                              "n_cell_types", 
+                              "bleeding_correction", 
+                              "expression_profile",
+                              "run_bayestme",
+                              "run_cogaps",
+                              "cogaps_niterations"
+                              })
 
 class RowChecker:
     """
