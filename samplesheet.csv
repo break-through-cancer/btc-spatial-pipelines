@@ -1,2 +1,2 @@
-sample,data_directory,n_cell_types,bleeding_correction,expression_profile,run_bayestme,run_cogaps,cogaps_niterations,cogaps_sparse
-"sample1","./breastcancer",5,false,,0,1,100,1
+sample,data_directory,n_cell_types,bleeding_correction,expression_profile,run_bayestme,run_cogaps,cogaps_niterations
+"sample1","./breastcancer",5,false,,0,1,100
