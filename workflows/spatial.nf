@@ -91,12 +91,14 @@ workflow SPATIAL {
         it.expression_profile,
         it.run_bayestme,
         it.run_cogaps,
+        it.n_top_genes
     ) }
 
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
     ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
     ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
     ch_input.map { tuple(it[0], it[2]) }.tap { n_cell_types }
+    ch_input.map { tuple(it[0], it[7]) }.tap { n_top_genes }
 
     // A new channel that contains *.html spaceranger reports for multiqc
     ch_sr_reports = data_directory.flatMap { item ->
@@ -112,14 +114,15 @@ workflow SPATIAL {
     BAYESTME_LOAD_SPACERANGER( ch_btme )
     ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
 
-    filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata.map { tuple(
-        it[0],
-        it[1],
-        true,
-        1000,
-        0.9)
+    filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata
+        .join( n_top_genes )
+        .map { tuple(
+            it[0],               // sample_name
+            it[1],               // adata
+            true,                // filter_ribosomal_genes
+            it[2],               // n_top_genes
+            0.9)                 // spot_threshold
     }.join(expression_profiles)
-
 
     BAYESTME_FILTER_GENES( filter_genes_input )
     ch_versions = ch_versions.mix(BAYESTME_FILTER_GENES.out.versions)

@@ -16,7 +16,8 @@ workflow INPUT_CHECK {
                 expression_profile: (row.expression_profile == null || row.expression_profile == "") ? [] : row.expression_profile,
                 run_bayestme: row.run_bayestme.toBoolean(),
                 run_cogaps: row.run_cogaps.toBoolean(),
-                cogaps_niterations: row.cogaps_niterations
+                cogaps_niterations: row.cogaps_niterations,
+                n_top_genes: row.n_top_genes
             ] }
             .set{ datasets }
 
