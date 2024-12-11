@@ -83,6 +83,7 @@ workflow SPATIAL {
         file(params.input)
     )
 
+    // NOTE: append to the list to avoid other indices being off
     ch_input = INPUT_CHECK.out.datasets.map { tuple(
         id:it.sample_name,
         it.data_directory,
@@ -91,7 +92,8 @@ workflow SPATIAL {
         it.expression_profile,
         it.run_bayestme,
         it.run_cogaps,
-        it.n_top_genes
+        it.n_top_genes,
+        it.spatial_transcriptional_programs
     ) }
 
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
@@ -99,6 +101,8 @@ workflow SPATIAL {
     ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
     ch_input.map { tuple(it[0], it[2]) }.tap { n_cell_types }
     ch_input.map { tuple(it[0], it[7]) }.tap { n_top_genes }
+    ch_input.map { tuple(it[0], it[8]) }.tap { spatial_transcriptional_programs }
+
 
     // A new channel that contains *.html spaceranger reports for multiqc
     ch_sr_reports = data_directory.flatMap { item ->
@@ -155,7 +159,10 @@ workflow SPATIAL {
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
 
-    BAYESTME_DECONVOLUTION.out.adata_deconvolved.join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
+    BAYESTME_DECONVOLUTION.out.adata_deconvolved
+        .join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
+        .join( spatial_transcriptional_programs )
+        .filter { it[3] == true }                           // spatial_transcriptional_programs bool
         .map { tuple(it[0], it[1], it[2], []) }
         .tap { stp_input }
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)

@@ -17,7 +17,8 @@ workflow INPUT_CHECK {
                 run_bayestme: row.run_bayestme.toBoolean(),
                 run_cogaps: row.run_cogaps.toBoolean(),
                 cogaps_niterations: row.cogaps_niterations,
-                n_top_genes: row.n_top_genes
+                n_top_genes: row.n_top_genes,
+                spatial_transcriptional_programs: row.spatial_transcriptional_programs
             ] }
             .set{ datasets }
 

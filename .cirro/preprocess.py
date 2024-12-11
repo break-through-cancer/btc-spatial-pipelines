@@ -12,7 +12,9 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample",
                                 "run_bayestme",
                                 "run_cogaps",
                                 "cogaps_niterations",
-                                "n_top_genes")
+                                "n_top_genes",
+                                "spatial_transcriptional_programs"
+                                )
 
 
 def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
@@ -48,7 +50,7 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
 
 
 def df_from_params(params):
-    pipeline_param_names = [c for c in SAMPLESHEET_REQUIRED_COLUMNS] + ['spatial_transcriptional_programs']
+    pipeline_param_names = [c for c in SAMPLESHEET_REQUIRED_COLUMNS]
     pipeline_params = { k: [params[k]] for k in pipeline_param_names if k in params.keys()}
 
     data_params = pd.DataFrame({

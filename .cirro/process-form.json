@@ -24,10 +24,6 @@
                         "type": "boolean",
                         "title": "BayesTME: Enable Bleeding Correction"
                     },
-                    "spatial_transcriptional_programs": {
-                        "type": "boolean",
-                        "title": "BayesTME: Enable Spatial Transcriptional Programs"
-                    },
                     "run_cogaps": {
                         "type": "boolean",
                         "title": "run CoGAPS"
@@ -35,6 +31,16 @@
                     "cogaps_niterations": {
                         "type": "integer",
                         "title": "CoGAPS: Number of Iterations"
+                    }
+                }
+            },
+            "spatial":{
+                "title": "Spatial options",
+                "type": "object",
+                "properties": {
+                    "spatial_transcriptional_programs": {
+                        "type": "boolean",
+                        "title": "BayesTME: Enable Spatial Transcriptional Programs"
                     }
                 }
             }

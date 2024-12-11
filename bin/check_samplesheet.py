@@ -19,7 +19,8 @@ REQUIRED_COLUMNS = frozenset({"sample",
                               "run_bayestme",
                               "run_cogaps",
                               "cogaps_niterations",
-                              "n_top_genes"
+                              "n_top_genes",
+                              "spatial_transcriptional_programs"
                               })
 
 class RowChecker:
