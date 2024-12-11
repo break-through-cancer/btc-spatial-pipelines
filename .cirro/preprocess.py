@@ -13,7 +13,8 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample",
                                 "run_cogaps",
                                 "cogaps_niterations",
                                 "n_top_genes",
-                                "spatial_transcriptional_programs"
+                                "spatial_transcriptional_programs",
+                                "run_spacemarkers"
                                 )
 
 

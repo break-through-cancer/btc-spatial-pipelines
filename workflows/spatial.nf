@@ -93,7 +93,8 @@ workflow SPATIAL {
         it.run_bayestme,
         it.run_cogaps,
         it.n_top_genes,
-        it.spatial_transcriptional_programs
+        it.spatial_transcriptional_programs,
+        it.run_spacemarkers
     ) }
 
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
@@ -102,6 +103,7 @@ workflow SPATIAL {
     ch_input.map { tuple(it[0], it[2]) }.tap { n_cell_types }
     ch_input.map { tuple(it[0], it[7]) }.tap { n_top_genes }
     ch_input.map { tuple(it[0], it[8]) }.tap { spatial_transcriptional_programs }
+    ch_input.map { tuple(it[0], it[9]) }.tap { run_spacemarkers }
 
 
     // A new channel that contains *.html spaceranger reports for multiqc
@@ -196,6 +198,9 @@ workflow SPATIAL {
     
     ch_versions = ch_versions.mix(COGAPS.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(ch_samplesheet))
+    ch_sm_inputs = ch_sm_inputs.join(run_spacemarkers).filter { it[2] == true } // make spacemarkers optional
+
+    ch_sm_inputs.view()
 
 
     //spacemarkers - main
@@ -218,12 +223,13 @@ workflow SPATIAL {
     version_yaml = Channel.empty()
     version_yaml = softwareVersionsToYAML(ch_versions)
                    .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
-    ch_multiqc_files = ch_multiqc_files.mix(ch_versions)
+    
 
     // MultiQC
+    // NOTE - will fail to find spaceranger reports unless the full path is provided
     MULTIQC (
-            ch_multiqc_files.collect(),[],[],[],[],[]
-        )
+            ch_multiqc_files.collect().ifEmpty([]),[],[],[],[],[]
+            )
     multiqc_report = MULTIQC.out.report.toList()
 
 

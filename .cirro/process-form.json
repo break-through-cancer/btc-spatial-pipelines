@@ -41,6 +41,10 @@
                     "spatial_transcriptional_programs": {
                         "type": "boolean",
                         "title": "BayesTME: Enable Spatial Transcriptional Programs"
+                    },
+                    "run_spacemarkers": {
+                        "type": "boolean",
+                        "title": "Enable SpaceMarkers"
                     }
                 }
             }
