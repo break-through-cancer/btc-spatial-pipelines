@@ -18,15 +18,15 @@
                     },
                     "run_bayestme": {
                         "type": "boolean",
-                        "title": "run BayesTME"
+                        "title": "Run BayesTME"
                     },
                     "bleeding_correction": {
                         "type": "boolean",
-                        "title": "BayesTME: Enable Bleeding Correction"
+                        "title": "Enable Bleeding Correction"
                     },
                     "run_cogaps": {
                         "type": "boolean",
-                        "title": "run CoGAPS"
+                        "title": "Run CoGAPS"
                     },
                     "cogaps_niterations": {
                         "type": "integer",
@@ -40,7 +40,7 @@
                 "properties": {
                     "spatial_transcriptional_programs": {
                         "type": "boolean",
-                        "title": "BayesTME: Enable Spatial Transcriptional Programs"
+                        "title": "Enable BayesTME Spatial Transcriptional Programs"
                     },
                     "run_spacemarkers": {
                         "type": "boolean",
