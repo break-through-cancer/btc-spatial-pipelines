@@ -46,10 +46,11 @@ include { BAYESTME_LOAD_SPACERANGER;
         
 include { SPACEMARKERS; 
           SPACEMARKERS_MQC;
-          SPACEMARKERS_IMSCORES } from '../modules/local/spacemarkers/nextflow/main'
+          SPACEMARKERS_IMSCORES; 
+        } from '../modules/local/spacemarkers/nextflow/main'
 
 include { COGAPS;
-          PREPROCESS } from '../modules/local/cogaps/nextflow/main'
+          ADATA_2DGCMAT } from '../modules/local/cogaps/nextflow/main'
 
 
 
@@ -175,13 +176,15 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
 
 
-    //cogaps
-    ch_samplesheet = INPUT_CHECK.out.datasets
-        .filter { it -> it.run_cogaps == true }
-        .map { tuple(meta=[id:it.sample_name], data=file(it.data_directory)) }
+    //cogaps - make use of the BTME preprocessing
+    ch_samplesheet = ch_input.map { tuple(it[0], it[1]) }
 
-    PREPROCESS( ch_samplesheet )
-    ch_versions = ch_versions.mix(PREPROCESS.out.versions)
+    ch_cogaps_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
+        .concat( not_bleed_corrected_deconvolution_input )
+        .map( it -> tuple(it[0], it[1]) )
+
+    ADATA_2DGCMAT( ch_cogaps_input )
+    ch_versions = ch_versions.mix(ADATA_2DGCMAT.out.versions)
 
     ch_gaps = INPUT_CHECK.out.datasets
         .filter { it -> it.run_cogaps == true }
@@ -191,7 +194,7 @@ workflow SPATIAL {
                                            distributed:'null', 
                                            nsets:1, 
                                            nthreads:1]) }
-        .join(PREPROCESS.out.dgCMatrix.map { tuple(it[0], it[1]) })
+        .join(ADATA_2DGCMAT.out.dgCMatrix.map { tuple(it[0], it[1]) })
         .map { tuple(it[0], it[2], it[1]) }                          // reorder to match cogaps input
 
     COGAPS(ch_gaps)
