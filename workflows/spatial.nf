@@ -50,7 +50,7 @@ include { SPACEMARKERS;
         } from '../modules/local/spacemarkers/nextflow/main'
 
 include { COGAPS;
-          ADATA_2DGCMAT } from '../modules/local/cogaps/nextflow/main'
+          COGAPS_ADATA2DGC; } from '../modules/local/cogaps/nextflow/main'
 
 
 
@@ -165,16 +165,16 @@ workflow SPATIAL {
     BAYESTME_DECONVOLUTION.out.adata_deconvolved
         .join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
         .join( spatial_transcriptional_programs )
-        .filter { it[3] == true }                           // spatial_transcriptional_programs bool
+        .filter { it -> it[3] == true }                           // spatial_transcriptional_programs bool
         .map { tuple(it[0], it[1], it[2], []) }
         .tap { stp_input }
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }
         .join(data_directory))
 
+
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
     ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
-
 
     //cogaps - make use of the BTME preprocessing
     ch_samplesheet = ch_input.map { tuple(it[0], it[1]) }
@@ -183,8 +183,8 @@ workflow SPATIAL {
         .concat( not_bleed_corrected_deconvolution_input )
         .map( it -> tuple(it[0], it[1]) )
 
-    ADATA_2DGCMAT( ch_cogaps_input )
-    ch_versions = ch_versions.mix(ADATA_2DGCMAT.out.versions)
+    COGAPS_ADATA2DGC( ch_cogaps_input )
+    ch_versions = ch_versions.mix(COGAPS_ADATA2DGC.out.versions)
 
     ch_gaps = INPUT_CHECK.out.datasets
         .filter { it -> it.run_cogaps == true }
@@ -194,16 +194,16 @@ workflow SPATIAL {
                                            distributed:'null', 
                                            nsets:1, 
                                            nthreads:1]) }
-        .join(ADATA_2DGCMAT.out.dgCMatrix.map { tuple(it[0], it[1]) })
+        .join(COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) })
         .map { tuple(it[0], it[2], it[1]) }                          // reorder to match cogaps input
 
     COGAPS(ch_gaps)
     
     ch_versions = ch_versions.mix(COGAPS.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(ch_samplesheet))
-    ch_sm_inputs = ch_sm_inputs.join(run_spacemarkers).filter { it[2] == true } // make spacemarkers optional
-
-    ch_sm_inputs.view()
+    ch_sm_inputs = ch_sm_inputs.join(run_spacemarkers)
+        .filter { it -> it[3] == true }                             // make spacemarkers optional
+        .map { tuple(it[0], it[1], it[2]) }
 
 
     //spacemarkers - main
