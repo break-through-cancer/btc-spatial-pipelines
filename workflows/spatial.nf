@@ -198,13 +198,12 @@ workflow SPATIAL {
         .map { tuple(it[0], it[2], it[1]) }                          // reorder to match cogaps input
 
     COGAPS(ch_gaps)
-    
     ch_versions = ch_versions.mix(COGAPS.out.versions)
+
     ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(ch_samplesheet))
-    ch_sm_inputs = ch_sm_inputs.join(run_spacemarkers)
+    ch_sm_inputs = ch_sm_inputs.combine(run_spacemarkers, by:0)
         .filter { it -> it[3] == true }                             // make spacemarkers optional
         .map { tuple(it[0], it[1], it[2]) }
-
 
     //spacemarkers - main
     SPACEMARKERS( ch_sm_inputs )
