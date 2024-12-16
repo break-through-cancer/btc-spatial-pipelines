@@ -4,7 +4,9 @@
     "n_cell_types": "$.params.dataset.paramJson.deconvolution.n_cell_types",
     "run_bayestme": "$.params.dataset.paramJson.deconvolution.run_bayestme",
     "bleeding_correction": "$.params.dataset.paramJson.deconvolution.bleeding_correction",
-    "spatial_transcriptional_programs": "$.params.dataset.paramJson.deconvolution.spatial_transcriptional_programs",
     "run_cogaps": "$.params.dataset.paramJson.deconvolution.run_cogaps",
-    "cogaps_niterations": "$.params.dataset.paramJson.deconvolution.cogaps_niterations"
+    "cogaps_niterations": "$.params.dataset.paramJson.deconvolution.cogaps_niterations",
+    "n_top_genes": "$.params.dataset.paramJson.deconvolution.n_top_genes",
+    "spatial_transcriptional_programs": "$.params.dataset.paramJson.spatial.spatial_transcriptional_programs",
+    "run_spacemarkers": "$.params.dataset.paramJson.spatial.run_spacemarkers"
 }

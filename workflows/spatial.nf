@@ -46,10 +46,11 @@ include { BAYESTME_LOAD_SPACERANGER;
         
 include { SPACEMARKERS; 
           SPACEMARKERS_MQC;
-          SPACEMARKERS_IMSCORES } from '../modules/local/spacemarkers/nextflow/main'
+          SPACEMARKERS_IMSCORES; 
+        } from '../modules/local/spacemarkers/nextflow/main'
 
 include { COGAPS;
-          PREPROCESS } from '../modules/local/cogaps/nextflow/main'
+          COGAPS_ADATA2DGC; } from '../modules/local/cogaps/nextflow/main'
 
 
 
@@ -83,6 +84,7 @@ workflow SPATIAL {
         file(params.input)
     )
 
+    // NOTE: append to the list to avoid other indices being off
     ch_input = INPUT_CHECK.out.datasets.map { tuple(
         id:it.sample_name,
         it.data_directory,
@@ -91,12 +93,19 @@ workflow SPATIAL {
         it.expression_profile,
         it.run_bayestme,
         it.run_cogaps,
+        it.n_top_genes,
+        it.spatial_transcriptional_programs,
+        it.run_spacemarkers
     ) }
 
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
     ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
     ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
     ch_input.map { tuple(it[0], it[2]) }.tap { n_cell_types }
+    ch_input.map { tuple(it[0], it[7]) }.tap { n_top_genes }
+    ch_input.map { tuple(it[0], it[8]) }.tap { spatial_transcriptional_programs }
+    ch_input.map { tuple(it[0], it[9]) }.tap { run_spacemarkers }
+
 
     // A new channel that contains *.html spaceranger reports for multiqc
     ch_sr_reports = data_directory.flatMap { item ->
@@ -112,14 +121,15 @@ workflow SPATIAL {
     BAYESTME_LOAD_SPACERANGER( ch_btme )
     ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
 
-    filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata.map { tuple(
-        it[0],
-        it[1],
-        true,
-        1000,
-        0.9)
+    filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata
+        .join( n_top_genes )
+        .map { tuple(
+            it[0],               // sample_name
+            it[1],               // adata
+            true,                // filter_ribosomal_genes
+            it[2],               // n_top_genes
+            0.9)                 // spot_threshold
     }.join(expression_profiles)
-
 
     BAYESTME_FILTER_GENES( filter_genes_input )
     ch_versions = ch_versions.mix(BAYESTME_FILTER_GENES.out.versions)
@@ -152,24 +162,29 @@ workflow SPATIAL {
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
 
-    BAYESTME_DECONVOLUTION.out.adata_deconvolved.join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
+    BAYESTME_DECONVOLUTION.out.adata_deconvolved
+        .join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
+        .join( spatial_transcriptional_programs )
+        .filter { it -> it[3] == true }                           // spatial_transcriptional_programs bool
         .map { tuple(it[0], it[1], it[2], []) }
         .tap { stp_input }
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }
         .join(data_directory))
 
+
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
     ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
 
+    //cogaps - make use of the BTME preprocessing
+    ch_samplesheet = ch_input.map { tuple(it[0], it[1]) }
 
-    //cogaps
-    ch_samplesheet = INPUT_CHECK.out.datasets
-        .filter { it -> it.run_cogaps == true }
-        .map { tuple(meta=[id:it.sample_name], data=file(it.data_directory)) }
+    ch_cogaps_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
+        .concat( not_bleed_corrected_deconvolution_input )
+        .map( it -> tuple(it[0], it[1]) )
 
-    PREPROCESS( ch_samplesheet )
-    ch_versions = ch_versions.mix(PREPROCESS.out.versions)
+    COGAPS_ADATA2DGC( ch_cogaps_input )
+    ch_versions = ch_versions.mix(COGAPS_ADATA2DGC.out.versions)
 
     ch_gaps = INPUT_CHECK.out.datasets
         .filter { it -> it.run_cogaps == true }
@@ -179,14 +194,16 @@ workflow SPATIAL {
                                            distributed:'null', 
                                            nsets:1, 
                                            nthreads:1]) }
-        .join(PREPROCESS.out.dgCMatrix.map { tuple(it[0], it[1]) })
+        .join(COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) })
         .map { tuple(it[0], it[2], it[1]) }                          // reorder to match cogaps input
 
     COGAPS(ch_gaps)
-    
     ch_versions = ch_versions.mix(COGAPS.out.versions)
-    ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(ch_samplesheet))
 
+    ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(ch_samplesheet))
+    ch_sm_inputs = ch_sm_inputs.combine(run_spacemarkers, by:0)
+        .filter { it -> it[3] == true }                             // make spacemarkers optional
+        .map { tuple(it[0], it[1], it[2]) }
 
     //spacemarkers - main
     SPACEMARKERS( ch_sm_inputs )
@@ -208,12 +225,13 @@ workflow SPATIAL {
     version_yaml = Channel.empty()
     version_yaml = softwareVersionsToYAML(ch_versions)
                    .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
-    ch_multiqc_files = ch_multiqc_files.mix(ch_versions)
+    
 
     // MultiQC
+    // NOTE - will fail to find spaceranger reports unless the full path is provided
     MULTIQC (
-            ch_multiqc_files.collect(),[],[],[],[],[]
-        )
+            ch_multiqc_files.collect().ifEmpty([]),[],[],[],[],[]
+            )
     multiqc_report = MULTIQC.out.report.toList()
 
 
