@@ -115,6 +115,19 @@ workflow SPATIAL {
         html_files.collect { file -> [meta: meta, sr_report: file] }
     }
 
+    // CODA annotation channel
+    ch_coda = data_directory.flatMap { item -> 
+        def meta = item[0]
+        def data_path = item[1]
+        def coda_files = []
+        data_path.eachFileRecurse { file ->
+            if (file.name.endsWith('tissue_positions_cellular_compositions.csv')) {
+                coda_files.add(file)
+            }
+        }
+        coda_files.collect { file -> [meta: meta, coda: file] }
+    }
+
     ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
 
     ch_btme = ch_input.filter { it[5] == true }.map { tuple(it[0], it[1]) }
@@ -204,6 +217,11 @@ workflow SPATIAL {
     ch_sm_inputs = ch_sm_inputs.combine(run_spacemarkers, by:0)
         .filter { it -> it[3] == true }                             // make spacemarkers optional
         .map { tuple(it[0], it[1], it[2]) }
+
+    ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
+        .join(data_directory)
+
+    ch_sm_inputs.view()
 
     //spacemarkers - main
     SPACEMARKERS( ch_sm_inputs )
