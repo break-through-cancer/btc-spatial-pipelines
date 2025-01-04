@@ -5,6 +5,10 @@ date: "2024-12-04"
 output:
   html_document: default
   pdf_document: default
+params:
+  spaceranger_dir: "~/OneDrive/BTC_DPTpilot1_spaceranger/BTC13"
+  coda_ann_path: "~/OneDrive/CODA/H13/tissue_positions_cellular_compositions.csv"
+  output_dir: "analysis_pilot"
 ---
 
 # VISIUM DATA ANALYSIS WITH SEURAT
@@ -12,19 +16,20 @@ output:
 
 ##### Loading packages
 ```{r}
-library(Seurat)
-library(ggplot2)
-library(leiden)
-library(patchwork)
-library(dplyr)
-library(rhdf5)
-library(ggrepel)
-library(Rfast2)
-library(EnhancedVolcano)
-library(fgsea)
-library(msigdbr)
-library(RColorBrewer)
-library(ggpubr)
+install_if_missing <- function(packages) {
+  for (package in packages) {
+    if (!requireNamespace(package, quietly = TRUE)) {
+      install.packages(package)
+    }
+    library(package, character.only = TRUE)
+  }
+}
+
+required <- c("Seurat", "ggplot2", "leiden", "patchwork", "dplyr", "rhdf5",
+              "ggrepel", "Rfast2", "EnhancedVolcano", "fgsea", "msigdbr",
+              "RColorBrewer", "ggpubr")
+
+install_if_missing(required)
 ```
 
 ## Increasing the allowed memory to avoid errors regarding lack of memory
@@ -34,7 +39,7 @@ options(future.globals.maxSize = 1024 * 1024 * 1024)  # 1 GB
 
 ## Loading the data for sample BTC13
 ```{r}
-BTC13 <- Load10X_Spatial("BTC13/")
+BTC13 <- Load10X_Spatial(params[["spaceranger_dir"]])
 dim(BTC13)
 head(BTC13@meta.data)
 ```
@@ -45,7 +50,7 @@ head(BTC13@meta.data)
 BTC13metadata <- BTC13@meta.data
 
 # uploading CODA annotations
-codaBTC13 <- as.data.frame(read.csv("tissue_positions_cellular_compositions.csv"))
+codaBTC13 <- as.data.frame(read.csv(params[["coda_ann_path"]]))
 rownames(codaBTC13) <- codaBTC13$X
 codaBTC13 <- codaBTC13[, -c(1, 2, 3, 4, 5, 6)]
 head(codaBTC13)
@@ -373,7 +378,7 @@ hallmark_pathways = msigdbr(species = "Homo sapiens", category = "H")
 hallmark_list <- split(hallmark_pathways$gene_symbol, hallmark_pathways$gs_name)
 
 # directory to save the plots
-output_dir <- "Analysis_pilot/BTC13/"
+output_dir <- params[["output_dir"]]
 dir.create(output_dir, showWarnings = FALSE)
 
 # loop for calculating module scores
@@ -395,7 +400,7 @@ for (pathway in names(hallmark_list)) {
 
 head(BTC13epit@meta.data)
 
-save(BTC13epit, file = 'Analysis_pilot/BTC13epit_modscores.Rda')
+save(BTC13epit, file = paste(output_dir,"BTC13epit_modscores.Rda", sep="/"))
 ```
 
 ### module scores violin plots
