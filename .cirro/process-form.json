@@ -42,6 +42,10 @@
                         "type": "boolean",
                         "title": "Enable BayesTME Spatial Transcriptional Programs"
                     },
+                    "find_annotations": {
+                        "type": "boolean",
+                        "title": "Look for External Annotations (only CODA now)"
+                    },
                     "run_spacemarkers": {
                         "type": "boolean",
                         "title": "Enable SpaceMarkers"

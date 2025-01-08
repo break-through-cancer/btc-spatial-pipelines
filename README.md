@@ -28,6 +28,17 @@ Each row represents a spatial transcriptomics sample and configuration parameter
 
 `expression_profile`: Optional reference expression profiles (leave blank if not using) if you have known cell types in your Visium data (perhaps from matched scRNA). See more info about how to generate this file here: https://bayestme.readthedocs.io/en/latest/fine_mapping_workflow.html
 
+`run_bayestme`: boolean, whether to run BayesTME deconvolution.
+
+`run_cogaps`: boolean, whether to run BayesTME deconvolution.
+
+`cogaps_niterations`: integer, number of CoGAPS NMF steps.
+
+`run_spacemarkers`: boolean, whether to run SpaceMarkers
+
+`find_annotations`: boolean, if `true`, CODA annotations will be sought using by `tissue_positions_cellular_compositions.csv` string in  the filename, and the data will be fed to SpaceMarkers. This has potential to run any external annotation in `csv`.
+
+
 >[!IMPORTANT]
 `export NXF_SINGULARITY_HOME_MOUNT=true` in order to allow matplotlib to write its logs (and avoid related error) if using singularity.
 

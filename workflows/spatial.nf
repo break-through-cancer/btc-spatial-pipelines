@@ -84,7 +84,6 @@ workflow SPATIAL {
         file(params.input)
     )
 
-    // NOTE: append to the list to avoid other indices being off
     ch_input = INPUT_CHECK.out.datasets.map { tuple(
         id:it.sample_name,
         it.data_directory,
@@ -95,17 +94,19 @@ workflow SPATIAL {
         it.run_cogaps,
         it.n_top_genes,
         it.spatial_transcriptional_programs,
-        it.run_spacemarkers
+        it.run_spacemarkers,
+        it.find_annotations
     ) }
 
-    ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
-    ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
+    // NOTE: append to the list to avoid other indices being off
     ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
     ch_input.map { tuple(it[0], it[2]) }.tap { n_cell_types }
+    ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
+    ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
     ch_input.map { tuple(it[0], it[7]) }.tap { n_top_genes }
     ch_input.map { tuple(it[0], it[8]) }.tap { spatial_transcriptional_programs }
     ch_input.map { tuple(it[0], it[9]) }.tap { run_spacemarkers }
-
+    ch_input.map { tuple(it[0], it[10]) }.tap { find_annotations }
 
     // A new channel that contains *.html spaceranger reports for multiqc
     ch_sr_reports = data_directory.flatMap { item ->
@@ -115,18 +116,25 @@ workflow SPATIAL {
         html_files.collect { file -> [meta: meta, sr_report: file] }
     }
 
+
     // CODA annotation channel
-    ch_coda = data_directory.flatMap { item -> 
-        def meta = item[0]
-        def data_path = item[1]
-        def coda_files = []
-        data_path.eachFileRecurse { file ->
-            if (file.name.endsWith('tissue_positions_cellular_compositions.csv')) {
-                coda_files.add(file)
+    ch_coda = data_directory
+        .join(find_annotations)
+        .filter { it -> it[2]==true} // only run if find_annotations is true
+        .flatMap { item -> 
+            def meta = item[0]
+            def data_path = item[1]
+            def coda_files = []
+            data_path.eachFileRecurse { file ->
+                if (file.name.endsWith('tissue_positions_cellular_compositions.csv')) {
+                    coda_files.add(file)
+                }
             }
+            coda_files.collect { file -> [meta: meta, coda: file] }
         }
-        coda_files.collect { file -> [meta: meta, coda: file] }
-    }
+    ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
+        .join(data_directory)
+
 
     ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
 
@@ -217,11 +225,6 @@ workflow SPATIAL {
     ch_sm_inputs = ch_sm_inputs.combine(run_spacemarkers, by:0)
         .filter { it -> it[3] == true }                             // make spacemarkers optional
         .map { tuple(it[0], it[1], it[2]) }
-
-    ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
-        .join(data_directory)
-
-    ch_sm_inputs.view()
 
     //spacemarkers - main
     SPACEMARKERS( ch_sm_inputs )
