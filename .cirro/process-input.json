@@ -8,5 +8,6 @@
     "cogaps_niterations": "$.params.dataset.paramJson.deconvolution.cogaps_niterations",
     "n_top_genes": "$.params.dataset.paramJson.deconvolution.n_top_genes",
     "spatial_transcriptional_programs": "$.params.dataset.paramJson.spatial.spatial_transcriptional_programs",
-    "run_spacemarkers": "$.params.dataset.paramJson.spatial.run_spacemarkers"
+    "run_spacemarkers": "$.params.dataset.paramJson.spatial.run_spacemarkers",
+    "find_annotations": "$.params.dataset.paramJson.spatial.find_annotations"
 }

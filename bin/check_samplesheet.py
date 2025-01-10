@@ -21,7 +21,8 @@ REQUIRED_COLUMNS = frozenset({"sample",
                               "cogaps_niterations",
                               "n_top_genes",
                               "spatial_transcriptional_programs",
-                              "run_spacemarkers"
+                              "run_spacemarkers",
+                              "find_annotations"
                               })
 
 class RowChecker:
