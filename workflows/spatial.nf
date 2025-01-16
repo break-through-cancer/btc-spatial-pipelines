@@ -46,7 +46,7 @@ include { BAYESTME_LOAD_SPACERANGER;
         
 include { SPACEMARKERS; 
           SPACEMARKERS_MQC;
-          SPACEMARKERS_IMSCORES; 
+          SPACEMARKERS_PLOTS;
         } from '../modules/local/spacemarkers/nextflow/main'
 
 include { COGAPS;
@@ -230,17 +230,16 @@ workflow SPATIAL {
     SPACEMARKERS( ch_sm_inputs )
     ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
 
-    //spacemarkers - imscores in csv, also part of SpaceMarkers.rds object
-    SPACEMARKERS_IMSCORES( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], //meta
-                                                                     it[1], //path to SpaceMarkers.rds
-                                                                     it[2]  //source - to create a unique path
-    ) } )
-    ch_versions = ch_versions.mix(SPACEMARKERS_IMSCORES.out.versions)
+
+    //spacemarkers - plots
+    SPACEMARKERS_PLOTS( SPACEMARKERS.out.overlapScores.map { tuple(it[0], it[1], it[2]) } )
+    ch_versions = ch_versions.mix(SPACEMARKERS_PLOTS.out.versions)
 
     //spacemarkers - mqc
     SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1], it[2]) } )
     ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
+
 
     //collate versions
     version_yaml = Channel.empty()
