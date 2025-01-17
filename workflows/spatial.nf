@@ -232,7 +232,12 @@ workflow SPATIAL {
 
 
     //spacemarkers - plots
-    SPACEMARKERS_PLOTS( SPACEMARKERS.out.overlapScores.map { tuple(it[0], it[1], it[2]) } )
+    ch_plotting_input = SPACEMARKERS.out.spaceMarkersScores
+        .map { tuple(it[0], it[1]) }
+    ch_plotting_input = ch_plotting_input.join(SPACEMARKERS.out.overlapScores)
+        .map { tuple(it[0], it[1], it[2], it[3]) }
+    
+    SPACEMARKERS_PLOTS( ch_plotting_input)
     ch_versions = ch_versions.mix(SPACEMARKERS_PLOTS.out.versions)
 
     //spacemarkers - mqc
