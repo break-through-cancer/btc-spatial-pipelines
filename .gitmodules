@@ -10,3 +10,6 @@
 	path = modules/local/cogaps
 	url = https://github.com/FertigLab/CoGAPS
 	update = merge
+[submodule "modules/local/dpt-visium-notebook"]
+	path = modules/local/dpt-visium-notebook
+	url = git@github.com:FertigLab/dpt-visium-notebook.git
