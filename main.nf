@@ -40,6 +40,7 @@ WorkflowMain.initialise(workflow, params, log)
 */
 
 include { SPATIAL } from './workflows/spatial'
+include { DPT } from './workflows/notebooks'
 
 //
 // WORKFLOW: Run main btc/spatial analysis pipeline
@@ -60,6 +61,7 @@ workflow BTC_SPATIAL {
 //
 workflow {
     BTC_SPATIAL ()
+    DPT()
 }
 
 /*
