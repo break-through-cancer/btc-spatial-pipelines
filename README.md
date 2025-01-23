@@ -3,6 +3,8 @@
 **btc/spatial** is a bioinformatics pipeline for spatial data. Currently we only have support for spatial transcriptomics (10X Visium), but in the future support for other modalities
 (Xenium, IMC, etc.) will be integrated into this pipeline as well.
 
+![image info](assets/btc-visium.svg)
+
 ## Usage
 
 >[!note]
@@ -36,7 +38,7 @@ Each row represents a spatial transcriptomics sample and configuration parameter
 
 `run_spacemarkers`: boolean, whether to run SpaceMarkers
 
-`find_annotations`: boolean, if `true`, CODA annotations will be sought using by `tissue_positions_cellular_compositions.csv` string in  the filename, and the data will be fed to SpaceMarkers. This has potential to run any external annotation in `csv`.
+`find_annotations`: boolean, if `true`, CODA annotations will be sought by `*tissue_positions_cellular_compositions.csv` string and the data will be fed to SpaceMarkers. This has potential to run any external annotation from a `csv`.
 
 
 >[!IMPORTANT]
