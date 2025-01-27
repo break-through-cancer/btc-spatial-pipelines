@@ -34,8 +34,6 @@ Each row represents a spatial transcriptomics sample and configuration parameter
 
 `run_cogaps`: boolean, whether to run BayesTME deconvolution.
 
-`cogaps_niterations`: integer, number of CoGAPS NMF steps.
-
 `run_spacemarkers`: boolean, whether to run SpaceMarkers
 
 `find_annotations`: boolean, if `true`, CODA annotations will be sought by `*tissue_positions_cellular_compositions.csv` string and the data will be fed to SpaceMarkers. This has potential to run any external annotation from a `csv`.

@@ -209,7 +209,7 @@ workflow SPATIAL {
 
     ch_gaps = INPUT_CHECK.out.datasets
         .filter { it -> it.run_cogaps == true }
-        .map { tuple([id:it.sample_name], [niterations:it.cogaps_niterations, 
+        .map { tuple([id:it.sample_name], [niterations:20000,         // match BayesTME default 
                                            npatterns:it.n_cell_types,
                                            sparse:1,
                                            distributed:'null', 
