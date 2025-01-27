@@ -1,12 +1,12 @@
 {
     "cirro_input": "$.params.inputs",
     "outdir": "$.params.dataset.s3|/data/",
+    "n_top_genes": "$.params.dataset.paramJson.preprocessing.n_top_genes",
+    "bleeding_correction": "$.params.dataset.paramJson.preprocessing.bleeding_correction",
     "n_cell_types": "$.params.dataset.paramJson.deconvolution.n_cell_types",
     "run_bayestme": "$.params.dataset.paramJson.deconvolution.run_bayestme",
-    "bleeding_correction": "$.params.dataset.paramJson.deconvolution.bleeding_correction",
     "run_cogaps": "$.params.dataset.paramJson.deconvolution.run_cogaps",
-    "n_top_genes": "$.params.dataset.paramJson.deconvolution.n_top_genes",
+    "find_annotations": "$.params.dataset.paramJson.deconvolution.find_annotations",
     "spatial_transcriptional_programs": "$.params.dataset.paramJson.spatial.spatial_transcriptional_programs",
-    "run_spacemarkers": "$.params.dataset.paramJson.spatial.run_spacemarkers",
-    "find_annotations": "$.params.dataset.paramJson.spatial.find_annotations"
+    "run_spacemarkers": "$.params.dataset.paramJson.spatial.run_spacemarkers"
 }

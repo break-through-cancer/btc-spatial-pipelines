@@ -4,6 +4,20 @@
         "title": "BTC 10X Visium Pipeline",
         "type": "object",
         "properties": {
+            "preprocessing":{
+                "title": "Preprocessing options",
+                "type": "object",
+                "properties":{
+                    "n_top_genes": {
+                        "type": "integer",
+                        "title": "Number of Top Genes (by var) to keep"
+                    },
+                    "bleeding_correction": {
+                        "type": "boolean",
+                        "title": "Enable Bleeding Correction"
+                    }
+                }
+            },
             "deconvolution": {
                 "title": "Deconvolution options",
                 "type": "object",
@@ -12,21 +26,17 @@
                         "type": "integer",
                         "title": "Number of Cell Types"
                     },
-                    "n_top_genes": {
-                        "type": "integer",
-                        "title": "Number of Top Genes (by var) to keep"
-                    },
                     "run_bayestme": {
                         "type": "boolean",
                         "title": "Run BayesTME"
                     },
-                    "bleeding_correction": {
-                        "type": "boolean",
-                        "title": "Enable Bleeding Correction"
-                    },
                     "run_cogaps": {
                         "type": "boolean",
                         "title": "Run CoGAPS"
+                    },
+                    "find_annotations": {
+                        "type": "boolean",
+                        "title": "Look for External Spot Annotations (e.g. CODA)"
                     }
                 }
             },
@@ -37,10 +47,6 @@
                     "spatial_transcriptional_programs": {
                         "type": "boolean",
                         "title": "Enable BayesTME Spatial Transcriptional Programs"
-                    },
-                    "find_annotations": {
-                        "type": "boolean",
-                        "title": "Look for External Annotations (only CODA now)"
                     },
                     "run_spacemarkers": {
                         "type": "boolean",
