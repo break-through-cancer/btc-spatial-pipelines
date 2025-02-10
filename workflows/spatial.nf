@@ -46,6 +46,7 @@ include { BAYESTME_LOAD_SPACERANGER;
         
 include { SPACEMARKERS; 
           SPACEMARKERS_MQC;
+          SPACEMARKERS_PLOTS;
         } from '../modules/local/spacemarkers/nextflow/main'
 
 include { COGAPS;
@@ -94,17 +95,19 @@ workflow SPATIAL {
         it.run_cogaps,
         it.n_top_genes,
         it.spatial_transcriptional_programs,
-        it.run_spacemarkers
+        it.run_spacemarkers,
+        it.find_annotations
     ) }
 
-    ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
-    ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
+    // NOTE: append to the list to avoid other indices being off
     ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
     ch_input.map { tuple(it[0], it[2]) }.tap { n_cell_types }
+    ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
+    ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
     ch_input.map { tuple(it[0], it[7]) }.tap { n_top_genes }
     ch_input.map { tuple(it[0], it[8]) }.tap { spatial_transcriptional_programs }
     ch_input.map { tuple(it[0], it[9]) }.tap { run_spacemarkers }
-
+    ch_input.map { tuple(it[0], it[10]) }.tap { find_annotations }
 
     // A new channel that contains *.html spaceranger reports for multiqc
     ch_sr_reports = data_directory.flatMap { item ->
@@ -113,6 +116,26 @@ workflow SPATIAL {
         def html_files = file(data_path).listFiles().findAll { it.name.endsWith('.html') }
         html_files.collect { file -> [meta: meta, sr_report: file] }
     }
+
+
+    // CODA annotation channel
+    ch_coda = data_directory
+        .join(find_annotations)
+        .filter { it -> it[2]==true} // only run if find_annotations is true
+        .flatMap { item -> 
+            def meta = item[0]
+            def data_path = item[1]
+            def coda_files = []
+            data_path.eachFileRecurse { file ->
+                if (file.name.endsWith('tissue_positions_cellular_compositions.csv')) {
+                    coda_files.add(file)
+                }
+            }
+            coda_files.collect { file -> [meta: meta, coda: file] }
+        }
+    ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
+        .join(data_directory)
+
 
     ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
 
@@ -187,7 +210,7 @@ workflow SPATIAL {
 
     ch_gaps = INPUT_CHECK.out.datasets
         .filter { it -> it.run_cogaps == true }
-        .map { tuple([id:it.sample_name], [niterations:it.cogaps_niterations, 
+        .map { tuple([id:it.sample_name], [niterations:20000,         // match BayesTME default 
                                            npatterns:it.n_cell_types,
                                            sparse:1,
                                            distributed:'null', 
@@ -208,10 +231,21 @@ workflow SPATIAL {
     SPACEMARKERS( ch_sm_inputs )
     ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
 
+
+    //spacemarkers - plots
+    ch_plotting_input = SPACEMARKERS.out.spaceMarkersScores
+        .map { tuple(it[0], it[1]) }
+    ch_plotting_input = ch_plotting_input.join(SPACEMARKERS.out.overlapScores)
+        .map { tuple(it[0], it[1], it[2], it[3]) }
+    
+    SPACEMARKERS_PLOTS( ch_plotting_input)
+    ch_versions = ch_versions.mix(SPACEMARKERS_PLOTS.out.versions)
+
     //spacemarkers - mqc
     SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1], it[2]) } )
     ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
+
 
     //collate versions
     version_yaml = Channel.empty()

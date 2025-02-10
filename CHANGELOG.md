@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### `Added`
+- optionally look for CODA annotation in the input and run spaceMarkers on that
+- spatial overlap and interaction plots for spaceMarkers
 
 ### `Fixed`
 

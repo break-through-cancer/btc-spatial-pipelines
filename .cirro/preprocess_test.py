@@ -22,8 +22,7 @@ def test_preprocess(mocker):
         "n_cell_types": 4,
         "expression_profile": "expression_profile",
         "run_bayestme": True,
-        "run_cogaps": True,
-        "cogaps_niterations": 100
+        "run_cogaps": True
     }
 
     try:

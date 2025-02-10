@@ -11,10 +11,10 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample",
                                 "expression_profile",
                                 "run_bayestme",
                                 "run_cogaps",
-                                "cogaps_niterations",
                                 "n_top_genes",
                                 "spatial_transcriptional_programs",
-                                "run_spacemarkers"
+                                "run_spacemarkers",
+                                "find_annotations"
                                 )
 
 
@@ -70,6 +70,7 @@ def main():
 
     # log
     ds.logger.info(ds.params)
+    print(ds.params)
 
 
 if __name__ == "__main__":

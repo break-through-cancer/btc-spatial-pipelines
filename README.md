@@ -3,6 +3,8 @@
 **btc/spatial** is a bioinformatics pipeline for spatial data. Currently we only have support for spatial transcriptomics (10X Visium), but in the future support for other modalities
 (Xenium, IMC, etc.) will be integrated into this pipeline as well.
 
+![image info](assets/btc-visium.svg)
+
 ## Usage
 
 >[!note]
@@ -27,6 +29,15 @@ Each row represents a spatial transcriptomics sample and configuration parameter
 `spatial_transcriptional_programs`: set to `true` if you want to enable spatial transcriptional programs for that sample.
 
 `expression_profile`: Optional reference expression profiles (leave blank if not using) if you have known cell types in your Visium data (perhaps from matched scRNA). See more info about how to generate this file here: https://bayestme.readthedocs.io/en/latest/fine_mapping_workflow.html
+
+`run_bayestme`: boolean, whether to run BayesTME deconvolution.
+
+`run_cogaps`: boolean, whether to run BayesTME deconvolution.
+
+`run_spacemarkers`: boolean, whether to run SpaceMarkers
+
+`find_annotations`: boolean, if `true`, CODA annotations will be sought by `*tissue_positions_cellular_compositions.csv` string and the data will be fed to SpaceMarkers. This has potential to run any external annotation from a `csv`.
+
 
 >[!IMPORTANT]
 `export NXF_SINGULARITY_HOME_MOUNT=true` in order to allow matplotlib to write its logs (and avoid related error) if using singularity.
