@@ -52,6 +52,7 @@ include { SPACEMARKERS;
 include { COGAPS;
           COGAPS_ADATA2DGC; } from '../modules/local/cogaps/nextflow/main'
 
+include { SVGS } from '../modules/local/squidpy/main'
 
 
 /*
@@ -152,6 +153,7 @@ workflow SPATIAL {
             0.9)                 // spot_threshold
     }.join(expression_profiles)
 
+
     BAYESTME_FILTER_GENES( filter_genes_input )
     ch_versions = ch_versions.mix(BAYESTME_FILTER_GENES.out.versions)
 
@@ -196,6 +198,12 @@ workflow SPATIAL {
 
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
     ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
+
+    // squidpy - spatially variable genes
+    ch_svgs = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
+        .concat( not_bleed_corrected_deconvolution_input )
+        .map { tuple(it[0], it[1]) }
+    SVGS( ch_svgs )
 
     //cogaps - make use of the BTME preprocessing
     ch_samplesheet = ch_input.map { tuple(it[0], it[1]) }
