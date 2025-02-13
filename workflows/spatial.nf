@@ -84,7 +84,8 @@ workflow SPATIAL {
     INPUT_CHECK (
         file(params.input)
     )
-
+    
+    // NOTE: append to the list to avoid other indices being off
     ch_input = INPUT_CHECK.out.datasets.map { tuple(
         id:it.sample_name,
         it.data_directory,
@@ -99,11 +100,11 @@ workflow SPATIAL {
         it.find_annotations
     ) }
 
-    // NOTE: append to the list to avoid other indices being off
     ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
     ch_input.map { tuple(it[0], it[2]) }.tap { n_cell_types }
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
     ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
+    ch_input.map { tuple(it[0], it[5]) }.tap { run_bayestme }
     ch_input.map { tuple(it[0], it[7]) }.tap { n_top_genes }
     ch_input.map { tuple(it[0], it[8]) }.tap { spatial_transcriptional_programs }
     ch_input.map { tuple(it[0], it[9]) }.tap { run_spacemarkers }
@@ -139,7 +140,7 @@ workflow SPATIAL {
 
     ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
 
-    ch_btme = ch_input.filter { it[5] == true }.map { tuple(it[0], it[1]) }
+    ch_btme = ch_input.map { tuple(it[0], it[1]) }
     BAYESTME_LOAD_SPACERANGER( ch_btme )
     ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
 
@@ -172,7 +173,6 @@ workflow SPATIAL {
         .join(expression_profiles)
         .tap { not_bleed_corrected_deconvolution_input }
 
-
     BAYESTME_BLEEDING_CORRECTION( bleeding_correction_input )
     ch_versions = ch_versions.mix(BAYESTME_BLEEDING_CORRECTION.out.versions)
 
@@ -181,6 +181,10 @@ workflow SPATIAL {
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
         .join(expression_profiles)
         .concat( not_bleed_corrected_deconvolution_input )
+        .combine( run_bayestme )
+        .filter { it -> it[-1] == true }   // run_bayestme
+
+    deconvolution_input.view() //[[id:sample1], /dataset_filtered.h5ad, 5, 1.0, []]
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
