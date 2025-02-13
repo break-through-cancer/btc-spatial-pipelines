@@ -183,6 +183,7 @@ workflow SPATIAL {
         .concat( not_bleed_corrected_deconvolution_input )
         .combine( run_bayestme )
         .filter { it -> it[-1] == true }   // run_bayestme
+        .map { tuple(it[0], it[1], it[2], it[3], it[4]) }
 
     deconvolution_input.view()
 
