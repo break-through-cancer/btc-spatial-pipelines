@@ -52,7 +52,7 @@ include { SPACEMARKERS;
 include { COGAPS;
           COGAPS_ADATA2DGC; } from '../modules/local/cogaps/nextflow/main'
 
-include { SVGS } from '../modules/local/squidpy/main'
+include { SQUIDPY } from '../modules/local/squidpy/main'
 
 
 /*
@@ -184,7 +184,7 @@ workflow SPATIAL {
         .combine( run_bayestme )
         .filter { it -> it[-1] == true }   // run_bayestme
 
-    deconvolution_input.view() //[[id:sample1], /dataset_filtered.h5ad, 5, 1.0, []]
+    deconvolution_input.view()
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
@@ -207,7 +207,8 @@ workflow SPATIAL {
     ch_svgs = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
         .concat( not_bleed_corrected_deconvolution_input )
         .map { tuple(it[0], it[1]) }
-    SVGS( ch_svgs )
+    SQUIDPY( ch_svgs )
+    ch_versions = ch_versions.mix(SQUIDPY.out.versions)
 
     //cogaps - make use of the BTME preprocessing
     ch_samplesheet = ch_input.map { tuple(it[0], it[1]) }
