@@ -223,12 +223,12 @@ workflow SPATIAL {
 
     ch_gaps = INPUT_CHECK.out.datasets
         .filter { it -> it.run_cogaps == true }
-        .map { tuple([id:it.sample_name], [niterations:20000,         // match BayesTME default 
+        .map { tuple([id:it.sample_name], [niterations:params.cogaps_niterations,
                                            npatterns:it.n_cell_types,
-                                           sparse:1,
-                                           distributed:'null', 
-                                           nsets:1, 
-                                           nthreads:1]) }
+                                           sparse:params.cogaps_sparse,
+                                           distributed:params.cogaps_distributed,
+                                           nsets:params.cogaps_nsets,
+                                           nthreads:params.cogaps_nthreads]) }
         .join(COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) })
         .map { tuple(it[0], it[2], it[1]) }                          // reorder to match cogaps input
 
