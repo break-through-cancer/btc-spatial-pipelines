@@ -1,2 +1,2 @@
 sample,data_directory,n_cell_types,n_top_genes,bleeding_correction,expression_profile,run_bayestme,run_cogaps,spatial_transcriptional_programs,run_spacemarkers,find_annotations
-"sample1",".breastcancer/",5,1000,0,,0,0,0,0,1,1
+"sample1",".breastcancer/",5,1000,0,,0,0,0,0,1
