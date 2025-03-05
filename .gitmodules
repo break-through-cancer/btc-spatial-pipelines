@@ -12,4 +12,5 @@
 	update = merge
 [submodule "modules/local/dpt-visium-notebook"]
 	path = modules/local/dpt-visium-notebook
-	url = git@github.com:FertigLab/dpt-visium-notebook.git
+	url = https://github.com/FertigLab/dpt-visium-notebook.git
+	update = merge
