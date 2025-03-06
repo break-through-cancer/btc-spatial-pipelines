@@ -1,6 +1,6 @@
 [submodule "modules/bayestme"]
 	path = modules/local/bayestme
-	url = https://github.com/tansey-lab/bayestme.git
+	url = https://github.com/tansey-lab/bayestme
 	update = merge
 [submodule "modules/local/spacemarkers"]
 	path = modules/local/spacemarkers
@@ -12,5 +12,5 @@
 	update = merge
 [submodule "modules/local/dpt-visium-notebook"]
 	path = modules/local/dpt-visium-notebook
-	url = https://github.com/FertigLab/dpt-visium-notebook.git
+	url = https://github.com/FertigLab/dpt-visium-notebook
 	update = merge
