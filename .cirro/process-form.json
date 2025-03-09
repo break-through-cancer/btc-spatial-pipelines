@@ -26,10 +26,6 @@
                         "type": "integer",
                         "title": "Number of Cell Types"
                     },
-                    "n_top_genes": {
-                        "type": "integer",
-                        "title": "Number of Top Genes (by var) to keep"
-                    },
                     "run_bayestme": {
                         "type": "boolean",
                         "title": "Run BayesTME"
