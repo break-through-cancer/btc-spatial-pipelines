@@ -10,7 +10,8 @@
                 "properties":{
                     "n_top_genes": {
                         "type": "integer",
-                        "title": "Number of Top Genes (by var) to keep"
+                        "title": "Number of Top Genes (by var) to keep",
+                        "default": 1000
                     },
                     "bleeding_correction": {
                         "type": "boolean",
