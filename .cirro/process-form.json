@@ -23,6 +23,11 @@
                 "title": "Deconvolution options",
                 "type": "object",
                 "properties": {
+                    "reference_scrna": {
+                        "type": "string",
+                        "title": "Reference scRNA-seq h5ad dataset (only for BayesTME)",
+                        "description": "Filemask to look for in the sample directory, i.e. 'reference.h5ad'"
+                    },
                     "n_cell_types": {
                         "type": "integer",
                         "title": "Number of Cell Types"

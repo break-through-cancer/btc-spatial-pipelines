@@ -8,5 +8,6 @@
     "run_cogaps": "$.params.dataset.paramJson.deconvolution.run_cogaps",
     "find_annotations": "$.params.dataset.paramJson.deconvolution.find_annotations",
     "spatial_transcriptional_programs": "$.params.dataset.paramJson.spatial.spatial_transcriptional_programs",
-    "run_spacemarkers": "$.params.dataset.paramJson.spatial.run_spacemarkers"
+    "run_spacemarkers": "$.params.dataset.paramJson.spatial.run_spacemarkers",
+    "expression_profile": "$.params.dataset.paramJson.deconvolution.reference_scrna"
 }
