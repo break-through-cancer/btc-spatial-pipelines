@@ -31,7 +31,7 @@ log.info logo + paramsSummaryLog(workflow) + citation
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
-include { RENDER_RMD } from '../modules/local/dpt-visium-notebook/render-rmd'
+include { NOTEBOOK_RENDER } from '../modules/local/dpt-visium-notebook/render-rmd'
 
 
 /*
@@ -49,7 +49,7 @@ include { RENDER_RMD } from '../modules/local/dpt-visium-notebook/render-rmd'
 
 
 workflow DPT {
-    ch_notebook = Channel.of("${projectDir}/modules/local/dpt-visium-notebook/Visium_SeuratPipeline.Rmd")
+    ch_notebook = "${projectDir}/modules/local/dpt-visium-notebook/Visium_SeuratPipeline.Rmd"
 
 
     INPUT_CHECK (
@@ -78,7 +78,7 @@ workflow DPT {
      ch_report_params.view()
 
     // Render the report
-    RENDER_RMD (
+    NOTEBOOK_RENDER (
         ch_report_params,
         ch_notebook
     )
