@@ -134,6 +134,24 @@ workflow SPATIAL {
             }
             coda_files.collect { file -> [meta: meta, coda: file] }
         }
+
+    // SCRNA reference data channel
+    ch_scrna = data_directory
+        .join(expression_profiles)
+        .filter { it -> it[2].length()>0 } // only run if a profile is provided
+        .flatMap { item -> 
+            def meta = item[0]
+            def data_path = item[1]
+            def seach_expr = item[2]
+            def scrna_files = []
+            data_path.eachFileRecurse { file ->
+                if (file.name.endsWith(seach_expr)) {
+                    scrna_files.add(file)
+                }
+            }
+            scrna_files.collect { file -> [meta, file] }
+        }
+
     ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
         .join(data_directory)
 
@@ -152,7 +170,7 @@ workflow SPATIAL {
             true,                // filter_ribosomal_genes
             it[2],               // n_top_genes
             0.9)                 // spot_threshold
-    }.join(expression_profiles)
+    }.join(ch_scrna)
 
 
     BAYESTME_FILTER_GENES( filter_genes_input )
@@ -170,7 +188,7 @@ workflow SPATIAL {
         .map { tuple(it[0], it[1]) }
         .join( ch_input.map { tuple(it[0], it[2]) } )
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
-        .join(expression_profiles)
+        .join(ch_scrna)
         .tap { not_bleed_corrected_deconvolution_input }
 
     BAYESTME_BLEEDING_CORRECTION( bleeding_correction_input )
@@ -179,7 +197,7 @@ workflow SPATIAL {
     deconvolution_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
         .join( ch_input.map { tuple(it[0], it[2]) } )
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
-        .join(expression_profiles)
+        .join(ch_scrna)
         .concat( not_bleed_corrected_deconvolution_input )
         .combine( run_bayestme )
         .filter { it -> it[-1] == true }   // run_bayestme
