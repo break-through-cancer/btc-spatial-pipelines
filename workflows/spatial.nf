@@ -211,6 +211,9 @@ workflow SPATIAL {
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
 
+    println('reference_scrna_sample_column='+params.reference_scrna_sample_column)
+    println('reference_scrna_celltype_column='+params.reference_scrna_celltype_column)
+
     BAYESTME_DECONVOLUTION.out.adata_deconvolved
         .join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
         .join( spatial_transcriptional_programs )
