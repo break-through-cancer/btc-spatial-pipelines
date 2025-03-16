@@ -1,7 +1,7 @@
-process MATCH_ADATAS {
+process ATLAS_MATCH {
     //return adata_sc with gene index matching adata_st by gene name or gene id
     tag "$meta.id"
-    label "match_adatas"
+    label "process_low"
     container "ghcr.io/break-through-cancer/btc-containers/squidpy:main"
 
     input:
@@ -12,8 +12,8 @@ process MATCH_ADATAS {
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
-    """
-    #!/usr/bin/env python3
+"""
+#!/usr/bin/env python3
 import os
 import anndata as ad
 
@@ -44,5 +44,41 @@ else:
 with open ("versions.yml", "w") as f:
     f.write("${task.process}:\\n")
     f.write("    anndata: {}\\n".format(ad.__version__))
-    """
+"""
 }
+
+process ATLAS_GET {
+    //download an atlas anndata file from a url
+    label "process_low"
+    container "ghcr.io/break-through-cancer/btc-containers/squidpy:main"
+
+    input:
+        val(url)
+    output:
+        path("atlas.h5ad"),  emit: atlas
+
+    script:
+    prefix = task.ext.prefix
+"""
+#!/usr/bin/env python3
+import os
+import anndata as ad
+import requests
+import validators
+
+if not(validators.url("$url")):
+    print("Invalid URL")
+    exit(1)
+if not("$url".endswith(".h5ad")):
+    print("URL does not end with .h5ad")
+    exit(1)
+
+r = requests.get("$url")
+r.raise_for_status()
+with open("atlas.h5ad", "wb") as f:
+    f.write(r.content)
+print("Downloaded atlas from $url")
+"""
+}
+
+workflow
