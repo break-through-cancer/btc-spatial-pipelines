@@ -54,8 +54,11 @@ include { COGAPS;
 
 include { SQUIDPY } from '../modules/local/squidpy/main'
 
-include { ATLAS } from '../subworkflows/local/atlas_prep'
+
+include { ATLAS_GET } from '../modules/local/util/util.nf'
 include { ATLAS_MATCH } from '../modules/local/util/util'
+
+include { RCTD } from '../modules/local/rctd/rctd'
 
 
 /*
@@ -142,9 +145,9 @@ workflow SPATIAL {
 
     //If an atlas has been provided download and prepare it
     if (params.sc_ref_url) {
-        ATLAS(params.sc_ref_url)
+        ATLAS_GET(params.sc_ref_url)
         ch_scrna = data_directory
-            .combine(ATLAS.out.atlas)
+            .combine(ATLAS_GET.out.atlas)
             .map { tuple(it[0], it[2]) } // meta, adata_sc
     } else{
     //else look for matched scRNA deconvolution files using file mask
@@ -208,11 +211,15 @@ workflow SPATIAL {
         .join( ch_input.map { tuple(it[0], it[2]) } )
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
         .join( ch_matched_scrna )
-        .tap { ch_debug }
         .concat( not_bleed_corrected_deconvolution_input )
         .combine( run_bayestme )
         .filter { it -> it[-1] == true }   // run_bayestme
-        .map { tuple(it[0], it[1], it[2], it[3], it[4]) }
+        .map { tuple(it[0], //meta
+                     it[1], //dataset_filtered
+                     it[2], //n_cell_types
+                     it[3], //smoothing_parameter
+                     it[4]) //adata_sc_matched
+                     }
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
@@ -230,6 +237,15 @@ workflow SPATIAL {
 
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
     ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
+    
+    // RCTD reference-based deconvolution
+    ch_rctd_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
+        .concat( not_bleed_corrected_deconvolution_input )
+        .join (ch_matched_scrna)
+        .map { tuple(it[0], it[-1], it[1]) }
+    
+    RCTD( ch_rctd_input )
+
 
     // squidpy - spatially variable genes
     ch_svgs = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected

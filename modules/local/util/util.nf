@@ -35,6 +35,7 @@ else:
     if (len(matching) > 0):
         print(f"Found {len(matching)} matching genes in var[feature_name], resetting index.")
         adata_sc.var.set_index("feature_name", inplace=True)
+        adata_sc.var.index = adata_sc.var.index.astype('object')
         adata_sc = adata_sc[:, matching]
         adata_sc.write_h5ad("${prefix}/adata_sc_matched.h5ad")
         print(f"Saved adata_sc with {len(matching)} matching genes")
@@ -80,5 +81,3 @@ with open("atlas.h5ad", "wb") as f:
 print("Downloaded atlas from $url")
 """
 }
-
-workflow
