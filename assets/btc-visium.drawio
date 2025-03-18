@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="Page-1" id="UtpHl4ARBOucqe9Nt2o0">
-        <mxGraphModel dx="1604" dy="454" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="none" math="0" shadow="0">
+        <mxGraphModel dx="810" dy="313" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="none" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -123,7 +123,7 @@
                 <mxCell id="MN6aCFW4edd8GgNkVKiP-9" value="MultiQC" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#3F2B29;" parent="1" vertex="1">
                     <mxGeometry x="225" y="312" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="12" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="MN6aCFW4edd8GgNkVKiP-15" target="2">
+                <mxCell id="12" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="MN6aCFW4edd8GgNkVKiP-15" target="2" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <Array as="points">
                             <mxPoint x="730" y="267"/>
@@ -131,7 +131,7 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="16" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="MN6aCFW4edd8GgNkVKiP-15" target="13">
+                <mxCell id="16" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" parent="1" source="MN6aCFW4edd8GgNkVKiP-15" target="13" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="510" y="245" as="targetPoint"/>
                     </mxGeometry>
@@ -166,21 +166,21 @@
                 <mxCell id="6" value="optional" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3F2B29;dashed=1;" parent="1" vertex="1">
                     <mxGeometry x="44.5" y="629" width="75" height="26" as="geometry"/>
                 </mxCell>
-                <mxCell id="9" value="" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="7" target="8">
+                <mxCell id="9" value="" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="7" target="8" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="240.5" y="254" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="7" value="scRNA ref&lt;div&gt;atlas / matched&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#B5B5B5;strokeColor=#3F2B29;shape=parallelogram;boundedLbl=1;perimeter=parallelogramPerimeter;fixedSize=1;dashed=1;" vertex="1" parent="1">
+                <mxCell id="7" value="scRNA ref&lt;div&gt;atlas / matched&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#B5B5B5;strokeColor=#3F2B29;shape=parallelogram;boundedLbl=1;perimeter=parallelogramPerimeter;fixedSize=1;dashed=1;" parent="1" vertex="1">
                     <mxGeometry x="40.5" y="224" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="15" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="8" target="13">
+                <mxCell id="15" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="8" target="13" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="8" value="Prepare Reference&lt;div&gt;match genes, format&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#3F2B29;fillColor=#B5B5B5;" vertex="1" parent="1">
+                <mxCell id="8" value="Prepare Reference&lt;div&gt;match genes, format&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#3F2B29;fillColor=#B5B5B5;" parent="1" vertex="1">
                     <mxGeometry x="322" y="222" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="13" value="&lt;div style=&quot;scrollbar-color: light-dark(#e2e2e2, #4b4b4b)&lt;br/&gt;&#x9;&#x9;&#x9;&#x9;&#x9;light-dark(#fbfbfb, var(--dark-panel-color));&quot;&gt;&lt;font color=&quot;#000000&quot;&gt;RCTD&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;scrollbar-color: light-dark(#e2e2e2, #4b4b4b)&lt;br/&gt;&#x9;&#x9;&#x9;&#x9;&#x9;light-dark(#fbfbfb, var(--dark-panel-color));&quot;&gt;deconvolution&lt;/div&gt;&lt;div style=&quot;scrollbar-color: light-dark(#e2e2e2, #4b4b4b)&lt;br/&gt;&#x9;&#x9;&#x9;&#x9;&#x9;light-dark(#fbfbfb, var(--dark-panel-color));&quot;&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;spatially aware&lt;/font&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#3F2B29;dashed=1;fillColor=#B5B5B5;" vertex="1" parent="1">
+                <mxCell id="13" value="&lt;div style=&quot;scrollbar-color: light-dark(#e2e2e2, #4b4b4b)&lt;br/&gt;&#x9;&#x9;&#x9;&#x9;&#x9;light-dark(#fbfbfb, var(--dark-panel-color));&quot;&gt;&lt;font color=&quot;#000000&quot;&gt;RCTD&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;scrollbar-color: light-dark(#e2e2e2, #4b4b4b)&lt;br/&gt;&#x9;&#x9;&#x9;&#x9;&#x9;light-dark(#fbfbfb, var(--dark-panel-color));&quot;&gt;deconvolution&lt;/div&gt;&lt;div style=&quot;scrollbar-color: light-dark(#e2e2e2, #4b4b4b)&lt;br/&gt;&#x9;&#x9;&#x9;&#x9;&#x9;light-dark(#fbfbfb, var(--dark-panel-color));&quot;&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;spatially aware w/ref&lt;/font&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#3F2B29;dashed=1;fillColor=#B5B5B5;" parent="1" vertex="1">
                     <mxGeometry x="322" y="415" width="120" height="60" as="geometry"/>
                 </mxCell>
             </root>
