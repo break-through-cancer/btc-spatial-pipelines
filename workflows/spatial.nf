@@ -144,8 +144,8 @@ workflow SPATIAL {
         .join(data_directory)
 
     //If an atlas has been provided download and prepare it
-    if (params.sc_ref_url) {
-        ATLAS_GET(params.sc_ref_url)
+    if (params.reference_scrna) {
+        ATLAS_GET(params.reference_scrna)
         ch_scrna = data_directory
             .combine(ATLAS_GET.out.atlas)
             .map { tuple(it[0], it[2]) } // meta, adata_sc
@@ -153,7 +153,7 @@ workflow SPATIAL {
     //else look for matched scRNA deconvolution files using file mask
         ch_scrna = data_directory
             .join(expression_profiles)
-            .filter { it -> it[2].length()>0 } // only run if a profile is provided
+            .filter { it -> it[2].size()>0 } // only run if a profile is provided
             .flatMap { item -> 
                 def meta = item[0]
                 def data_path = item[1]

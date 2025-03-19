@@ -3,6 +3,7 @@
 from cirro.helpers.preprocess_dataset import PreprocessDataset
 import pandas as pd
 import numpy as np
+import validators
 
 SAMPLESHEET_REQUIRED_COLUMNS = ("sample", 
                                 "data_directory", 
@@ -20,7 +21,12 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample",
 
 def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.logger.info([ds.params])
-
+    
+    # If the reference_scrna is a URL, we assume it is a file mask string
+    # to look for in the data directory downstream
+    if not validators.url(ds.params['reference_scrna']):
+        ds.params['expression_profile'] = ds.params['reference_scrna']
+    
     samplesheet = df_from_params(ds.params)
 
     for colname in SAMPLESHEET_REQUIRED_COLUMNS:
@@ -34,11 +40,11 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     # Save to a file
     samplesheet.to_csv("samplesheet.csv", index=None)
 
-    # Clear all nextflow params other than --outdir and --input
-    # since the input samplesheet now contains all the information we need.
+    # Clear params that we wrote to the samplesheet
+    # cleared params will not overload the nextflow.params
     to_remove = []
     for k in ds.params:
-        if k != "outdir":
+        if k not in ["outdir","reference_scrna","input"]:
             to_remove.append(k)
 
     for k in to_remove:

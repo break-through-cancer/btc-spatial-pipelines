@@ -25,8 +25,12 @@
                 "properties": {
                     "reference_scrna": {
                         "type": "string",
-                        "title": "Reference scRNA-seq h5ad dataset (only for BayesTME)",
-                        "description": "Filemask to look for in the sample directory, i.e. 'reference.h5ad'"
+                        "title": "Reference scRNA-seq h5ad dataset to use for RCTD deconvolution",
+                        "description": "Filemask to look for in the sample directory, i.e. 'reference.h5ad' or a URL"
+                    },
+                    "find_annotations": {
+                        "type": "boolean",
+                        "title": "Look for External Spot Annotations (e.g. CODA)"
                     },
                     "n_cell_types": {
                         "type": "integer",
@@ -39,10 +43,6 @@
                     "run_cogaps": {
                         "type": "boolean",
                         "title": "Run CoGAPS"
-                    },
-                    "find_annotations": {
-                        "type": "boolean",
-                        "title": "Look for External Spot Annotations (e.g. CODA)"
                     }
                 }
             },
