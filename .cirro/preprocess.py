@@ -3,7 +3,7 @@
 from cirro.helpers.preprocess_dataset import PreprocessDataset
 import pandas as pd
 import numpy as np
-import validators
+from urllib.parse import urlparse
 
 SAMPLESHEET_REQUIRED_COLUMNS = ("sample", 
                                 "data_directory", 
@@ -18,13 +18,21 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample",
                                 "find_annotations"
                                 )
 
+# Helper function to check if a string is a URL
+def is_url(string):
+    try:
+        result = urlparse(string)
+        return all([result.scheme, result.netloc])
+    except ValueError:
+        return False
+
 
 def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.logger.info([ds.params])
     
     # If the reference_scrna is a URL, we assume it is a file mask string
     # to look for in the data directory downstream
-    if not validators.url(ds.params['reference_scrna']):
+    if not is_url(ds.params['reference_scrna']):
         ds.params['expression_profile'] = ds.params['reference_scrna']
     
     samplesheet = df_from_params(ds.params)
