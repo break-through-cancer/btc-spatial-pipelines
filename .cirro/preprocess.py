@@ -32,7 +32,7 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     
     # If the reference_scrna is a URL, we assume it is a file mask string
     # to look for in the data directory downstream
-    if not is_url(ds.params['reference_scrna']):
+    if 'reference_scrna' in ds.params and not is_url(ds.params['reference_scrna']):
         ds.params['expression_profile'] = ds.params['reference_scrna']
     
     samplesheet = df_from_params(ds.params)
