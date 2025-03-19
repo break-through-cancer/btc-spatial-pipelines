@@ -255,10 +255,10 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(SQUIDPY.out.versions)
 
     //cogaps - make use of the BTME preprocessing
-    ch_samplesheet = ch_input.map { tuple(it[0], it[1]) }
-
     ch_cogaps_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
         .concat( not_bleed_corrected_deconvolution_input )
+        .join(INPUT_CHECK.out.datasets)
+        .filter { it -> it[-1].run_cogaps == true }
         .map( it -> tuple(it[0], it[1]) )
 
     COGAPS_ADATA2DGC( ch_cogaps_input )
@@ -277,7 +277,7 @@ workflow SPATIAL {
 
     COGAPS(ch_gaps)
     ch_versions = ch_versions.mix(COGAPS.out.versions)
-
+    ch_samplesheet = ch_input.map { tuple(it[0], it[1]) }
     ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(ch_samplesheet))
     ch_sm_inputs = ch_sm_inputs.combine(run_spacemarkers, by:0)
         .filter { it -> it[3] == true }                             // make spacemarkers optional
