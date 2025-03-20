@@ -245,7 +245,8 @@ workflow SPATIAL {
         .map { tuple(it[0], it[-1], it[1]) }
     
     RCTD( ch_rctd_input )
-
+    ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
+        .join(data_directory))
 
     // squidpy - spatially variable genes
     ch_svgs = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
@@ -277,12 +278,11 @@ workflow SPATIAL {
 
     COGAPS(ch_gaps)
     ch_versions = ch_versions.mix(COGAPS.out.versions)
-    ch_samplesheet = ch_input.map { tuple(it[0], it[1]) }
-    ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(ch_samplesheet))
+    ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(data_directory))
     ch_sm_inputs = ch_sm_inputs.combine(run_spacemarkers, by:0)
         .filter { it -> it[3] == true }                             // make spacemarkers optional
         .map { tuple(it[0], it[1], it[2]) }
-
+    
     //spacemarkers - main
     SPACEMARKERS( ch_sm_inputs )
     ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
