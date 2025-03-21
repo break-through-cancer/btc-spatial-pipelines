@@ -218,7 +218,7 @@ workflow SPATIAL {
                      it[1], //dataset_filtered
                      it[2], //n_cell_types
                      it[3], //smoothing_parameter
-                     '')    //expression truth placeholder
+                     [])    //expression truth placeholder
                      }
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
