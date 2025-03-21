@@ -201,6 +201,7 @@ workflow SPATIAL {
         .map { tuple(it[0], it[1]) }
         .join( ch_input.map { tuple(it[0], it[2]) } )
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
+    //  .join( ch_matched_scrna ) there is issue with BTME or the data, see #65
         .tap { not_bleed_corrected_deconvolution_input }
 
     BAYESTME_BLEEDING_CORRECTION( bleeding_correction_input )
@@ -209,13 +210,15 @@ workflow SPATIAL {
     deconvolution_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
         .join( ch_input.map { tuple(it[0], it[2]) } )
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
+    //  .join( ch_matched_scrna ) there is issue with BTME or the data, see #65
         .concat( not_bleed_corrected_deconvolution_input )
         .combine( run_bayestme )
         .filter { it -> it[-1] == true }   // run_bayestme
         .map { tuple(it[0], //meta
                      it[1], //dataset_filtered
                      it[2], //n_cell_types
-                     it[3]) //smoothing_parameter
+                     it[3], //smoothing_parameter
+                     '')    //expression truth placeholder
                      }
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
