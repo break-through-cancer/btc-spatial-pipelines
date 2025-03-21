@@ -25,8 +25,7 @@
                 "properties": {
                     "reference_scrna": {
                         "type": "string",
-                        "title": "Reference scRNA-seq h5ad dataset to use for RCTD deconvolution",
-                        "description": "Filemask to look for in the sample directory, i.e. 'reference.h5ad' or a URL"
+                        "title": "Reference scRNA-seq h5ad dataset to use for RCTD deconvolution (URL or file name mask)"
                     },
                     "find_annotations": {
                         "type": "boolean",
