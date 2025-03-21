@@ -245,6 +245,7 @@ workflow SPATIAL {
         .map { tuple(it[0], it[-1], it[1]) }
     
     RCTD( ch_rctd_input )
+    ch_versions = ch_versions.mix(RCTD.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
         .join(data_directory))
 

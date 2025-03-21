@@ -7,6 +7,7 @@ process RCTD {
     tuple val(meta), path(adata_sc), path(adata_st)
     output:
     tuple val(meta), path("${prefix}/rctd_cell_types.csv"), emit: rctd_cell_types
+    path "versions.yml",                                    emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"

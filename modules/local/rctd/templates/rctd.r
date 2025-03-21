@@ -1,14 +1,17 @@
 #!/usr/bin/env Rscript
-reticulate::use_virtualenv('/app/venv')
+library(reticulate)
+library(spacexr)
+library(Matrix)
 
+reticulate::use_virtualenv('/app/venv')
 ad <- reticulate::import('anndata')
 
 #args:  adata_sc_path, adata_st_path, ncores
-args <- commandArgs(trailingOnly = TRUE)
 adata_sc_path <- '${adata_sc}'
 adata_st_path <- '${adata_st}'
 ncores <- ${task.cpus}
 outdir <- '${prefix}'
+process <- '${task.process}'
 
 message('prepare rctd ref object')
 #1. counts - genes need to be in rows, cells in columns
@@ -44,3 +47,11 @@ cell_types <- spacexr::normalize_weights(rctd_res@results[['weights']])
 message(sprintf('saving results to %s/', outdir))
 dir.create(outdir, showWarnings = FALSE)
 write.csv(as.matrix(cell_types), file=file.path(outdir, 'rctd_cell_types.csv'))
+
+#versions
+message("reading session info")
+sinfo <- sessionInfo()
+versions <- lapply(sinfo[["otherPkgs"]], function(x) {sprintf("  %s: %s",x[["Package"]],x[["Version"]])})
+versions[['R']] <- sprintf("  R: %s\n",packageVersion("base"))
+cat(paste0(process,":\n"), file="versions.yml")
+cat(unlist(versions), file="versions.yml", append=TRUE, sep="\n")
