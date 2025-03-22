@@ -10,7 +10,8 @@
                 "properties":{
                     "n_top_genes": {
                         "type": "integer",
-                        "title": "Number of Top Genes (by var) to keep"
+                        "title": "Number of Top Genes (by var) to keep",
+                        "default": 1000
                     },
                     "bleeding_correction": {
                         "type": "boolean",
@@ -22,6 +23,14 @@
                 "title": "Deconvolution options",
                 "type": "object",
                 "properties": {
+                    "reference_scrna": {
+                        "type": "string",
+                        "title": "Reference scRNA-seq h5ad dataset to use for RCTD deconvolution (URL or file name mask)"
+                    },
+                    "find_annotations": {
+                        "type": "boolean",
+                        "title": "Look for External Spot Annotations (e.g. CODA)"
+                    },
                     "n_cell_types": {
                         "type": "integer",
                         "title": "Number of Cell Types"
@@ -33,10 +42,6 @@
                     "run_cogaps": {
                         "type": "boolean",
                         "title": "Run CoGAPS"
-                    },
-                    "find_annotations": {
-                        "type": "boolean",
-                        "title": "Look for External Spot Annotations (e.g. CODA)"
                     }
                 }
             },
