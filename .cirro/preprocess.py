@@ -30,7 +30,7 @@ def is_url(string):
 def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.logger.info([ds.params])
     
-    # If the reference_scrna is a URL, we assume it is a file mask string
+    # If the reference_scrna is not a URL, we assume it is a file mask string
     # to look for in the data directory downstream
     if 'reference_scrna' in ds.params and not is_url(ds.params['reference_scrna']):
         ds.params['expression_profile'] = ds.params['reference_scrna']
