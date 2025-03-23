@@ -111,6 +111,7 @@ workflow SPATIAL {
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
     ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
     ch_input.map { tuple(it[0], it[5]) }.tap { run_bayestme }
+    ch_input.map { tuple(it[0], it[6]) }.tap { run_cogaps }
     ch_input.map { tuple(it[0], it[7]) }.tap { n_top_genes }
     ch_input.map { tuple(it[0], it[8]) }.tap { spatial_transcriptional_programs }
     ch_input.map { tuple(it[0], it[9]) }.tap { run_spacemarkers }
@@ -191,13 +192,13 @@ workflow SPATIAL {
 
     BAYESTME_FILTER_GENES.out.adata_filtered
         .join( should_run_bleeding_correction )
-        .filter { it[2] == true }
+        .filter { it[-1] == true }
         .map { tuple(it[0], it[1]) }
         .tap { bleeding_correction_input }
 
     BAYESTME_FILTER_GENES.out.adata_filtered
         .join( should_run_bleeding_correction )
-        .filter { it[2] == false }
+        .filter { it[-1] == false }
         .map { tuple(it[0], it[1]) }
         .join( ch_input.map { tuple(it[0], it[2]) } )
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
@@ -257,31 +258,29 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(SQUIDPY.out.versions)
 
     //cogaps - make use of the BTME preprocessing
-    ch_cogaps_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
+    ch_convert_adata = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
         .concat( not_bleed_corrected_deconvolution_input )
-        .join(INPUT_CHECK.out.datasets)
-        .filter { it -> it[-1].run_cogaps == true }
+        .join(run_cogaps)
+        .filter { it -> it[-1] == true }
         .map( it -> tuple(it[0], it[1]) )
-
-    COGAPS_ADATA2DGC( ch_cogaps_input )
+    
+    COGAPS_ADATA2DGC( ch_convert_adata )
     ch_versions = ch_versions.mix(COGAPS_ADATA2DGC.out.versions)
 
-    ch_gaps = INPUT_CHECK.out.datasets
-        .filter { it -> it.run_cogaps == true }
-        .map { tuple([id:it.sample_name], [niterations:params.cogaps_niterations,
-                                           npatterns:it.n_cell_types,
+    ch_cogaps = COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) }
+        .join(n_cell_types)
+        .map { tuple(it[0], it[1], [niterations:params.cogaps_niterations,
+                                           npatterns:it[-1],
                                            sparse:params.cogaps_sparse,
                                            distributed:params.cogaps_distributed,
                                            nsets:params.cogaps_nsets,
                                            nthreads:params.cogaps_nthreads]) }
-        .join(COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) })
-        .map { tuple(it[0], it[2], it[1]) }                          // reorder to match cogaps input
 
-    COGAPS(ch_gaps)
+    COGAPS(ch_cogaps)
     ch_versions = ch_versions.mix(COGAPS.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(data_directory))
     ch_sm_inputs = ch_sm_inputs.combine(run_spacemarkers, by:0)
-        .filter { it -> it[3] == true }                             // make spacemarkers optional
+        .filter { it -> it[-1] == true }                             // make spacemarkers optional
         .map { tuple(it[0], it[1], it[2]) }
     
     //spacemarkers - main
