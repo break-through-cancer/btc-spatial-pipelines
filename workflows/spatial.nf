@@ -55,6 +55,12 @@ include { COGAPS;
 include { SQUIDPY } from '../modules/local/squidpy/main'
 
 
+include { ATLAS_GET } from '../modules/local/util/util.nf'
+include { ATLAS_MATCH } from '../modules/local/util/util'
+
+include { RCTD } from '../modules/local/rctd/rctd'
+
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -84,7 +90,7 @@ workflow SPATIAL {
     INPUT_CHECK (
         file(params.input)
     )
-    
+
     // NOTE: append to the list to avoid other indices being off
     ch_input = INPUT_CHECK.out.datasets.map { tuple(
         id:it.sample_name,
@@ -105,21 +111,22 @@ workflow SPATIAL {
     ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
     ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
     ch_input.map { tuple(it[0], it[5]) }.tap { run_bayestme }
+    ch_input.map { tuple(it[0], it[6]) }.tap { run_cogaps }
     ch_input.map { tuple(it[0], it[7]) }.tap { n_top_genes }
     ch_input.map { tuple(it[0], it[8]) }.tap { spatial_transcriptional_programs }
     ch_input.map { tuple(it[0], it[9]) }.tap { run_spacemarkers }
     ch_input.map { tuple(it[0], it[10]) }.tap { find_annotations }
 
-    // A new channel that contains *.html spaceranger reports for multiqc
+    // A channel that contains *.html spaceranger reports for multiqc
     ch_sr_reports = data_directory.flatMap { item ->
         def meta = item[0]
         def data_path = item[1]
         def html_files = file(data_path).listFiles().findAll { it.name.endsWith('.html') }
         html_files.collect { file -> [meta: meta, sr_report: file] }
     }
+    ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
 
-
-    // CODA annotation channel
+    // CODA annotation channel - or any other external annotaion
     ch_coda = data_directory
         .join(find_annotations)
         .filter { it -> it[2]==true} // only run if find_annotations is true
@@ -137,12 +144,38 @@ workflow SPATIAL {
     ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
         .join(data_directory)
 
-
-    ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
+    //If an atlas has been provided download and prepare it
+    if (params.reference_scrna) {
+        ATLAS_GET(params.reference_scrna)
+        ch_scrna = data_directory
+            .combine(ATLAS_GET.out.atlas)
+            .map { tuple(it[0], it[2]) } // meta, adata_sc
+    } else{
+    //else look for matched scRNA deconvolution files using file mask
+        ch_scrna = data_directory
+            .join(expression_profiles)
+            .filter { it -> it[2].size()>0 } // only run if a profile is provided
+            .flatMap { item -> 
+                def meta = item[0]
+                def data_path = item[1]
+                def seach_expr = item[2]
+                def scrna_files = []
+                data_path.eachFileRecurse { file ->
+                    if (file.name.endsWith(seach_expr)) {
+                        scrna_files.add(file)
+                    }
+                }
+                scrna_files.collect { file -> [meta, file] } // meta, adata_sc
+            }
+    }
 
     ch_btme = ch_input.map { tuple(it[0], it[1]) }
     BAYESTME_LOAD_SPACERANGER( ch_btme )
     ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
+
+    //match scRNA and spatial data
+    ATLAS_MATCH(ch_scrna.join( BAYESTME_LOAD_SPACERANGER.out.adata ))
+    ch_matched_scrna = ATLAS_MATCH.out.adata_sc_matched
 
     filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata
         .join( n_top_genes )
@@ -152,25 +185,24 @@ workflow SPATIAL {
             true,                // filter_ribosomal_genes
             it[2],               // n_top_genes
             0.9)                 // spot_threshold
-    }.join(expression_profiles)
-
+    }.join( ch_matched_scrna )
 
     BAYESTME_FILTER_GENES( filter_genes_input )
     ch_versions = ch_versions.mix(BAYESTME_FILTER_GENES.out.versions)
 
     BAYESTME_FILTER_GENES.out.adata_filtered
         .join( should_run_bleeding_correction )
-        .filter { it[2] == true }
+        .filter { it[-1] == true }
         .map { tuple(it[0], it[1]) }
         .tap { bleeding_correction_input }
 
     BAYESTME_FILTER_GENES.out.adata_filtered
         .join( should_run_bleeding_correction )
-        .filter { it[2] == false }
+        .filter { it[-1] == false }
         .map { tuple(it[0], it[1]) }
         .join( ch_input.map { tuple(it[0], it[2]) } )
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
-        .join(expression_profiles)
+    //  .join( ch_matched_scrna ) there is issue with BTME or the data, see #65
         .tap { not_bleed_corrected_deconvolution_input }
 
     BAYESTME_BLEEDING_CORRECTION( bleeding_correction_input )
@@ -179,13 +211,16 @@ workflow SPATIAL {
     deconvolution_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
         .join( ch_input.map { tuple(it[0], it[2]) } )
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
-        .join(expression_profiles)
+    //  .join( ch_matched_scrna ) there is issue with BTME or the data, see #65
         .concat( not_bleed_corrected_deconvolution_input )
         .combine( run_bayestme )
         .filter { it -> it[-1] == true }   // run_bayestme
-        .map { tuple(it[0], it[1], it[2], it[3], it[4]) }
-
-    deconvolution_input.view()
+        .map { tuple(it[0], //meta
+                     it[1], //dataset_filtered
+                     it[2], //n_cell_types
+                     it[3], //smoothing_parameter
+                     [])    //expression truth placeholder
+                     }
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
@@ -203,6 +238,17 @@ workflow SPATIAL {
 
     BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
     ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
+    
+    // RCTD reference-based deconvolution
+    ch_rctd_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
+        .concat( not_bleed_corrected_deconvolution_input )
+        .join (ch_matched_scrna)
+        .map { tuple(it[0], it[-1], it[1]) }
+    
+    RCTD( ch_rctd_input )
+    ch_versions = ch_versions.mix(RCTD.out.versions)
+    ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
+        .join(data_directory))
 
     // squidpy - spatially variable genes
     ch_svgs = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
@@ -212,34 +258,31 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(SQUIDPY.out.versions)
 
     //cogaps - make use of the BTME preprocessing
-    ch_samplesheet = ch_input.map { tuple(it[0], it[1]) }
-
-    ch_cogaps_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
+    ch_convert_adata = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
         .concat( not_bleed_corrected_deconvolution_input )
+        .join(run_cogaps)
+        .filter { it -> it[-1] == true }
         .map( it -> tuple(it[0], it[1]) )
-
-    COGAPS_ADATA2DGC( ch_cogaps_input )
+    
+    COGAPS_ADATA2DGC( ch_convert_adata )
     ch_versions = ch_versions.mix(COGAPS_ADATA2DGC.out.versions)
 
-    ch_gaps = INPUT_CHECK.out.datasets
-        .filter { it -> it.run_cogaps == true }
-        .map { tuple([id:it.sample_name], [niterations:params.cogaps_niterations,
-                                           npatterns:it.n_cell_types,
+    ch_cogaps = COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) }
+        .join(n_cell_types)
+        .map { tuple(it[0], it[1], [niterations:params.cogaps_niterations,
+                                           npatterns:it[-1],
                                            sparse:params.cogaps_sparse,
                                            distributed:params.cogaps_distributed,
                                            nsets:params.cogaps_nsets,
                                            nthreads:params.cogaps_nthreads]) }
-        .join(COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) })
-        .map { tuple(it[0], it[2], it[1]) }                          // reorder to match cogaps input
 
-    COGAPS(ch_gaps)
+    COGAPS(ch_cogaps)
     ch_versions = ch_versions.mix(COGAPS.out.versions)
-
-    ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(ch_samplesheet))
+    ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(data_directory))
     ch_sm_inputs = ch_sm_inputs.combine(run_spacemarkers, by:0)
-        .filter { it -> it[3] == true }                             // make spacemarkers optional
+        .filter { it -> it[-1] == true }                             // make spacemarkers optional
         .map { tuple(it[0], it[1], it[2]) }
-
+    
     //spacemarkers - main
     SPACEMARKERS( ch_sm_inputs )
     ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
