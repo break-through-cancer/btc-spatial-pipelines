@@ -151,6 +151,7 @@ workflow SPATIAL {
             .map { tuple(it[0], it[2]) } // meta, adata_sc
     } else{
     //else look for matched scRNA deconvolution files using file mask
+    //from expression_profiles column of the samplesheet
         ch_scrna = data_directory
             .join(expression_profiles)
             .filter { it -> it[2].size()>0 } // only run if a profile is provided
@@ -169,6 +170,7 @@ workflow SPATIAL {
     }
 
     ch_btme = ch_input.map { tuple(it[0], it[1]) }
+
     BAYESTME_LOAD_SPACERANGER( ch_btme )
     ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
 
@@ -184,7 +186,9 @@ workflow SPATIAL {
             true,                // filter_ribosomal_genes
             it[2],               // n_top_genes
             0.9)                 // spot_threshold
-    }.join( ch_matched_scrna )
+    }.join( ch_matched_scrna, remainder: true )
+     .map { tuple(it[0], it[1], it[2], it[3], it[4], it[5]?:[]) } //null to [] in case scrna is not provided
+
 
     BAYESTME_FILTER_GENES( filter_genes_input )
     ch_versions = ch_versions.mix(BAYESTME_FILTER_GENES.out.versions)
