@@ -6,12 +6,13 @@ library(Matrix)
 reticulate::use_virtualenv('/app/venv')
 ad <- reticulate::import('anndata')
 
-#args:  adata_sc_path, adata_st_path, ncores
+#args:  adata_sc_path, adata_st_path, ncores, cell_type_col
 adata_sc_path <- '${adata_sc}'
 adata_st_path <- '${adata_st}'
 ncores <- ${task.cpus}
 outdir <- '${prefix}'
 process <- '${task.process}'
+cell_type_col <- '${params.type_col_scrna}'
 
 message('prepare rctd ref object')
 #1. counts - genes need to be in rows, cells in columns
@@ -19,10 +20,16 @@ adata_sc <- ad[['read_h5ad']](adata_sc_path)
 counts_sc <- Matrix::t(as(adata_sc[['X']], "CsparseMatrix"))
 rownames(counts_sc) <- as.character(adata_sc[['var_names']][['values']])
 colnames(counts_sc) <- as.character(adata_sc[['obs_names']][['values']])
+
 #2. celltypes must be named factor
-celltypes_sc <- as.character(adata_sc[['obs']][['cell_type']])
+message("found columns: ", paste(colnames(adata_sc[['obs']]), collapse = ', '))
+if(!cell_type_col %in% colnames(adata_sc[['obs']])) {
+  stop(sprintf('cell type column "%s" not found in adata_sc', cell_type_col))
+}
+celltypes_sc <- as.character(adata_sc[['obs']][[cell_type_col]])
 names(celltypes_sc) <- adata_sc[['obs_names']][['values']]
 celltypes_sc <- as.factor(celltypes_sc)
+
 #3. create reference object
 ref <- spacexr::Reference(cell_types=celltypes_sc, counts=counts_sc)
 
