@@ -49,10 +49,6 @@
                 "title": "Spatial options",
                 "type": "object",
                 "properties": {
-                    "spatial_transcriptional_programs": {
-                        "type": "boolean",
-                        "title": "Enable BayesTME Spatial Transcriptional Programs"
-                    },
                     "run_spacemarkers": {
                         "type": "boolean",
                         "title": "Enable SpaceMarkers"

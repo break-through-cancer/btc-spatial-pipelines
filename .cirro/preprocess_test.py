@@ -18,7 +18,6 @@ def test_preprocess(mocker):
         "outdir": "s3://bucket/output",
         "data_directory": "s3://bucket/data",
         "bleeding_correction": True,
-        "spatial_transcriptional_programs": False,
         "n_cell_types": 4,
         "expression_profile": "expression_profile",
         "run_bayestme": True,

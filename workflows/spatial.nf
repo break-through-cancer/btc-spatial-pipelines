@@ -41,7 +41,6 @@ include { BAYESTME_LOAD_SPACERANGER;
           BAYESTME_FILTER_GENES;
           BAYESTME_BLEEDING_CORRECTION;
           BAYESTME_DECONVOLUTION;
-          BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS;
         } from '../modules/local/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
         
 include { SPACEMARKERS; 
@@ -230,14 +229,9 @@ workflow SPATIAL {
         .join( spatial_transcriptional_programs )
         .filter { it -> it[3] == true }                           // spatial_transcriptional_programs bool
         .map { tuple(it[0], it[1], it[2], []) }
-        .tap { stp_input }
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }
         .join(data_directory))
-
-
-    BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
-    ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
     
     // RCTD reference-based deconvolution
     ch_rctd_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
