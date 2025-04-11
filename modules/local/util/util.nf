@@ -56,28 +56,37 @@ process ATLAS_GET {
     input:
         val(url)
     output:
-        path("atlas.h5ad"),  emit: atlas
+        path("*.h5ad"),  emit: atlas
 
     script:
     prefix = task.ext.prefix
 """
 #!/usr/bin/env python3
 import os
-import anndata as ad
 import requests
-import validators
+from urllib.parse import urlparse
+import boto3
 
-if not(validators.url("$url")):
-    print("Invalid URL")
-    exit(1)
-if not("$url".endswith(".h5ad")):
+myurl = "${url}"
+
+if not(myurl.endswith(".h5ad")):
     print("URL does not end with .h5ad")
     exit(1)
 
-r = requests.get("$url")
-r.raise_for_status()
-with open("atlas.h5ad", "wb") as f:
-    f.write(r.content)
-print("Downloaded atlas from $url")
+parsed_url = urlparse(myurl)
+file_key = parsed_url.path.lstrip('/')
+
+if (myurl.startswith("s3://")):
+    print("Downloading from S3")
+    bucket_name = parsed_url.netloc
+    s3 = boto3.client('s3')
+    s3.download_file(bucket_name, file_key, os.path.basename(file_key))
+else:
+    print("Downloading from http")
+    r = requests.get(myurl)
+    r.raise_for_status()
+    with open(os.path.basename(file_key), "wb") as f:
+        f.write(r.content)
+print(f"Downloaded atlas from {myurl}")
 """
 }
