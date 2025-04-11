@@ -174,9 +174,12 @@ workflow SPATIAL {
     BAYESTME_LOAD_SPACERANGER( ch_btme )
     ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
 
-    //match scRNA and spatial data
-    ATLAS_MATCH(ch_scrna.join( BAYESTME_LOAD_SPACERANGER.out.adata ))
-    ch_matched_scrna = ATLAS_MATCH.out.adata_sc_matched
+    //match scRNA atlas to spatial data using first spatial sample
+    ATLAS_MATCH(ch_scrna.join( BAYESTME_LOAD_SPACERANGER.out.adata.first() ))
+    ch_matched_scrna = ch_input.combine(ATLAS_MATCH.out.adata_matched)
+        .map(it -> tuple(it[0], it[-1])) // meta, adata_sc
+
+    ch_matched_scrna.view()
 
     filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata
         .join( n_top_genes )

@@ -1,14 +1,16 @@
 process ATLAS_MATCH {
-    //return adata_sc with gene index matching adata_st by gene name or gene id
+    //return adata1 with gene index matching adata2 by gene name or gene id
     tag "$meta.id"
-    label "process_low"
+    label "process_high_memory"
     container "ghcr.io/break-through-cancer/btc-containers/squidpy:main"
 
+    //adata_sc adata1
+    //adata_st adata2
     input:
-    tuple val(meta), path(adata_sc), path(adata_st)
+    tuple val(meta), path(adata1), path(adata2)
     output:
-    tuple val(meta), path("${prefix}/adata_sc_matched.h5ad"), emit: adata_sc_matched
-    path "versions.yml",                                      emit: versions
+    path("${prefix}/adata_matched.h5ad"),                  emit: adata_matched
+    path "versions.yml",                                   emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -17,28 +19,29 @@ process ATLAS_MATCH {
 import os
 import anndata as ad
 
-adata_st = ad.read_h5ad("$adata_st")
-adata_sc = ad.read_h5ad("$adata_sc")
+adata2 = ad.read_h5ad("$adata2")
+adata1 = ad.read_h5ad("$adata1")
 
 os.makedirs("${prefix}", exist_ok=True)
+print(f"adata1 is {adata1}, adata2 is {adata2}")
 
-matching = adata_st.var.index.intersection(adata_sc.var.index)
+matching = adata2.var.index.intersection(adata1.var.index)
 print(f"Found {len(matching)} matching genes in var.index")
 
 if (len(matching) > 0):
-    adata_sc = adata_sc[:, matching]
-    adata_sc.write_h5ad("${prefix}/adata_sc_matched.h5ad")
-    print(f"Saved adata_sc with {len(matching)} matching genes")
+    adata1 = adata1[:, matching]
+    adata1.write_h5ad("${prefix}/adata_matched.h5ad")
+    print(f"Saved adata1 with {len(matching)} matching genes")
 else:
     print("Trying to match by feature_name")
-    matching = adata_st.var.index.intersection(adata_sc.var["feature_name"])
+    matching = adata2.var.index.intersection(adata1.var["feature_name"])
     if (len(matching) > 0):
         print(f"Found {len(matching)} matching genes in var[feature_name], resetting index.")
-        adata_sc.var.set_index("feature_name", inplace=True)
-        adata_sc.var.index = adata_sc.var.index.astype('object')
-        adata_sc = adata_sc[:, matching]
-        adata_sc.write_h5ad("${prefix}/adata_sc_matched.h5ad")
-        print(f"Saved adata_sc with {len(matching)} matching genes")
+        adata1.var.set_index("feature_name", inplace=True)
+        adata1.var.index = adata1.var.index.astype('object')
+        adata1 = adata1[:, matching]
+        adata1.write_h5ad("${prefix}/adata_matched.h5ad")
+        print(f"Saved adata1 with {len(matching)} matching genes")
     else:
         print("No matching genes found")
 
