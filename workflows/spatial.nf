@@ -189,10 +189,9 @@ workflow SPATIAL {
             it[1],               // adata
             true,                // filter_ribosomal_genes
             it[2],               // n_top_genes
-            0.9)                 // spot_threshold
-    }.join( ch_scrna, remainder: true )
-     .map { tuple(it[0], it[1], it[2], it[3], it[4], it[5]?:[]) } //null to [] in case scrna is not provided
-
+            0.9,                 // spot_threshold
+            [])                  // disabled ch_scrna, see #65
+        }
 
     BAYESTME_FILTER_GENES( filter_genes_input )
     ch_versions = ch_versions.mix(BAYESTME_FILTER_GENES.out.versions)
@@ -224,8 +223,8 @@ workflow SPATIAL {
                      it[1], //dataset_filtered
                      it[2], //n_cell_types
                      it[3], //smoothing_parameter
-                     [])    //expression truth placeholder
-                     }
+                     [])    //expression truth placeholder, see #65
+            }
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
