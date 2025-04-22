@@ -51,7 +51,7 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     # cleared params will not overload the nextflow.params
     to_remove = []
     for k in ds.params:
-        if k not in ["outdir","reference_scrna","input"]:
+        if k not in ["outdir","reference_scrna","input","type_col_scrna"]:
             to_remove.append(k)
 
     for k in to_remove:
