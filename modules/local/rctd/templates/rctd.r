@@ -15,16 +15,6 @@ process <- '${task.process}'
 cell_type_col <- '${params.type_col_scrna}'
 n_top_genes <- as.numeric('${n_top_genes}')
 
-#example inputs
-#args:  adata_sc_path, adata_st_path, ncores, cell_type_col
-#adata_sc_path <- 'scAtlas.rds.h5ad'
-#adata_st_path <- 'adata_matched.h5ad'
-#ncores <- 6
-#outdir <- 'sample1'
-#process <- 'BTC_SPATIAL:SPATIAL:RCTD'
-#cell_type_col <- 'Clusters'
-
-
 ### prep spatial (query) object
 #1. coords need to be present in anndata.obsm['spatial']
 adata_st <- ad[["read_h5ad"]](adata_st_path)
