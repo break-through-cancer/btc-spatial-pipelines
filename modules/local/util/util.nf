@@ -21,11 +21,13 @@ import anndata as ad
 
 print("Reading adata1 in the backed mode")
 adata1 = ad.read_h5ad("$adata1", backed='r')
-print(f"adata1 is {adata1}")
+print("adata1:")
+print(adata1)
 
 print("Reading adata2")
 adata2 = ad.read_h5ad("$adata2")
-print(f"adata2 is {adata2}")
+print("adata2:")
+print(adata2)
 
 os.makedirs("${prefix}", exist_ok=True)
 
@@ -33,20 +35,26 @@ matching = adata2.var.index.intersection(adata1.var.index)
 print(f"Found {len(matching)} matching genes in var.index")
 
 if (len(matching) > 0):
-    adata_2_matched = adata2[:, matching].copy().write_h5ad("${prefix}/adata_matched.h5ad")
+    adata2[:, matching].write_h5ad("${prefix}/adata_matched.h5ad")
     print(f"Saved adata2 with {len(matching)} matching genes")
 else:
     print("Trying to match by feature_name")
-    matching = adata1.var.index.intersection(adata2.var["feature_name"])
+    matching = adata2.var_names.intersection(adata1.var["feature_name"])
     if (len(matching) > 0):
         print(f"Found {len(matching)} matching genes in var[feature_name], resetting index.")
-        adata2.var.set_index("feature_name", inplace=True)
+        m = {value: key for key, value in zip(adata1.var.index, adata1.var["feature_name"])}
+        adata2.var["name_matched"] = adata2.var.index.map(m)
+        adata2.var.dropna(subset=["name_matched"], inplace=True)
+        adata2.var.reset_index(drop=False, inplace=True)
+        adata2.var.set_index("name_matched", inplace=True)
         adata2.var.index = adata2.var.index.astype('object')
-        adata2 = adata2[:, matching] 
-        adata2.write_h5ad("${prefix}/adata_matched.h5ad")
+        adata2[:, adata2.var.index].write_h5ad("${prefix}/adata_matched.h5ad")
         print(f"Saved adata2 with {len(matching)} matching genes")
     else:
         print("No matching genes found")
+
+adata1.file.close()
+adata2.file.close()
 
 with open ("versions.yml", "w") as f:
     f.write("${task.process}:\\n")
