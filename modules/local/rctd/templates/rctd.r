@@ -13,10 +13,17 @@ ncores <- ${task.cpus}
 outdir <- '${prefix}'
 process <- '${task.process}'
 cell_type_col <- '${params.type_col_scrna}'
+n_top_genes <- as.numeric('${n_top_genes}')
 
-#!/usr/bin/env Rscript
-library(reticulate)
-ad <- reticulate::import("anndata")
+#example inputs
+#args:  adata_sc_path, adata_st_path, ncores, cell_type_col
+#adata_sc_path <- 'scAtlas.rds.h5ad'
+#adata_st_path <- 'adata_matched.h5ad'
+#ncores <- 6
+#outdir <- 'sample1'
+#process <- 'BTC_SPATIAL:SPATIAL:RCTD'
+#cell_type_col <- 'Clusters'
+
 
 ### prep spatial (query) object
 #1. coords need to be present in anndata.obsm['spatial']
@@ -27,6 +34,11 @@ rownames(spatial) <- adata_st[["obs_names"]][["values"]]
 counts_st <- Matrix::t(as(adata_st[['X']], "CsparseMatrix"))
 rownames(counts_st) <- as.character(adata_st[['var_names']][['values']])
 colnames(counts_st) <- as.character(adata_st[['obs_names']][['values']])
+
+#3. select top variable genes
+top_genes <- apply(counts_st, 1, var) |> sort(decreasing = TRUE) |> head(n_top_genes)
+counts_st <- counts_st[rownames(counts_st) %in% names(top_genes), ]
+
 query <- spacexr::SpatialRNA(coords=spatial, counts=counts_st)
 
 
@@ -35,13 +47,21 @@ query <- spacexr::SpatialRNA(coords=spatial, counts=counts_st)
 adata_sc <- ad[["read_h5ad"]](adata_sc_path, backed = "r")
 
 if (is.null(adata_sc[["raw"]])) {
-  counts_sc <- Matrix::t(adata_sc[["X"]][])
-  rownames(counts_sc) <- rownames(adata_sc[["var"]])
+  message('no raw data, using X from adata_sc')
+  gene_names <-rownames(adata_sc[["var"]])
+  select_genes <- which(gene_names %in% names(top_genes))
+  counts_sc <- Matrix::t(adata_sc[["X"]][,select_genes])
+  rownames(counts_sc) <- gene_names[select_genes]
 } else {
-  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][])
-  rownames(counts_sc) <- rownames(adata_sc[["raw"]][["var"]])
+  message('using raw.X from adata_sc')
+  gene_names <- rownames(adata_sc[["raw"]][["var"]])
+  select_genes <- which(gene_names %in% names(top_genes))
+  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][,select_genes])
+  rownames(counts_sc) <- gene_names[select_genes]
 }
 
+#room for RAM improvement: read in at most 10K cells by index as RCTD limit
+counts_sc <- counts_sc[rownames(counts_sc) %in% names(top_genes), ]
 colnames(counts_sc) <- as.character(adata_sc[["obs_names"]][["values"]])
 
 #2. celltypes must be named factor
@@ -56,11 +76,12 @@ celltypes_sc <- as.factor(celltypes_sc)
 
 #3. drop non-matching genes from atlas object & convert to column orientation
 counts_sc <- counts_sc[rownames(counts_sc) %in% rownames(counts_st), ]
+counts_sc <- as(counts_sc, "CsparseMatrix")
 
 #4. create reference object
 ref <- spacexr::Reference(cell_types=celltypes_sc, counts=counts_sc)
 
-message('run rctd') 
+message('run rctd')
 #this converts the reference object to a dense matrix
 rctd <- spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores)
 rctd_res <- spacexr::run.RCTD(rctd, doublet_mode = 'full')
@@ -76,6 +97,9 @@ write.csv(as.matrix(cell_types), file=file.path(outdir, 'rctd_cell_types.csv'))
 message("reading session info")
 sinfo <- sessionInfo()
 versions <- lapply(sinfo[["otherPkgs"]], function(x) {sprintf("  %s: %s",x[["Package"]],x[["Version"]])})
-versions[['R']] <- sprintf("  R: %s\n",packageVersion("base"))
-cat(paste0(process,":\n"), file="versions.yml")
-cat(unlist(versions), file="versions.yml", append=TRUE, sep="\n")
+versions[['R']] <- sprintf("  R: %s
+",packageVersion("base"))
+cat(paste0(process,":
+"), file="versions.yml")
+cat(unlist(versions), file="versions.yml", append=TRUE, sep="
+")
