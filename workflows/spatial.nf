@@ -234,6 +234,7 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }
         .join(data_directory))
+
     
     // RCTD reference-based deconvolution
     ch_rctd_input = data_directory

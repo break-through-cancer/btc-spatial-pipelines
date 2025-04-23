@@ -12,6 +12,7 @@ adata_st_path <- '${adata_st}'
 ncores <- ${task.cpus}
 outdir <- '${prefix}'
 process <- '${task.process}'
+
 cell_type_col <- '${params.type_col_scrna}'
 n_top_genes <- as.numeric('${n_top_genes}')
 
@@ -20,6 +21,7 @@ n_top_genes <- as.numeric('${n_top_genes}')
 adata_st <- ad[["read_h5ad"]](adata_st_path)
 spatial <- as.data.frame(adata_st[["obsm"]]["spatial"])
 rownames(spatial) <- adata_st[["obs_names"]][["values"]]
+
 #2. counts - genes need to be in rows, cells in columns
 counts_st <- Matrix::t(as(adata_st[['X']], "CsparseMatrix"))
 rownames(counts_st) <- as.character(adata_st[['var_names']][['values']])
