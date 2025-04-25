@@ -41,7 +41,6 @@ include { BAYESTME_LOAD_SPACERANGER;
           BAYESTME_FILTER_GENES;
           BAYESTME_BLEEDING_CORRECTION;
           BAYESTME_DECONVOLUTION;
-          BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS;
         } from '../modules/local/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
         
 include { SPACEMARKERS; 
@@ -152,6 +151,7 @@ workflow SPATIAL {
             .map { tuple(it[0], it[2]) } // meta, adata_sc
     } else{
     //else look for matched scRNA deconvolution files using file mask
+    //from expression_profiles column of the samplesheet
         ch_scrna = data_directory
             .join(expression_profiles)
             .filter { it -> it[2].size()>0 } // only run if a profile is provided
@@ -170,12 +170,14 @@ workflow SPATIAL {
     }
 
     ch_btme = ch_input.map { tuple(it[0], it[1]) }
+
     BAYESTME_LOAD_SPACERANGER( ch_btme )
     ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
 
-    //match scRNA and spatial data
+    //match scRNA atlas to spatial data
     ATLAS_MATCH(ch_scrna.join( BAYESTME_LOAD_SPACERANGER.out.adata ))
-    ch_matched_scrna = ATLAS_MATCH.out.adata_sc_matched
+    ch_matched_adata = ch_input.combine(ATLAS_MATCH.out.adata_matched)
+        .map(it -> tuple(it[0], it[-1])) // meta, adata_sc
 
     filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata
         .join( n_top_genes )
@@ -184,8 +186,9 @@ workflow SPATIAL {
             it[1],               // adata
             true,                // filter_ribosomal_genes
             it[2],               // n_top_genes
-            0.9)                 // spot_threshold
-    }.join( ch_matched_scrna )
+            0.9,                 // spot_threshold
+            [])                  // disabled ch_scrna, see #65
+        }
 
     BAYESTME_FILTER_GENES( filter_genes_input )
     ch_versions = ch_versions.mix(BAYESTME_FILTER_GENES.out.versions)
@@ -202,7 +205,6 @@ workflow SPATIAL {
         .map { tuple(it[0], it[1]) }
         .join( ch_input.map { tuple(it[0], it[2]) } )
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
-    //  .join( ch_matched_scrna ) there is issue with BTME or the data, see #65
         .tap { not_bleed_corrected_deconvolution_input }
 
     BAYESTME_BLEEDING_CORRECTION( bleeding_correction_input )
@@ -211,7 +213,6 @@ workflow SPATIAL {
     deconvolution_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
         .join( ch_input.map { tuple(it[0], it[2]) } )
         .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
-    //  .join( ch_matched_scrna ) there is issue with BTME or the data, see #65
         .concat( not_bleed_corrected_deconvolution_input )
         .combine( run_bayestme )
         .filter { it -> it[-1] == true }   // run_bayestme
@@ -219,8 +220,8 @@ workflow SPATIAL {
                      it[1], //dataset_filtered
                      it[2], //n_cell_types
                      it[3], //smoothing_parameter
-                     [])    //expression truth placeholder
-                     }
+                     [])    //expression truth placeholder, see #65
+            }
 
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
@@ -230,20 +231,17 @@ workflow SPATIAL {
         .join( spatial_transcriptional_programs )
         .filter { it -> it[3] == true }                           // spatial_transcriptional_programs bool
         .map { tuple(it[0], it[1], it[2], []) }
-        .tap { stp_input }
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }
         .join(data_directory))
 
-
-    BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS( stp_input )
-    ch_versions = ch_versions.mix(BAYESTME_SPATIAL_TRANSCRIPTIONAL_PROGRAMS.out.versions)
     
     // RCTD reference-based deconvolution
-    ch_rctd_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
-        .concat( not_bleed_corrected_deconvolution_input )
-        .join (ch_matched_scrna)
-        .map { tuple(it[0], it[-1], it[1]) }
+    ch_rctd_input = data_directory
+        .join( ch_scrna )
+        .join( ch_matched_adata )
+        .map { tuple(it[0], it[2], it[-1]) }
+        .join( n_top_genes)
     
     RCTD( ch_rctd_input )
     ch_versions = ch_versions.mix(RCTD.out.versions)

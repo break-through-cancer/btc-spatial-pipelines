@@ -18,7 +18,6 @@ workflow INPUT_CHECK {
                 run_cogaps: row.run_cogaps.toBoolean(),
                 cogaps_niterations: row.cogaps_niterations,
                 n_top_genes: row.n_top_genes,
-                spatial_transcriptional_programs: row.spatial_transcriptional_programs.toBoolean(),
                 run_spacemarkers: row.run_spacemarkers.toBoolean(),
                 find_annotations: row.find_annotations.toBoolean()
             ] }

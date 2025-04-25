@@ -25,7 +25,12 @@
                 "properties": {
                     "reference_scrna": {
                         "type": "string",
-                        "title": "Reference scRNA-seq h5ad dataset to use for RCTD deconvolution (URL or file name mask)"
+                        "title": "Reference scRNA-seq h5ad dataset for RCTD deconvolution (URL or S3 URI)"
+                    },
+                    "type_col_scrna": {
+                        "type": "string",
+                        "title": "Column name in the reference scRNA-seq dataset that contains the cell type labels",
+                        "default": "cell_type"
                     },
                     "find_annotations": {
                         "type": "boolean",
@@ -49,10 +54,6 @@
                 "title": "Spatial options",
                 "type": "object",
                 "properties": {
-                    "spatial_transcriptional_programs": {
-                        "type": "boolean",
-                        "title": "Enable BayesTME Spatial Transcriptional Programs"
-                    },
                     "run_spacemarkers": {
                         "type": "boolean",
                         "title": "Enable SpaceMarkers"

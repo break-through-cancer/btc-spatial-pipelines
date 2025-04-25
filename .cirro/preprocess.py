@@ -13,7 +13,6 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample",
                                 "run_bayestme",
                                 "run_cogaps",
                                 "n_top_genes",
-                                "spatial_transcriptional_programs",
                                 "run_spacemarkers",
                                 "find_annotations"
                                 )
@@ -52,7 +51,7 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     # cleared params will not overload the nextflow.params
     to_remove = []
     for k in ds.params:
-        if k not in ["outdir","reference_scrna","input"]:
+        if k in SAMPLESHEET_REQUIRED_COLUMNS:
             to_remove.append(k)
 
     for k in to_remove:

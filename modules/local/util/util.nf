@@ -1,14 +1,16 @@
 process ATLAS_MATCH {
-    //return adata_sc with gene index matching adata_st by gene name or gene id
+    //return adata1 with gene index matching adata2 by gene name or gene id
     tag "$meta.id"
-    label "process_low"
+    label "process_high_memory"
     container "ghcr.io/break-through-cancer/btc-containers/squidpy:main"
 
+    //adata_sc adata1
+    //adata_st adata2
     input:
-    tuple val(meta), path(adata_sc), path(adata_st)
+    tuple val(meta), path(adata1), path(adata2)
     output:
-    tuple val(meta), path("${prefix}/adata_sc_matched.h5ad"), emit: adata_sc_matched
-    path "versions.yml",                                      emit: versions
+    path("${prefix}/adata_matched.h5ad"),                  emit: adata_matched
+    path "versions.yml",                                   emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -17,30 +19,42 @@ process ATLAS_MATCH {
 import os
 import anndata as ad
 
-adata_st = ad.read_h5ad("$adata_st")
-adata_sc = ad.read_h5ad("$adata_sc")
+print("Reading adata1 in the backed mode")
+adata1 = ad.read_h5ad("$adata1", backed='r')
+print("adata1:")
+print(adata1)
+
+print("Reading adata2")
+adata2 = ad.read_h5ad("$adata2")
+print("adata2:")
+print(adata2)
 
 os.makedirs("${prefix}", exist_ok=True)
 
-matching = adata_st.var.index.intersection(adata_sc.var.index)
+matching = adata2.var.index.intersection(adata1.var.index)
 print(f"Found {len(matching)} matching genes in var.index")
 
 if (len(matching) > 0):
-    adata_sc = adata_sc[:, matching]
-    adata_sc.write_h5ad("${prefix}/adata_sc_matched.h5ad")
-    print(f"Saved adata_sc with {len(matching)} matching genes")
+    adata2[:, matching].write_h5ad("${prefix}/adata_matched.h5ad")
+    print(f"Saved adata2 with {len(matching)} matching genes")
 else:
     print("Trying to match by feature_name")
-    matching = adata_st.var.index.intersection(adata_sc.var["feature_name"])
+    matching = adata2.var_names.intersection(adata1.var["feature_name"])
     if (len(matching) > 0):
         print(f"Found {len(matching)} matching genes in var[feature_name], resetting index.")
-        adata_sc.var.set_index("feature_name", inplace=True)
-        adata_sc.var.index = adata_sc.var.index.astype('object')
-        adata_sc = adata_sc[:, matching]
-        adata_sc.write_h5ad("${prefix}/adata_sc_matched.h5ad")
-        print(f"Saved adata_sc with {len(matching)} matching genes")
+        m = {value: key for key, value in zip(adata1.var.index, adata1.var["feature_name"])}
+        adata2.var["name_matched"] = adata2.var.index.map(m)
+        adata2.var.dropna(subset=["name_matched"], inplace=True)
+        adata2.var.reset_index(drop=False, inplace=True)
+        adata2.var.set_index("name_matched", inplace=True)
+        adata2.var.index = adata2.var.index.astype('object')
+        adata2[:, adata2.var.index].write_h5ad("${prefix}/adata_matched.h5ad")
+        print(f"Saved adata2 with {len(matching)} matching genes")
     else:
         print("No matching genes found")
+
+adata1.file.close()
+adata2.file.close()
 
 with open ("versions.yml", "w") as f:
     f.write("${task.process}:\\n")
@@ -56,28 +70,37 @@ process ATLAS_GET {
     input:
         val(url)
     output:
-        path("atlas.h5ad"),  emit: atlas
+        path("*.h5ad"),  emit: atlas
 
     script:
     prefix = task.ext.prefix
 """
 #!/usr/bin/env python3
 import os
-import anndata as ad
 import requests
-import validators
+from urllib.parse import urlparse
+import boto3
 
-if not(validators.url("$url")):
-    print("Invalid URL")
-    exit(1)
-if not("$url".endswith(".h5ad")):
+myurl = "${url}"
+
+if not(myurl.endswith(".h5ad")):
     print("URL does not end with .h5ad")
     exit(1)
 
-r = requests.get("$url")
-r.raise_for_status()
-with open("atlas.h5ad", "wb") as f:
-    f.write(r.content)
-print("Downloaded atlas from $url")
+parsed_url = urlparse(myurl)
+file_key = parsed_url.path.lstrip('/')
+
+if (myurl.startswith("s3://")):
+    print("Downloading from S3")
+    bucket_name = parsed_url.netloc
+    s3 = boto3.client('s3')
+    s3.download_file(bucket_name, file_key, os.path.basename(file_key))
+else:
+    print("Downloading from http")
+    r = requests.get(myurl)
+    r.raise_for_status()
+    with open(os.path.basename(file_key), "wb") as f:
+        f.write(r.content)
+print(f"Downloaded atlas from {myurl}")
 """
 }
