@@ -104,3 +104,40 @@ else:
 print(f"Downloaded atlas from {myurl}")
 """
 }
+
+process VHD_TO_H5AD {
+    //convert vhd file to h5ad
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+
+    input:
+        tuple val(meta), path(data)
+    output:
+        tuple val(meta), path("**.h5ad"),  emit: adata
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+"""
+#!/usr/bin/env python3
+
+import os
+from spatialdata_io import visium_hd
+from spatialdata_io.experimental import to_legacy_anndata
+import dask
+
+sample = "${prefix}"
+data = "${data}"
+table = "${params.hd}"
+os.makedirs(sample, exist_ok=True)
+
+#read visium_hd dataset
+ds = visium_hd(data, dataset_id=sample, var_names_make_unique=True)
+
+#convert to anndata
+adata = to_legacy_anndata(ds, coordinate_system=sample,
+                          table_name=table, include_images=True)
+#save
+outname = os.path.join(sample, f"{table}.h5ad")
+adata.write_h5ad(filename=outname)
+"""
+}

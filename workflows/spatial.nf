@@ -54,8 +54,9 @@ include { COGAPS;
 include { SQUIDPY } from '../modules/local/squidpy/main'
 
 
-include { ATLAS_GET } from '../modules/local/util/util.nf'
+include { ATLAS_GET } from '../modules/local/util/util'
 include { ATLAS_MATCH } from '../modules/local/util/util'
+include { VHD_TO_H5AD } from '../modules/local/util/util'
 
 include { RCTD } from '../modules/local/rctd/rctd'
 
@@ -169,17 +170,23 @@ workflow SPATIAL {
             }
     }
 
-    ch_btme = ch_input.map { tuple(it[0], it[1]) }
 
-    BAYESTME_LOAD_SPACERANGER( ch_btme )
-    ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
+    if(params.hd) {
+        VHD_TO_H5AD( ch_input.map { tuple(it[0], it[1]) } )
+        ch_adata = VHD_TO_H5AD.out.adata
+    } else {
+        ch_btme = ch_input.map { tuple(it[0], it[1]) }
+        BAYESTME_LOAD_SPACERANGER( ch_btme )
+        ch_adata = BAYESTME_LOAD_SPACERANGER.out.adata
+        ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
+    }
 
     //match scRNA atlas to spatial data
-    ATLAS_MATCH(ch_scrna.join( BAYESTME_LOAD_SPACERANGER.out.adata ))
+    ATLAS_MATCH(ch_scrna.join( ch_adata ))
     ch_matched_adata = ch_input.combine(ATLAS_MATCH.out.adata_matched)
         .map(it -> tuple(it[0], it[-1])) // meta, adata_sc
 
-    filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata
+    filter_genes_input = ch_adata
         .join( n_top_genes )
         .map { tuple(
             it[0],               // sample_name
