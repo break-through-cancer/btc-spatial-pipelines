@@ -307,18 +307,21 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
 
-
     //collate versions
     version_yaml = Channel.empty()
     version_yaml = softwareVersionsToYAML(ch_versions)
                    .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
     
-
     // MultiQC
     // NOTE - will fail to find spaceranger reports unless the full path is provided
     MULTIQC (
-            ch_multiqc_files.collect().ifEmpty([]),[],[],[],[],[]
-            )
+        ch_multiqc_files.collect().ifEmpty([]),
+        ch_multiqc_config,
+        ch_multiqc_custom_config,
+        ch_multiqc_logo,
+        ch_multiqc_custom_methods_description,
+        []
+    )
     multiqc_report = MULTIQC.out.report.toList()
 
 
