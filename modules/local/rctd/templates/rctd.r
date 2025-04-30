@@ -75,15 +75,17 @@ counts_sc <- as(counts_sc, "CsparseMatrix")
 ref <- spacexr::Reference(cell_types=celltypes_sc, counts=counts_sc)
 
 message('run rctd')
-tryCatch({
-  rctd <- spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores)
-  rctd_res <- spacexr::run.RCTD(rctd, doublet_mode = 'full')
+rctd_res <- tryCatch({
+  spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores),
+                    doublet_mode = 'full')
 }, error = function(e) {
-  message('RCTD threw error:',e[["message"]])
+  message('RCTD threw error: "',e[["message"]],'"')
   if(grep(pattern="UMI_min_sigma", x=e[["message"]])){
-    message("Low UMI counts, setting UMI_min_sigma to 1")
-    rctd <- spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores, UMI_min_sigma = 1)
-    rctd_res <- spacexr::run.RCTD(rctd, doublet_mode = 'full')
+    message('RCTD error caught, retrying with UMI_min_sigma=1')
+    spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores, UMI_min_sigma = 1),
+                      doublet_mode = 'full')
+  } else {
+    stop("Could not catch the error")
   }
 })
 
