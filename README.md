@@ -38,13 +38,26 @@ Each row represents a spatial transcriptomics sample and configuration parameter
 >[!IMPORTANT]
 `export NXF_SINGULARITY_HOME_MOUNT=true` in order to allow matplotlib to write its logs (and avoid related error) if using singularity.
 
-Now, you can run the pipeline using:
+Simple run without reference deconvolution:
 
 ```bash
 nextflow run break-through-cancer/btc-spatial-pipelines \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
    --outdir <OUTDIR>
+```
+
+
+Run with Visium HD support and reference atlas annotation
+```
+nextflow run break-through-cancer/btc-spatial-pipelines 
+   -profile docker
+   --input samplesheet.csv 
+   --outdir out
+   --hd 'square_016um' 
+   --reference_scrna https://datasets.cellxgene.cziscience.com/d1d90d18-2109-412f-8dc0-e014e8abb338.h5ad
+   --type_col_scrna Clusters
+   -resume
 ```
 
 >[!WARNING]
