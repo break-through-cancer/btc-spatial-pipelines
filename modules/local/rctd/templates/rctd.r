@@ -79,8 +79,8 @@ tryCatch({
   rctd <- spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores)
   rctd <- spacexr::run.RCTD(rctd, doublet_mode = 'full')
 }, error = function(e) {
-  message('RCTD threw error:',e$message)
-  if(grep(pattern="UMI_min_sigma", x=e$message)){
+  message('RCTD threw error:',e[["message"]])
+  if(grep(pattern="UMI_min_sigma", x=e[["message"]])){
     message("Low UMI counts, setting UMI_min_sigma to 1")
     rctd <- spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores, UMI_min_sigma = 1)
     rctd <- spacexr::run.RCTD(rctd, doublet_mode = 'full')
