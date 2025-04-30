@@ -74,9 +74,17 @@ counts_sc <- as(counts_sc, "CsparseMatrix")
 ref <- spacexr::Reference(cell_types=celltypes_sc, counts=counts_sc)
 
 message('run rctd')
-#this converts the reference object to a dense matrix
-rctd <- spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores)
-rctd_res <- spacexr::run.RCTD(rctd, doublet_mode = 'full')
+tryCatch({
+  rctd <- spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores)
+  rctd <- spacexr::run.RCTD(rctd, doublet_mode = 'full')
+}, error = function(e) {
+  message('RCTD threw error:',e$message)
+  if(grep(pattern="UMI_min_sigma", x=e$message)){
+    message("Low UMI counts, setting UMI_min_sigma to 1")
+    rctd <- spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores, UMI_min_sigma = 1)
+    rctd <- spacexr::run.RCTD(rctd, doublet_mode = 'full')
+  }
+})
 
 #cell type deconvolution results
 message('getting cell type deconvolution results')
