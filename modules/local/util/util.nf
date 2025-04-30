@@ -41,14 +41,14 @@ if ('gene_ids' in adata_st.var.columns):
     matching_gene_ids = adata_sc.var.index.intersection(adata_st.var["gene_ids"])
     print(f"Found {len(matching_gene_ids)} matching genes in var[gene_ids]")
 else:
-    matching_gene_ids = 0
+    matching_gene_ids = []
 
 #look for adata_st.index in adata_sc.var["feature_names"]
 if ('feature_name' in adata_sc.var.columns):
     matching_feature_names = adata_st.var.index.intersection(adata_sc.var["feature_name"])
     print(f"Found {len(matching_feature_names)} matching genes in var[feature_name]")
 else:
-    matching_feature_names = 0
+    matching_feature_names = []
 
 #find largest matching case
 matching_lengths = [len(x) for x in [matching_index, matching_gene_ids, matching_feature_names]]
@@ -62,7 +62,7 @@ if (which_matching == 0):
     print("Matching by index")
     matching = matching_index
     adata_st[:, matching].write_h5ad("${prefix}/adata_matched.h5ad")
-    print(f"Saved adata_st with {len(mathing)} matching genes")
+    print(f"Saved adata_st with {len(matching)} matching genes")
 elif (which_matching == 1):
     print("Matching by gene_ids")
     matching = matching_gene_ids
@@ -73,7 +73,7 @@ elif (which_matching == 1):
     print(f"Saved adata_st with {len(matching)} matching genes")
 elif (which_matching == 2):
     print("Matching by feature_name")
-    mathing = matching_feature_names
+    matching = matching_feature_names
     m = {value: key for key, value in zip(adata_sc.var.index, adata_sc.var["feature_name"])}
     adata_st.var["name_matched"] = adata_st.var.index.map(m)
     adata_st.var.dropna(subset=["name_matched"], inplace=True)
@@ -146,7 +146,7 @@ process VHD_TO_H5AD {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("**.h5ad"),  emit: adata
+        tuple val(meta), path("${prefix}/${params.hd}.h5ad"),  emit: adata
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
