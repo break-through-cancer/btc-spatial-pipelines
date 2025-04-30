@@ -27,8 +27,9 @@ counts_st <- Matrix::t(as(adata_st[['X']], "CsparseMatrix"))
 rownames(counts_st) <- as.character(adata_st[['var_names']][['values']])
 colnames(counts_st) <- as.character(adata_st[['obs_names']][['values']])
 
-#3. select top variable genes
-top_genes <- apply(counts_st, 1, var) |> sort(decreasing = TRUE) |> head(n_top_genes)
+#3. select top variable genes with less RAM footprint (as opposed to apply())
+gene_vars <- sapply(rownames(counts_st), function(x){var(counts_st[x,])})
+top_genes <- sort(gene_vars, decreasing = TRUE)[1:n_top_genes]
 counts_st <- counts_st[rownames(counts_st) %in% names(top_genes), ]
 
 query <- spacexr::SpatialRNA(coords=spatial, counts=counts_st)
