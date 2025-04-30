@@ -29,7 +29,7 @@ colnames(counts_st) <- as.character(adata_st[['obs_names']][['values']])
 
 #3. select top variable genes with less RAM footprint (as opposed to apply())
 gene_vars <- sapply(rownames(counts_st), function(x){var(counts_st[x,])})
-top_genes <- sort(gene_vars, decreasing = TRUE)[1:n_top_genes]
+top_genes <- sort(gene_vars, decreasing = TRUE)[1:min(n_top_genes, length(gene_vars))]
 counts_st <- counts_st[rownames(counts_st) %in% names(top_genes), ]
 
 query <- spacexr::SpatialRNA(coords=spatial, counts=counts_st)
@@ -43,13 +43,13 @@ if (is.null(adata_sc[["raw"]])) {
   message('no raw data, using X from adata_sc')
   gene_names <-rownames(adata_sc[["var"]])
   select_genes <- which(gene_names %in% names(top_genes))
-  counts_sc <- Matrix::t(adata_sc[["X"]][,select_genes])
+  counts_sc <- Matrix::t(adata_sc[["X"]][,select_genes-1])          #-1 for 0-based ind
   rownames(counts_sc) <- gene_names[select_genes]
 } else {
   message('using raw.X from adata_sc')
   gene_names <- rownames(adata_sc[["raw"]][["var"]])
   select_genes <- which(gene_names %in% names(top_genes))
-  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][,select_genes])
+  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][,select_genes-1]) #-1 for 0-based ind
   rownames(counts_sc) <- gene_names[select_genes]
 }
 
