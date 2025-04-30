@@ -1,8 +1,6 @@
 ## Introduction
 
-**btc/spatial** is a bioinformatics pipeline for spatial data. Currently we only have support for spatial transcriptomics (10X Visium), but in the future support for other modalities
-(Xenium, IMC, etc.) will be integrated into this pipeline as well.
-
+**btc/spatial** is a bioinformatics pipeline for 10X Visium and Visum HD spatial data. Being a simple preprocessing-deconvolution-interaction pipeline it features multiple tools, including reference-based deconvolution. In case of reference-based deconvolution, atlas may be specified as an URL on an S3 location (e.g. CellxGene), or matched-scRNAmade made available in the sample folder.
 ![image info](assets/btc-visium.svg)
 
 ## Usage
@@ -25,8 +23,6 @@ Each row represents a spatial transcriptomics sample and configuration parameter
 `n_cell_types`: This parameter controls how many cell types to deconvolve into. If you pass `expression_profile` this value will be ignored, we will determine number of cell types from the matched scRNA data.
 
 `bleeding_correction`: set to `true` if you want to enable bleeding correction for that sample.
-
-`spatial_transcriptional_programs`: set to `true` if you want to enable spatial transcriptional programs for that sample.
 
 `expression_profile`: Optional reference expression profiles (leave blank if not using) if you have known cell types in your Visium data (perhaps from matched scRNA). See more info about how to generate this file here: https://bayestme.readthedocs.io/en/latest/fine_mapping_workflow.html
 

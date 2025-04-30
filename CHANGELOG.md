@@ -8,12 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 - optionally look for CODA annotation in the input and run spaceMarkers on that
 - spatial overlap and interaction plots for spaceMarkers
+- RCTD deconvolution with single cell atlas reference
+- Visium HD support
 
 ### `Fixed`
 
 ### `Dependencies`
 
 ### `Deprecated`
+- spatial transcriptional programs from the BayesTME package
 
 
 ## v1.1.0 - 2024-12-16
