@@ -1,6 +1,6 @@
 process RCTD {
     tag "$meta.id"
-    label 'process_medium'
+    label 'process_high'
     container 'ghcr.io/break-through-cancer/btc-containers/rctd:main'
 
     input:
