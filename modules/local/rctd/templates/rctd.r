@@ -28,10 +28,15 @@ rownames(counts_st) <- as.character(adata_st[['var_names']][['values']])
 colnames(counts_st) <- as.character(adata_st[['obs_names']][['values']])
 
 #3. select top variable genes with less RAM footprint (as opposed to apply())
-gene_vars <- sapply(rownames(counts_st), function(x){var(counts_st[x,])})
+if(require('pbapply')){#pbapply is nice when debugging
+  gene_vars <- pbapply::pbsapply(rownames(counts_st), function(x){var(counts_st[x,])})
+} else {
+  gene_vars <- sapply(rownames(counts_st), function(x){var(counts_st[x,])})
+}
 top_genes <- sort(gene_vars, decreasing = TRUE)[1:min(n_top_genes, length(gene_vars))]
 counts_st <- counts_st[rownames(counts_st) %in% names(top_genes), ]
 
+#4. prep query object
 query <- spacexr::SpatialRNA(coords=spatial, counts=counts_st)
 
 
@@ -71,8 +76,10 @@ celltypes_sc <- as.factor(celltypes_sc)
 counts_sc <- counts_sc[rownames(counts_sc) %in% rownames(counts_st), ]
 counts_sc <- as(counts_sc, "CsparseMatrix")
 
-#4. create reference object
+#4. create reference object and cleanup
 ref <- spacexr::Reference(cell_types=celltypes_sc, counts=counts_sc)
+counts_sc <- NULL
+gc()
 
 message('run rctd')
 rctd_res <- tryCatch({
