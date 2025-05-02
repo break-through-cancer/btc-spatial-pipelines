@@ -1,7 +1,7 @@
 process SQUIDPY {
     tag "$meta.id"
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/squidpy:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
 
     input:
     tuple val(meta), path(data)

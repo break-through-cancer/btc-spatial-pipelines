@@ -2,7 +2,7 @@ process ATLAS_MATCH {
     //return adata_sc with gene index matching adata_st by gene name or gene id
     tag "$meta.id"
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/squidpy:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
 
     //adata_sc adata_sc
     //adata_st adata_st
@@ -98,7 +98,7 @@ with open ("versions.yml", "w") as f:
 process ATLAS_GET {
     //download an atlas anndata file from a url
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/squidpy:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
 
     input:
         val(url)
