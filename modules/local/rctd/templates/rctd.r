@@ -104,18 +104,16 @@ dir.create(outdir, showWarnings = FALSE)
 write.csv(as.matrix(cell_types), file=file.path(outdir, 'rctd_cell_types.csv'))
 
 #create lean anndata object for plotting
-message('adding cell types to adata_st')
-which_cell_max <- apply(cell_types, 1, which.max)
-cell_type_vect <- rep(NA, nrow(adata_st[['obs']]))
-names(cell_type_vect) <- adata_st[['obs_names']][['values']]
-cell_type <- merge(cell_type_vect, which_cell_max, by = 'row.names', all.x = TRUE)
-cell_type[['x']] <- as.factor(cell_type[['y']])
-levels(cell_type[['x']]) <- colnames(cell_types)
-cell_type[['y']] <- NULL
-adata_st[['obs']][['cell_types']] <- cell_type[['x']]
+message('removing X, adding cell types to adata_st')
 adata_st[['X']] <- NULL
-adata_st[['write_h5ad']](file.path(outdir, 'rctd_adata.h5ad'), compression = 0)
-
+adata_st[['raw']][['X']] <- NULL
+which_cell_max <- apply(cell_types, 1, function(x) colnames(cell_types)[which.max(x)])
+cell_type_vect <- rep(NA, length(adata_st[['obs_names']]))
+names(cell_type_vect) <- adata_st[['obs_names']][['values']]
+cell_type_vect[names(which_cell_max)] <- which_cell_max
+cell_type_vect <- as.factor(cell_type_vect)
+adata_st[['obs']][['cell_type']] <- cell_type_vect
+adata_st[['write_h5ad']](file.path(outdir, 'rctd.h5ad'), compression = 0)
 
 #versions
 message("reading session info")
