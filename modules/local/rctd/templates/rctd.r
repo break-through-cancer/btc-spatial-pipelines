@@ -103,10 +103,8 @@ message(sprintf('saving results to %s/', outdir))
 dir.create(outdir, showWarnings = FALSE)
 write.csv(as.matrix(cell_types), file=file.path(outdir, 'rctd_cell_types.csv'))
 
-#create lean anndata object for plotting
-message('removing X, adding cell types to adata_st')
-adata_st[['X']] <- NULL
-adata_st[['raw']][['X']] <- NULL
+#create lean anndata object for plotting (switch back to full temporarily)
+message('adding cell types to adata_st')
 which_cell_max <- apply(cell_types, 1, function(x) colnames(cell_types)[which.max(x)])
 cell_type_vect <- rep(NA, length(adata_st[['obs_names']]))
 names(cell_type_vect) <- adata_st[['obs_names']][['values']]
