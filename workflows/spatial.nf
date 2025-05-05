@@ -53,12 +53,12 @@ include { COGAPS;
 
 include { SQUIDPY } from '../modules/local/squidpy/main'
 
+include { ATLAS_GET;
+          ATLAS_MATCH;
+          VHD_TO_H5AD } from '../modules/local/util/util'
 
-include { ATLAS_GET } from '../modules/local/util/util'
-include { ATLAS_MATCH } from '../modules/local/util/util'
-include { VHD_TO_H5AD } from '../modules/local/util/util'
-
-include { RCTD } from '../modules/local/rctd/rctd'
+include { RCTD;
+          RCTD_PLOTS; } from '../modules/local/rctd/rctd'
 
 
 /*
@@ -229,7 +229,6 @@ workflow SPATIAL {
                      it[3], //smoothing_parameter
                      [])    //expression truth placeholder, see #65
             }
-
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
 
@@ -242,8 +241,10 @@ workflow SPATIAL {
     ch_sm_inputs = ch_sm_inputs.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }
         .join(data_directory))
 
-    
-    // RCTD reference-based deconvolution
+
+    // RCTD reference-based deconvolution and plots
+    // plots are temporary as there is the idea to plot
+    // all deconvolution stats with the same process/workflow
     ch_rctd_input = data_directory
         .join( ch_scrna )
         .join( ch_matched_adata )
@@ -254,6 +255,8 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(RCTD.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
         .join(data_directory))
+    
+    RCTD_PLOTS( RCTD.out.rctd_adata )
 
     // squidpy - spatially variable genes
     ch_svgs = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
