@@ -9,7 +9,7 @@ process ATLAS_MATCH {
     input:
     tuple val(meta), path(adata_sc), path(adata_st)
     output:
-    path("${prefix}/adata_matched.h5ad"),                  emit: adata_matched
+    tuple val(meta), path("${prefix}/adata_matched.h5ad"), emit: adata_matched
     path "versions.yml",                                   emit: versions
 
     script:

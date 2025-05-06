@@ -183,7 +183,7 @@ workflow SPATIAL {
 
     //match scRNA atlas to spatial data
     ATLAS_MATCH(ch_scrna.join( ch_adata ))
-    ch_matched_adata = ch_input.combine(ATLAS_MATCH.out.adata_matched)
+    ch_matched_adata = ch_input.join(ATLAS_MATCH.out.adata_matched)
         .map(it -> tuple(it[0], it[-1])) // meta, adata_sc
 
     filter_genes_input = ch_adata
