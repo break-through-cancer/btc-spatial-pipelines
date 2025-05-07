@@ -1,7 +1,7 @@
 process SQUIDPY {
     tag "$meta.id"
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/squidpy:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
 
     input:
     tuple val(meta), path(data)
@@ -38,7 +38,7 @@ sq.gr.spatial_neighbors(adata)
 sq.gr.spatial_autocorr(adata, mode="moran")
 
 svgs = adata.uns["moranI"]
-svgs = svgs[svgs["pval_norm_fdr_bh"] < 0.1]
+svgs = svgs[svgs["pval_norm"] < 0.05]
 svgs = svgs[svgs["I"].notnull()]
 svgs.to_csv("${prefix}/spatially_variable_genes.csv")
 

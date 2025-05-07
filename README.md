@@ -1,8 +1,6 @@
 ## Introduction
 
-**btc/spatial** is a bioinformatics pipeline for spatial data. Currently we only have support for spatial transcriptomics (10X Visium), but in the future support for other modalities
-(Xenium, IMC, etc.) will be integrated into this pipeline as well.
-
+**btc/spatial** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data. Being a simple preprocessing-deconvolution-interaction pipeline it features multiple tools, including reference-based deconvolution. In case of reference-based deconvolution, atlas may be specified as an URL on an S3 location (e.g. CellxGene), or matched-scRNAmade made available in the sample folder.
 ![image info](assets/btc-visium.svg)
 
 ## Usage
@@ -26,8 +24,6 @@ Each row represents a spatial transcriptomics sample and configuration parameter
 
 `bleeding_correction`: set to `true` if you want to enable bleeding correction for that sample.
 
-`spatial_transcriptional_programs`: set to `true` if you want to enable spatial transcriptional programs for that sample.
-
 `expression_profile`: Optional reference expression profiles (leave blank if not using) if you have known cell types in your Visium data (perhaps from matched scRNA). See more info about how to generate this file here: https://bayestme.readthedocs.io/en/latest/fine_mapping_workflow.html
 
 `run_bayestme`: boolean, whether to run BayesTME deconvolution.
@@ -42,13 +38,26 @@ Each row represents a spatial transcriptomics sample and configuration parameter
 >[!IMPORTANT]
 `export NXF_SINGULARITY_HOME_MOUNT=true` in order to allow matplotlib to write its logs (and avoid related error) if using singularity.
 
-Now, you can run the pipeline using:
+Simple run without reference deconvolution:
 
 ```bash
 nextflow run break-through-cancer/btc-spatial-pipelines \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
    --outdir <OUTDIR>
+```
+
+
+Run with Visium HD support and reference atlas annotation
+```
+nextflow run break-through-cancer/btc-spatial-pipelines 
+   -profile docker
+   --input samplesheet.csv 
+   --outdir out
+   --hd 'square_016um' 
+   --reference_scrna https://datasets.cellxgene.cziscience.com/d1d90d18-2109-412f-8dc0-e014e8abb338.h5ad
+   --type_col_scrna Clusters
+   -resume
 ```
 
 >[!WARNING]
