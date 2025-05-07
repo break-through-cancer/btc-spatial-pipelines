@@ -46,11 +46,13 @@ if 'spatial' in adata.uns:
                         title="{} Spatial Scatter Plot".format(sample),
                         dpi=300
                         )
-else: #bayestne adata
+else: #bayestme adata
     sq.pl.spatial_scatter(adata, 
                         color=["cell_type"],
                         shape=None,
                         crop_coord=(min_x, min_y, max_x, max_y),
+                        save="{}_spatial_scatter.png".format(sample),
+                        title="{} Spatial Scatter Plot".format(sample),
                         dpi=300
                         )
 
