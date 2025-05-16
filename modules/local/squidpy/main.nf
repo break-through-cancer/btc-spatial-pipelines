@@ -23,10 +23,10 @@ process SQUIDPY_SPATIAL_PLOTS {
     input:
     tuple val(meta), path(adata)
     output:
-    tuple val(meta), path("figures/spatial_scatter_${prefix}.png"),    emit: spatial_scatter_plot
-    tuple val(meta), path("figures/interaction_matrix_${prefix}.png"), emit: interaction_matrix_plot
-    tuple val(meta), path("figures/co_occurrence_${prefix}.png"),      emit: co_occurrence_plot
-    tuple val(meta), path("figures/nhood_enrichment_${prefix}.png"),   emit: nhood_enrichment_plot
+    tuple val(meta), path("${prefix}/figures/spatial_scatter.png"),    emit: spatial_scatter_plot
+    tuple val(meta), path("${prefix}/figures/interaction_matrix.png"), emit: interaction_matrix_plot
+    tuple val(meta), path("${prefix}/figures/co_occurrence.png"),      emit: co_occurrence_plot
+    tuple val(meta), path("${prefix}/figures/nhood_enrichment.png"),   emit: nhood_enrichment_plot
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -42,8 +42,8 @@ process SQUIDPY_LIGREC_ANALYSIS { //WIP
     tuple val(meta), path(adata)
     output:
     tuple val(meta), path("figures/ligrec_interactions_${prefix}.png"),  emit: ligrec_plot
-    tuple val(meta), path("${prefix}/ligrec_interactions.csv"),         emit: ligrec_csv
-    path "versions.yml",                                                emit: versions
+    tuple val(meta), path("${prefix}/ligrec_interactions.csv"),          emit: ligrec_csv
+    path "versions.yml",                                                 emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"

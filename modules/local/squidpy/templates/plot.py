@@ -11,11 +11,14 @@ log = logging.getLogger()
 adata_path = "${adata}"
 sample = "${prefix}"
 
-#squidpy insists on dir naming, not creating outdir as usually
+os.makedirs(sample, exist_ok=True)
+
 log.info("loading {}".format(adata_path))
 adata = ad.read_h5ad(adata_path)
 log.info("adata is {}".format(adata))
 
+#squidpy insists on dir naming, not creating outdir as usually
+os.chdir(sample)
 
 # Extract spatial coordinates from the AnnData object
 spatial_coords = adata.obsm['spatial']
@@ -42,7 +45,7 @@ if 'spatial' in adata.uns:
                         color=["cell_type"],
                         crop_coord=(min_x, min_y, max_x, max_y),
                         shape=None,
-                        save="{}_spatial_scatter.png".format(sample),
+                        save="spatial_scatter.png",
                         title="{} Spatial Scatter Plot".format(sample),
                         dpi=300
                         )
@@ -51,7 +54,7 @@ else: #bayestme adata
                         color=["cell_type"],
                         shape=None,
                         crop_coord=(min_x, min_y, max_x, max_y),
-                        save="spatial_scatter_{}.png".format(sample),
+                        save="spatial_scatter.png",
                         title="{} Spatial Scatter Plot".format(sample),
                         dpi=300
                         )
@@ -62,7 +65,7 @@ sq.gr.spatial_neighbors(adata)
 sq.gr.interaction_matrix(adata, cluster_key="cell_type")
 sq.pl.interaction_matrix(adata,
                         cluster_key="cell_type",
-                        save="interaction_matrix_{}.png".format(sample),
+                        save="interaction_matrix.png",
                         title="{} Interaction Matrix".format(sample))
 
 #Plot the co-occurence, needs not NaN clusters to run
@@ -73,7 +76,7 @@ sq.gr.co_occurrence(nona_adata, cluster_key="cell_type")
 sq.pl.co_occurrence(nona_adata,
                     cluster_key="cell_type",
                     clusters=clusters,
-                    save="co_occurrence_{}.png".format(sample),
+                    save="co_occurrence.png",
                     dpi=300
                     )
 
@@ -81,7 +84,7 @@ sq.pl.co_occurrence(nona_adata,
 sq.gr.nhood_enrichment(nona_adata, cluster_key="cell_type")
 sq.pl.nhood_enrichment(nona_adata,
                         cluster_key="cell_type",
-                        save="nhood_enrichment_{}.png".format(sample),
+                        save="nhood_enrichment.png",
                         title="{} Nhood Enrichment".format(sample),
                         dpi=300
                         )
