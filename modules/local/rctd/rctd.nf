@@ -14,19 +14,3 @@ process RCTD {
     prefix = task.ext.prefix ?: "${meta.id}"
     template 'rctd.r'
 }
-
-process RCTD_PLOTS {
-    tag "$meta.id"
-    label 'process_single'
-    container 'ghcr.io/break-through-cancer/btc-containers/scverse:main'
-
-    input:
-    tuple val(meta), path(rctd_adata)
-    output:
-    tuple val(meta), path("figures/${prefix}_spatial_scatter.png"),    emit: spatial_scatter_plot
-    tuple val(meta), path("figures/${prefix}_interaction_matrix.png"), emit: interaction_matrix_plot
-
-    script:
-    prefix = task.ext.prefix ?: "${meta.id}"
-    template 'plot.py'
-}

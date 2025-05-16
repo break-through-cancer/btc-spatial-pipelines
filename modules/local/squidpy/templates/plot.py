@@ -8,12 +8,12 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
 
 
-adata_path = "${rctd_adata}"
+adata_path = "${adata}"
 sample = "${prefix}"
 
 #squidpy insists on dir naming, not creating outdir as usually
 log.info("loading {}".format(adata_path))
-adata = ad.read_h5ad(adata_path, backed="r")
+adata = ad.read_h5ad(adata_path)
 log.info("adata is {}".format(adata))
 
 
@@ -51,7 +51,7 @@ else: #bayestme adata
                         color=["cell_type"],
                         shape=None,
                         crop_coord=(min_x, min_y, max_x, max_y),
-                        save="{}_spatial_scatter.png".format(sample),
+                        save="spatial_scatter_{}.png".format(sample),
                         title="{} Spatial Scatter Plot".format(sample),
                         dpi=300
                         )
@@ -62,5 +62,26 @@ sq.gr.spatial_neighbors(adata)
 sq.gr.interaction_matrix(adata, cluster_key="cell_type")
 sq.pl.interaction_matrix(adata,
                         cluster_key="cell_type",
-                        save="{}_interaction_matrix.png".format(sample),
+                        save="interaction_matrix_{}.png".format(sample),
                         title="{} Interaction Matrix".format(sample))
+
+#Plot the co-occurence, needs not NaN clusters to run
+nona_adata = adata[~adata.obs["cell_type"].isna()]
+clusters = nona_adata.obs["cell_type"].unique()
+sq.gr.spatial_neighbors(nona_adata)
+sq.gr.co_occurrence(nona_adata, cluster_key="cell_type")
+sq.pl.co_occurrence(nona_adata,
+                    cluster_key="cell_type",
+                    clusters=clusters,
+                    save="co_occurrence_{}.png".format(sample),
+                    dpi=300
+                    )
+
+#Plor nhood enrichment
+sq.gr.nhood_enrichment(nona_adata, cluster_key="cell_type")
+sq.pl.nhood_enrichment(nona_adata,
+                        cluster_key="cell_type",
+                        save="nhood_enrichment_{}.png".format(sample),
+                        title="{} Nhood Enrichment".format(sample),
+                        dpi=300
+                        )

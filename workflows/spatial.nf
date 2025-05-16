@@ -51,14 +51,14 @@ include { SPACEMARKERS;
 include { COGAPS;
           COGAPS_ADATA2DGC; } from '../modules/local/cogaps/nextflow/main'
 
-include { SQUIDPY } from '../modules/local/squidpy/main'
+include { SQUIDPY_MORANS_I;
+          SQUIDPY_SPATIAL_PLOTS; } from '../modules/local/squidpy/main'
 
 include { ATLAS_GET;
           ATLAS_MATCH;
           VHD_TO_H5AD } from '../modules/local/util/util'
 
-include { RCTD;
-          RCTD_PLOTS; } from '../modules/local/rctd/rctd'
+include { RCTD } from '../modules/local/rctd/rctd'
 
 
 /*
@@ -255,15 +255,6 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(RCTD.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
         .join(data_directory))
-    
-    RCTD_PLOTS( RCTD.out.rctd_adata )
-
-    // squidpy - spatially variable genes
-    ch_svgs = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
-        .concat( not_bleed_corrected_deconvolution_input )
-        .map { tuple(it[0], it[1]) }
-    SQUIDPY( ch_svgs )
-    ch_versions = ch_versions.mix(SQUIDPY.out.versions)
 
     //cogaps - make use of the BTME preprocessing
     ch_convert_adata = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
@@ -309,6 +300,14 @@ workflow SPATIAL {
     SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1], it[2]) } )
     ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
+
+    // squidpy analysis 
+    ch_squidpy = RCTD.out.rctd_adata
+        .map { tuple(it[0], it[1]) }
+    SQUIDPY_MORANS_I( ch_squidpy )
+    SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
+
+    ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
 
     //collate versions
     version_yaml = Channel.empty()
