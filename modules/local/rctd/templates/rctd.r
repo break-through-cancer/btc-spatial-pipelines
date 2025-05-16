@@ -27,10 +27,18 @@ counts_st <- Matrix::t(as(adata_st[['X']], "CsparseMatrix"))
 rownames(counts_st) <- as.character(adata_st[['var_names']][['values']])
 colnames(counts_st) <- as.character(adata_st[['obs_names']][['values']])
 
-#3. select top variable genes
-top_genes <- apply(counts_st, 1, var) |> sort(decreasing = TRUE) |> head(n_top_genes)
-counts_st <- counts_st[rownames(counts_st) %in% names(top_genes), ]
+#3. select top variable genes with less RAM footprint (as opposed to apply())
+if (n_top_genes < nrow(counts_st)){
+  gene_vars <- pbapply::pbsapply(rownames(counts_st), function(x){var(counts_st[x,])})
+  top_genes <- sort(gene_vars, decreasing = TRUE)[1:min(n_top_genes, length(gene_vars))]
+  counts_st <- counts_st[rownames(counts_st) %in% names(top_genes), ]
+} else{
+  top_genes <- rownames(counts_st)
+  names(top_genes) <- top_genes
+}
 
+
+#4. prep query object
 query <- spacexr::SpatialRNA(coords=spatial, counts=counts_st)
 
 
@@ -42,13 +50,13 @@ if (is.null(adata_sc[["raw"]])) {
   message('no raw data, using X from adata_sc')
   gene_names <-rownames(adata_sc[["var"]])
   select_genes <- which(gene_names %in% names(top_genes))
-  counts_sc <- Matrix::t(adata_sc[["X"]][,select_genes])
+  counts_sc <- Matrix::t(adata_sc[["X"]][,select_genes-1])          #-1 for 0-based ind
   rownames(counts_sc) <- gene_names[select_genes]
 } else {
   message('using raw.X from adata_sc')
   gene_names <- rownames(adata_sc[["raw"]][["var"]])
   select_genes <- which(gene_names %in% names(top_genes))
-  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][,select_genes])
+  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][,select_genes-1]) #-1 for 0-based ind
   rownames(counts_sc) <- gene_names[select_genes]
 }
 
@@ -70,13 +78,25 @@ celltypes_sc <- as.factor(celltypes_sc)
 counts_sc <- counts_sc[rownames(counts_sc) %in% rownames(counts_st), ]
 counts_sc <- as(counts_sc, "CsparseMatrix")
 
-#4. create reference object
+#4. create reference object and cleanup
 ref <- spacexr::Reference(cell_types=celltypes_sc, counts=counts_sc)
+counts_sc <- NULL
+gc()
 
 message('run rctd')
-#this converts the reference object to a dense matrix
-rctd <- spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores)
-rctd_res <- spacexr::run.RCTD(rctd, doublet_mode = 'full')
+rctd_res <- tryCatch({
+  spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores),
+                    doublet_mode = 'full')
+}, error = function(e) {
+  message('RCTD threw error: "',e[["message"]],'"')
+  if(grep(pattern="UMI_min_sigma", x=e[["message"]])){
+    message('RCTD error caught, retrying with UMI_min_sigma=1')
+    spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores, UMI_min_sigma = 1),
+                      doublet_mode = 'full')
+  } else {
+    stop("Could not catch the error")
+  }
+})
 
 #cell type deconvolution results
 message('getting cell type deconvolution results')
@@ -84,6 +104,16 @@ cell_types <- spacexr::normalize_weights(rctd_res@results[['weights']])
 message(sprintf('saving results to %s/', outdir))
 dir.create(outdir, showWarnings = FALSE)
 write.csv(as.matrix(cell_types), file=file.path(outdir, 'rctd_cell_types.csv'))
+
+#create lean anndata object for plotting (switch back to full temporarily)
+message('adding cell types to adata_st')
+which_cell_max <- apply(cell_types, 1, function(x) colnames(cell_types)[which.max(x)])
+cell_type_vect <- rep(NA, length(adata_st[['obs_names']]))
+names(cell_type_vect) <- adata_st[['obs_names']][['values']]
+cell_type_vect[names(which_cell_max)] <- which_cell_max
+cell_type_vect <- as.factor(cell_type_vect)
+adata_st[['obs']][['cell_type']] <- cell_type_vect
+adata_st[['write_h5ad']](file.path(outdir, 'rctd.h5ad'), compression = 0)
 
 #versions
 message("reading session info")
