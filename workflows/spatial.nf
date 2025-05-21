@@ -311,6 +311,8 @@ workflow SPATIAL {
 
     ch_multiqc_files = ch_multiqc_files.mix(SQUIDPY_MORANS_I.out.svgs.map { it[1] })
 
+    //ch_multiqc_files.view()
+
     //collate versions
     version_yaml = Channel.empty()
     version_yaml = softwareVersionsToYAML(ch_versions)
@@ -318,14 +320,14 @@ workflow SPATIAL {
     
     // MultiQC
     // NOTE - will fail to find spaceranger reports unless the full path is provided
-    MULTIQC (
-            ch_multiqc_files.collect().ifEmpty([]),[],[],[],[],[]
-            )
-    multiqc_report = MULTIQC.out.report.toList()
+   // MULTIQC (
+    //         ch_multiqc_files.collect().ifEmpty([]),[],[],[],[],[]
+    //         )
+    // multiqc_report = MULTIQC.out.report.toList()
 
 
-    emit:
-    multiqc_report // channel: /path/to/multiqc_report.html
+    // emit:
+    // multiqc_report // channel: /path/to/multiqc_report.html
 
 }
 
