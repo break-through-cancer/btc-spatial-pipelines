@@ -51,11 +51,12 @@ include { SPACEMARKERS;
 include { COGAPS;
           COGAPS_ADATA2DGC; } from '../modules/local/cogaps/nextflow/main'
 
-include { SQUIDPY } from '../modules/local/squidpy/main'
+include { SQUIDPY_MORANS_I;
+          SQUIDPY_SPATIAL_PLOTS; } from '../modules/local/squidpy/main'
 
-
-include { ATLAS_GET } from '../modules/local/util/util.nf'
-include { ATLAS_MATCH } from '../modules/local/util/util'
+include { ATLAS_GET;
+          ATLAS_MATCH;
+          VHD_TO_H5AD } from '../modules/local/util/util'
 
 include { RCTD } from '../modules/local/rctd/rctd'
 
@@ -169,17 +170,23 @@ workflow SPATIAL {
             }
     }
 
-    ch_btme = ch_input.map { tuple(it[0], it[1]) }
 
-    BAYESTME_LOAD_SPACERANGER( ch_btme )
-    ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
+    if(params.hd) {
+        VHD_TO_H5AD( ch_input.map { tuple(it[0], it[1]) } )
+        ch_adata = VHD_TO_H5AD.out.adata
+    } else {
+        ch_btme = ch_input.map { tuple(it[0], it[1]) }
+        BAYESTME_LOAD_SPACERANGER( ch_btme )
+        ch_adata = BAYESTME_LOAD_SPACERANGER.out.adata
+        ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
+    }
 
     //match scRNA atlas to spatial data
-    ATLAS_MATCH(ch_scrna.join( BAYESTME_LOAD_SPACERANGER.out.adata ))
-    ch_matched_adata = ch_input.combine(ATLAS_MATCH.out.adata_matched)
+    ATLAS_MATCH(ch_scrna.join( ch_adata ))
+    ch_matched_adata = ch_input.join(ATLAS_MATCH.out.adata_matched)
         .map(it -> tuple(it[0], it[-1])) // meta, adata_sc
 
-    filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata
+    filter_genes_input = ch_adata
         .join( n_top_genes )
         .map { tuple(
             it[0],               // sample_name
@@ -222,7 +229,6 @@ workflow SPATIAL {
                      it[3], //smoothing_parameter
                      [])    //expression truth placeholder, see #65
             }
-
     BAYESTME_DECONVOLUTION( deconvolution_input )
     ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
 
@@ -235,8 +241,10 @@ workflow SPATIAL {
     ch_sm_inputs = ch_sm_inputs.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }
         .join(data_directory))
 
-    
-    // RCTD reference-based deconvolution
+
+    // RCTD reference-based deconvolution and plots
+    // plots are temporary as there is the idea to plot
+    // all deconvolution stats with the same process/workflow
     ch_rctd_input = data_directory
         .join( ch_scrna )
         .join( ch_matched_adata )
@@ -247,13 +255,6 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(RCTD.out.versions)
     ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
         .join(data_directory))
-
-    // squidpy - spatially variable genes
-    ch_svgs = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
-        .concat( not_bleed_corrected_deconvolution_input )
-        .map { tuple(it[0], it[1]) }
-    SQUIDPY( ch_svgs )
-    ch_versions = ch_versions.mix(SQUIDPY.out.versions)
 
     //cogaps - make use of the BTME preprocessing
     ch_convert_adata = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
@@ -300,23 +301,33 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
 
+    // squidpy analysis 
+    ch_squidpy = RCTD.out.rctd_adata
+        .map { tuple(it[0], it[1]) }
+    SQUIDPY_MORANS_I( ch_squidpy )
+    SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
+
+    ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
+
+    ch_multiqc_files = ch_multiqc_files.mix(SQUIDPY_MORANS_I.out.svgs.map { it[1] })
+
+    //ch_multiqc_files.view()
 
     //collate versions
     version_yaml = Channel.empty()
     version_yaml = softwareVersionsToYAML(ch_versions)
                    .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
     
-
     // MultiQC
     // NOTE - will fail to find spaceranger reports unless the full path is provided
-    MULTIQC (
-            ch_multiqc_files.collect().ifEmpty([]),[],[],[],[],[]
-            )
-    multiqc_report = MULTIQC.out.report.toList()
+   // MULTIQC (
+    //         ch_multiqc_files.collect().ifEmpty([]),[],[],[],[],[]
+    //         )
+    // multiqc_report = MULTIQC.out.report.toList()
 
 
-    emit:
-    multiqc_report // channel: /path/to/multiqc_report.html
+    // emit:
+    // multiqc_report // channel: /path/to/multiqc_report.html
 
 }
 

@@ -4,6 +4,16 @@
         "title": "BTC 10X Visium Pipeline",
         "type": "object",
         "properties": {
+            "data": {
+                "title": "Data format options",
+                "type": "object",
+                "properties": {
+                    "hd": {
+                        "type": "string",
+                        "title": "Table name if Visium HD format"
+                    }
+                }
+            },
             "preprocessing":{
                 "title": "Preprocessing options",
                 "type": "object",
