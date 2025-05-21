@@ -23,10 +23,11 @@ process SQUIDPY_SPATIAL_PLOTS {
     input:
     tuple val(meta), path(adata)
     output:
-    tuple val(meta), path("${prefix}/figures/spatial_scatter.png"),    emit: spatial_scatter_plot
-    tuple val(meta), path("${prefix}/figures/interaction_matrix.png"), emit: interaction_matrix_plot
-    tuple val(meta), path("${prefix}/figures/co_occurrence.png"),      emit: co_occurrence_plot
-    tuple val(meta), path("${prefix}/figures/nhood_enrichment.png"),   emit: nhood_enrichment_plot
+    tuple val(meta), path("${prefix}/figures/spatial_scatter.png"),     emit: spatial_scatter_plot
+    tuple val(meta), path("${prefix}/figures/interaction_matrix.png"),  emit: interaction_matrix_plot
+    tuple val(meta), path("${prefix}/figures/co_occurrence*.png"),      emit: co_occurrence_plot
+    tuple val(meta), path("${prefix}/figures/nhood_enrichment.png"),    emit: nhood_enrichment_plot
+    tuple val(meta), path("${prefix}/figures/centrality_scores.png"),   emit: centrality_scores_plot
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"

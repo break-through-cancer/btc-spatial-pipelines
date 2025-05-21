@@ -44,7 +44,7 @@ if 'spatial' in adata.uns:
     sq.pl.spatial_scatter(adata, 
                         color=["cell_type"],
                         crop_coord=(min_x, min_y, max_x, max_y),
-                        shape=None,
+                        library_id=lib_id,
                         save="spatial_scatter.png",
                         title="{} Spatial Scatter Plot".format(sample),
                         dpi=300
@@ -73,18 +73,30 @@ nona_adata = adata[~adata.obs["cell_type"].isna()]
 clusters = nona_adata.obs["cell_type"].unique()
 sq.gr.spatial_neighbors(nona_adata)
 sq.gr.co_occurrence(nona_adata, cluster_key="cell_type")
-sq.pl.co_occurrence(nona_adata,
-                    cluster_key="cell_type",
-                    clusters=clusters,
-                    save="co_occurrence.png",
-                    dpi=300
-                    )
 
-#Plor nhood enrichment
+for c in clusters:
+    sq.pl.co_occurrence(nona_adata,
+                        cluster_key="cell_type",
+                        clusters=c,
+                        save="co_occurrence_{}.png".format(c),
+                        dpi=300
+                        )
+
+
+#Plot nhood enrichment
 sq.gr.nhood_enrichment(nona_adata, cluster_key="cell_type")
 sq.pl.nhood_enrichment(nona_adata,
                         cluster_key="cell_type",
                         save="nhood_enrichment.png",
                         title="{} Nhood Enrichment".format(sample),
+                        dpi=300
+                        )
+
+#Plot centrality scores
+sq.gr.centrality_scores(adata, cluster_key="cell_type")
+sq.pl.centrality_scores(adata,
+                        score="degree_centrality",
+                        cluster_key="cell_type",
+                        save="centrality_scores.png",
                         dpi=300
                         )
