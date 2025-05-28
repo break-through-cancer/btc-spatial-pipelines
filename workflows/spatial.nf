@@ -141,8 +141,6 @@ workflow SPATIAL {
             }
             coda_files.collect { file -> [meta: meta, coda: file] }
         }
-    ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
-        .join(data_directory)
 
     //If an atlas has been provided download and prepare it
     if (params.reference_scrna) {
@@ -174,12 +172,16 @@ workflow SPATIAL {
     if(params.hd) {
         VHD_TO_H5AD( ch_input.map { tuple(it[0], it[1]) } )
         ch_adata = VHD_TO_H5AD.out.adata
+        data_directory = data_directory.map{ it -> tuple(it[0], it[1] + "/binned_outputs/${params.hd}")}
     } else {
         ch_btme = ch_input.map { tuple(it[0], it[1]) }
         BAYESTME_LOAD_SPACERANGER( ch_btme )
         ch_adata = BAYESTME_LOAD_SPACERANGER.out.adata
         ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
     }
+
+    ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
+        .join(data_directory)
 
     //match scRNA atlas to spatial data
     ATLAS_MATCH(ch_scrna.join( ch_adata ))
