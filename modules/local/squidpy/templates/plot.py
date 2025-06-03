@@ -49,10 +49,11 @@ if 'spatial' in adata.uns:
                         title="{} Spatial Scatter Plot".format(sample),
                         dpi=300
                         )
-else: #bayestme adata
+else: #bayestme adata, no image
     sq.pl.spatial_scatter(adata, 
                         color=["cell_type"],
                         shape=None,
+                        na_color=(1,1,1,0),
                         crop_coord=(min_x, min_y, max_x, max_y),
                         save="spatial_scatter.png",
                         title="{} Spatial Scatter Plot".format(sample),
@@ -100,3 +101,6 @@ sq.pl.centrality_scores(adata,
                         save="centrality_scores.png",
                         dpi=300
                         )
+
+#save the object with newly calculated attributes
+adata.write_h5ad("squidpy.h5ad", compression="gzip")
