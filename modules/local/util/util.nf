@@ -138,7 +138,7 @@ print(f"Downloaded atlas from {myurl}")
 """
 }
 
-process VHD_TO_H5AD {
+process ADATA_FROM_VISIUM_HD {
     //convert vhd file to h5ad
     label "process_medium"
     container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
@@ -146,7 +146,7 @@ process VHD_TO_H5AD {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/${params.hd}.h5ad"),  emit: adata
+        tuple val(meta), path("${prefix}/visiumhd_${params.hd}.h5ad"),  emit: adata
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -171,6 +171,43 @@ adata = to_legacy_anndata(ds, coordinate_system=sample,
                           table_name=table, include_images=True)
 #save
 outname = os.path.join(sample, f"{table}.h5ad")
+adata.write_h5ad(filename=outname)
+"""
+}
+
+process ADATA_FROM_VISIUM {
+    //convert visium dir to h5ad
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+
+    input:
+        tuple val(meta), path(data)
+    output:
+        tuple val(meta), path("${prefix}/visium.h5ad"),  emit: adata
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+"""
+#!/usr/bin/env python3
+
+import os
+from spatialdata_io import visium
+from spatialdata_io.experimental import to_legacy_anndata
+import dask
+
+sample = "${prefix}"
+data = "${data}"
+
+os.makedirs(sample, exist_ok=True)
+
+#read visium dataset
+ds = visium(data, dataset_id=sample, var_names_make_unique=True)
+
+#convert to anndata
+adata = to_legacy_anndata(ds, coordinate_system=sample,
+                          include_images=True)
+#save
+outname = os.path.join(sample, "visium.h5ad")
 adata.write_h5ad(filename=outname)
 """
 }

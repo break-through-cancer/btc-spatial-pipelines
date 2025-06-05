@@ -56,7 +56,8 @@ include { SQUIDPY_MORANS_I;
 
 include { ATLAS_GET;
           ATLAS_MATCH;
-          VHD_TO_H5AD } from '../modules/local/util/util'
+          ADATA_FROM_VISIUM;
+          ADATA_FROM_VISIUM_HD; } from '../modules/local/util/util'
 
 include { RCTD } from '../modules/local/rctd/rctd'
 
@@ -170,14 +171,12 @@ workflow SPATIAL {
 
 
     if(params.hd) {
-        VHD_TO_H5AD( ch_input.map { tuple(it[0], it[1]) } )
-        ch_adata = VHD_TO_H5AD.out.adata
+        ADATA_FROM_VISIUM_HD( ch_input.map { tuple(it[0], it[1]) } )
+        ch_adata = ADATA_FROM_VISIUM_HD.out.adata
         data_directory = data_directory.map{ it -> tuple(it[0], it[1] + "/binned_outputs/${params.hd}")}
     } else {
-        ch_btme = ch_input.map { tuple(it[0], it[1]) }
-        BAYESTME_LOAD_SPACERANGER( ch_btme )
-        ch_adata = BAYESTME_LOAD_SPACERANGER.out.adata
-        ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
+        ADATA_FROM_VISIUM( ch_input.map { tuple(it[0], it[1]) } )
+        ch_adata = ADATA_FROM_VISIUM.out.adata
     }
 
     ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
