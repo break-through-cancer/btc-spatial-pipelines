@@ -146,7 +146,7 @@ process ADATA_FROM_VISIUM_HD {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/visiumhd_${params.hd}.h5ad"),  emit: adata
+        tuple val(meta), path("${prefix}/${params.hd}.h5ad"),  emit: adata
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
