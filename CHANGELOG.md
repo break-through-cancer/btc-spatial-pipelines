@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - optionally look for CODA annotation in the input and run spaceMarkers on that
 - spatial overlap and interaction plots for spaceMarkers
 - RCTD deconvolution with single cell atlas reference
-- Visium HD support
+- Visium HD support (RCTD)
+- Squidpy module for plotting deconvolution results
 
 ### `Fixed`
 
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Deprecated`
 - spatial transcriptional programs from the BayesTME package
+- BAYESTME_LOAD_SPACERANGER deprecated to allow Visium HD (and possible more) input
 
 
 ## v1.1.0 - 2024-12-16

@@ -156,6 +156,7 @@ process ADATA_FROM_VISIUM_HD {
 import os
 from spatialdata_io import visium_hd
 from spatialdata_io.experimental import to_legacy_anndata
+from squidpy import gr
 import dask
 
 sample = "${prefix}"
@@ -169,6 +170,13 @@ ds = visium_hd(data, dataset_id=sample, var_names_make_unique=True)
 #convert to anndata
 adata = to_legacy_anndata(ds, coordinate_system=sample,
                           table_name=table, include_images=True)
+adata.var_names_make_unique()
+
+#make compatible with BayesTME (uses an older, scanpy notation)
+adata.uns['layout'] = 'IRREGULAR'
+gr.spatial_neighbors(adata)
+adata.obsp['connectivities'] = adata.obsp['spatial_connectivities']
+
 #save
 outname = os.path.join(sample, f"{table}.h5ad")
 adata.write_h5ad(filename=outname)
@@ -193,6 +201,7 @@ process ADATA_FROM_VISIUM {
 import os
 from spatialdata_io import visium
 from spatialdata_io.experimental import to_legacy_anndata
+from squidpy import gr
 import dask
 
 sample = "${prefix}"
@@ -206,6 +215,13 @@ ds = visium(data, dataset_id=sample, var_names_make_unique=True)
 #convert to anndata
 adata = to_legacy_anndata(ds, coordinate_system=sample,
                           include_images=True)
+adata.var_names_make_unique()
+
+#make compatible with BayesTME (uses an older, scanpy notation)
+adata.uns['layout'] = 'IRREGULAR'
+gr.spatial_neighbors(adata)
+adata.obsp['connectivities'] = adata.obsp['spatial_connectivities']
+
 #save
 outname = os.path.join(sample, "visium.h5ad")
 adata.write_h5ad(filename=outname)
