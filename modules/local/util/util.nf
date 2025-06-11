@@ -169,6 +169,11 @@ ds = visium_hd(data, dataset_id=sample, var_names_make_unique=True)
 #convert to anndata
 adata = to_legacy_anndata(ds, coordinate_system=sample,
                           table_name=table, include_images=True)
+adata.var_names_make_unique()
+
+#make compatible with BayesTME
+adata.uns['layout'] = 'SQUARE'
+
 #save
 outname = os.path.join(sample, f"{table}.h5ad")
 adata.write_h5ad(filename=outname)
@@ -206,6 +211,11 @@ ds = visium(data, dataset_id=sample, var_names_make_unique=True)
 #convert to anndata
 adata = to_legacy_anndata(ds, coordinate_system=sample,
                           include_images=True)
+adata.var_names_make_unique()
+
+#make compatible with BayesTME
+adata.uns['layout'] = 'HEX'
+
 #save
 outname = os.path.join(sample, "visium.h5ad")
 adata.write_h5ad(filename=outname)
