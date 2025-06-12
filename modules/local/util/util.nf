@@ -177,6 +177,9 @@ adata.uns['layout'] = 'IRREGULAR'
 gr.spatial_neighbors(adata)
 adata.obsp['connectivities'] = adata.obsp['spatial_connectivities']
 
+#make compatible with BayesTME
+adata.uns['layout'] = 'SQUARE'
+
 #save
 outname = os.path.join(sample, f"{table}.h5ad")
 adata.write_h5ad(filename=outname)
@@ -221,6 +224,9 @@ adata.var_names_make_unique()
 adata.uns['layout'] = 'IRREGULAR'
 gr.spatial_neighbors(adata)
 adata.obsp['connectivities'] = adata.obsp['spatial_connectivities']
+
+#make compatible with BayesTME
+adata.uns['layout'] = 'HEX'
 
 #save
 outname = os.path.join(sample, "visium.h5ad")
