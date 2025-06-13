@@ -304,11 +304,15 @@ workflow SPATIAL {
     // squidpy analysis 
     ch_squidpy = RCTD.out.rctd_adata
         .map { tuple(it[0], it[1]) }
+
+    ch_squidpy = ch_squidpy.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved)
+        .map { tuple(it[0], it[1]) }
+    
     SQUIDPY_MORANS_I( ch_squidpy )
     SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
 
-    ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
 
+    ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(SQUIDPY_MORANS_I.out.svgs.map { it[1] })
 
     //ch_multiqc_files.view()

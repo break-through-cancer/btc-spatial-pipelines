@@ -173,12 +173,10 @@ adata = to_legacy_anndata(ds, coordinate_system=sample,
 adata.var_names_make_unique()
 
 #make compatible with BayesTME (uses an older, scanpy notation)
+adata.X = adata.X.astype(int)
 adata.uns['layout'] = 'IRREGULAR'
 gr.spatial_neighbors(adata)
-adata.obsp['connectivities'] = adata.obsp['spatial_connectivities']
-
-#make compatible with BayesTME
-adata.uns['layout'] = 'SQUARE'
+adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 
 #save
 outname = os.path.join(sample, f"{table}.h5ad")
@@ -221,12 +219,10 @@ adata = to_legacy_anndata(ds, coordinate_system=sample,
 adata.var_names_make_unique()
 
 #make compatible with BayesTME (uses an older, scanpy notation)
+adata.X = adata.X.astype(int)
 adata.uns['layout'] = 'IRREGULAR'
 gr.spatial_neighbors(adata)
-adata.obsp['connectivities'] = adata.obsp['spatial_connectivities']
-
-#make compatible with BayesTME
-adata.uns['layout'] = 'HEX'
+adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 
 #save
 outname = os.path.join(sample, "visium.h5ad")
