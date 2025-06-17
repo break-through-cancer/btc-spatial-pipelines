@@ -70,7 +70,9 @@ message("found columns: ", paste(obs_cols, collapse = ', '))
 if(!cell_type_col %in% obs_cols) {
   stop(sprintf('cell type column "%s" not found in adata_sc', cell_type_col))
 }
+#read and clean cell_types
 celltypes_sc <- as.character(adata_sc[['obs']][[cell_type_col]])
+celltypes_sc <- gsub(pattern = "[^[:alnum:]_ \\-]", replacement = "_", x = celltypes_sc)
 names(celltypes_sc) <- adata_sc[['obs_names']][['values']]
 celltypes_sc <- as.factor(celltypes_sc)
 
