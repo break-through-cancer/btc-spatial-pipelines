@@ -19,22 +19,11 @@ process ATLAS_MATCH {
 import os
 import anndata as ad
 import numpy as np
-import re
 
 print("Reading adata_sc in the backed mode")
 adata_sc = ad.read_h5ad("$adata_sc", backed='r')
 print("adata_sc:")
 print(adata_sc)
-
-#check if the cell_type column exists
-cell_type_col = "${params.type_col_scrna}"
-if cell_type_col not in adata_sc.obs.columns:
-    print(f"No {cell_type_col} column found in the adata_sc.obs")
-    exit(1)
-
-#keep alphanumeric, space, dash, underscore in cell_type
-adata_sc.obs[cell_type_col] = adata_sc.obs[cell_type_col].apply(lambda x: re.sub(r'[^a-zA-Z0-9 _-]', '', x))
-adata_sc.write()
 
 print("Reading adata_st")
 adata_st = ad.read_h5ad("$adata_st")
@@ -107,7 +96,7 @@ with open ("versions.yml", "w") as f:
 }
 
 process ATLAS_GET {
-    //download atlas anndata file from a url
+    //download an atlas anndata file from a url
     label "process_low"
     container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
 
