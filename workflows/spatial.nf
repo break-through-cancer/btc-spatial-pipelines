@@ -188,6 +188,8 @@ workflow SPATIAL {
 
     filter_genes_input = ch_adata
         .join( n_top_genes )
+        .join( run_bayestme )
+        .filter { it -> it[-1] == true }   // run_bayestme
         .map { tuple(
             it[0],               // sample_name
             it[1],               // adata
