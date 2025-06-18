@@ -72,7 +72,7 @@ if(!cell_type_col %in% obs_cols) {
 }
 #read and clean up cell_types
 celltypes_sc <- as.character(adata_sc[['obs']][[cell_type_col]])
-iconv('co_occurrence_T cells central memory and naïve.png',to="ASCII//TRANSLIT")     #rm diacritics
+celltypes_sc <- iconv(celltypes_sc,to="ASCII//TRANSLIT")                             #rm diacritics
 celltypes_sc <- gsub(pattern = "[^[:alnum:] ]", replacement = " ", x = celltypes_sc) #rm punctuation
 celltypes_sc <- gsub(pattern = " +", replacement = " ", x = celltypes_sc)            #rm extra spaces
 names(celltypes_sc) <- adata_sc[['obs_names']][['values']]
