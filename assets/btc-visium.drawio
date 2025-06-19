@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="Page-1" id="UtpHl4ARBOucqe9Nt2o0">
-        <mxGraphModel dx="1066" dy="386" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="none" math="0" shadow="0">
+        <mxGraphModel dx="1354" dy="608" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="none" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -45,7 +45,7 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="MN6aCFW4edd8GgNkVKiP-16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#3F2B29;" parent="1" source="lG0zF8bITZGp1ZAjM_VV-13" target="MN6aCFW4edd8GgNkVKiP-15" edge="1">
+                <mxCell id="29" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="lG0zF8bITZGp1ZAjM_VV-13" target="MN6aCFW4edd8GgNkVKiP-15">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="lG0zF8bITZGp1ZAjM_VV-13" value="Filter Genes" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#3F2B29;dashed=1;" parent="1" vertex="1">
@@ -67,7 +67,7 @@
                 <mxCell id="lG0zF8bITZGp1ZAjM_VV-15" value="CODA csv files" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;strokeColor=#3F2B29;shape=parallelogram;boundedLbl=1;perimeter=parallelogramPerimeter;fixedSize=1;dashed=1;" parent="1" vertex="1">
                     <mxGeometry x="44.5" y="372" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="lG0zF8bITZGp1ZAjM_VV-17" value="Visium SeuratPipeline.Rmd" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#3F2B29;" parent="1" vertex="1">
+                <mxCell id="lG0zF8bITZGp1ZAjM_VV-17" value="Visium SeuratPipeline.Rmd" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#B5B5B5;strokeColor=#3F2B29;" parent="1" vertex="1">
                     <mxGeometry x="44.5" y="596" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="MN6aCFW4edd8GgNkVKiP-12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#3F2B29;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="1" source="lG0zF8bITZGp1ZAjM_VV-23" target="MN6aCFW4edd8GgNkVKiP-9" edge="1">
@@ -97,16 +97,11 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="21" value="" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="MN6aCFW4edd8GgNkVKiP-15" target="8" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="510" y="278" as="targetPoint"/>
-                    </mxGeometry>
-                </mxCell>
                 <mxCell id="MN6aCFW4edd8GgNkVKiP-15" value="Bleeding Correction" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#3F2B29;dashed=1;" parent="1" vertex="1">
                     <mxGeometry x="590" y="248" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="JdvyvIJq4wOrrEWista5-1" value="in progress" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#B8B8B8;strokeColor=#3F2B29;" parent="1" vertex="1">
-                    <mxGeometry x="44.5" y="753" width="75" height="26" as="geometry"/>
+                <mxCell id="JdvyvIJq4wOrrEWista5-1" value="branch" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#B8B8B8;strokeColor=#3F2B29;" parent="1" vertex="1">
+                    <mxGeometry x="691" y="718" width="75" height="26" as="geometry"/>
                 </mxCell>
                 <mxCell id="lG0zF8bITZGp1ZAjM_VV-23" value="Spacemarkers" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#3F2B29;dashed=1;" parent="1" vertex="1">
                     <mxGeometry x="225" y="596" width="120" height="60" as="geometry"/>
@@ -128,10 +123,10 @@
                     <mxGeometry x="54.5" y="45" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="2" value="Squidpy" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#3F2B29;" parent="1" vertex="1">
-                    <mxGeometry x="590" y="696" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="351" y="684" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="6" value="optional" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3F2B29;dashed=1;" parent="1" vertex="1">
-                    <mxGeometry x="44.5" y="714" width="75" height="26" as="geometry"/>
+                    <mxGeometry x="691" y="679" width="75" height="26" as="geometry"/>
                 </mxCell>
                 <mxCell id="9" value="" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="7" target="8" edge="1">
                     <mxGeometry relative="1" as="geometry">
@@ -165,6 +160,9 @@
                         </Array>
                         <mxPoint x="650" y="338" as="sourcePoint"/>
                     </mxGeometry>
+                </mxCell>
+                <mxCell id="28" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="23" target="8">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="23" value="Visium SD/HD to Andata" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#3F2B29;dashed=0;" parent="1" vertex="1">
                     <mxGeometry x="324" y="127" width="120" height="60" as="geometry"/>
