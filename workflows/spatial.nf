@@ -53,12 +53,9 @@ include { COGAPS;
 include { SQUIDPY_MORANS_I;
           SQUIDPY_SPATIAL_PLOTS; } from '../modules/local/squidpy/main'
 
-include { ATLAS_GET;
-          ATLAS_MATCH;
-          ADATA_FROM_VISIUM;
-          ADATA_FROM_VISIUM_HD; } from '../modules/local/util/util'
-
 include { RCTD } from '../modules/local/rctd/rctd'
+
+include { LOAD_DATASET } from '../subworkflows/local/load_dataset'
 
 
 /*
@@ -126,65 +123,16 @@ workflow SPATIAL {
     }
     ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
 
-    // CODA annotation channel - or any other external annotaion
-    ch_coda = data_directory
-        .join(find_annotations)
-        .filter { it -> it[2]==true} // only run if find_annotations is true
-        .flatMap { item -> 
-            def meta = item[0]
-            def data_path = item[1]
-            def coda_files = []
-            data_path.eachFileRecurse { file ->
-                if (file.name.endsWith('tissue_positions_cellular_compositions.csv')) {
-                    coda_files.add(file)
-                }
-            }
-            coda_files.collect { file -> [meta: meta, coda: file] }
-        }
-
-    //If an atlas has been provided download and prepare it
-    if (params.reference_scrna) {
-        ATLAS_GET(params.reference_scrna)
-        ch_scrna = data_directory
-            .combine(ATLAS_GET.out.atlas)
-            .map { tuple(it[0], it[2]) } // meta, adata_sc
-    } else{
-    //else look for matched scRNA deconvolution files using file mask
-    //from expression_profiles column of the samplesheet
-        ch_scrna = data_directory
-            .join(expression_profiles)
-            .filter { it -> it[2].size()>0 } // only run if a profile is provided
-            .flatMap { item -> 
-                def meta = item[0]
-                def data_path = item[1]
-                def seach_expr = item[2]
-                def scrna_files = []
-                data_path.eachFileRecurse { file ->
-                    if (file.name.endsWith(seach_expr)) {
-                        scrna_files.add(file)
-                    }
-                }
-                scrna_files.collect { file -> [meta, file] } // meta, adata_sc
-            }
-    }
-
-
-    if(params.hd) {
-        ADATA_FROM_VISIUM_HD( ch_input.map { tuple(it[0], it[1]) } )
-        ch_adata = ADATA_FROM_VISIUM_HD.out.adata
-        data_directory = data_directory.map{ it -> tuple(it[0], it[1] + "/binned_outputs/${params.hd}")}
-    } else {
-        ADATA_FROM_VISIUM( ch_input.map { tuple(it[0], it[1]) } )
-        ch_adata = ADATA_FROM_VISIUM.out.adata
-    }
+    // Grab datasets
+    LOAD_DATASET(ch_input.map { tuple(it[0], it[1], it[4], it[10]) }) //[meta, data_directory, expression_profiles, find_annotations]
+    ch_adata = LOAD_DATASET.out.ch_adata
+    ch_scrna = LOAD_DATASET.out.ch_scrna
+    ch_coda = LOAD_DATASET.out.ch_coda
+    data_directory = LOAD_DATASET.out.data_directory
+    ch_matched_adata = LOAD_DATASET.out.ch_matched_adata
 
     ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
         .join(data_directory)
-
-    //match scRNA atlas to spatial data
-    ATLAS_MATCH(ch_scrna.join( ch_adata ))
-    ch_matched_adata = ch_input.join(ATLAS_MATCH.out.adata_matched)
-        .map(it -> tuple(it[0], it[-1])) // meta, adata_sc
 
     filter_genes_input = ch_adata
         .join( n_top_genes )
