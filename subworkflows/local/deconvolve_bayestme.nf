@@ -26,7 +26,7 @@ workflow BAYESTME {
                           .join( run_bayestme )
                           .filter { it -> it[-1] == true }   // run_bayestme
 
-        BAYESTME_LOAD_SPACERANGER( ch_input.map { tuple(it[0], it[1]) })
+        BAYESTME_LOAD_SPACERANGER( ch_btme )
         ch_adata = BAYESTME_LOAD_SPACERANGER.out.adata
 
         filter_genes_input = ch_adata
