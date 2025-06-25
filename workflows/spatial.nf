@@ -37,11 +37,8 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
-include { BAYESTME_FILTER_GENES;
-          BAYESTME_BLEEDING_CORRECTION;
-          BAYESTME_DECONVOLUTION;
-        } from '../modules/local/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
-        
+include { BAYESTME;} from '../subworkflows/local/deconvolve_bayestme'
+
 include { SPACEMARKERS; 
           SPACEMARKERS_MQC;
           SPACEMARKERS_PLOTS;
@@ -134,63 +131,12 @@ workflow SPATIAL {
     ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
         .join(data_directory)
 
-    filter_genes_input = ch_adata
-        .join( n_top_genes )
-        .join( run_bayestme )
-        .filter { it -> it[-1] == true }   // run_bayestme
-        .map { tuple(
-            it[0],               // sample_name
-            it[1],               // adata
-            true,                // filter_ribosomal_genes
-            it[2],               // n_top_genes
-            0.9,                 // spot_threshold
-            [])                  // disabled ch_scrna, see #65
-        }
-
-    BAYESTME_FILTER_GENES( filter_genes_input )
-    ch_versions = ch_versions.mix(BAYESTME_FILTER_GENES.out.versions)
-
-    BAYESTME_FILTER_GENES.out.adata_filtered
-        .join( should_run_bleeding_correction )
-        .filter { it[-1] == true }
-        .map { tuple(it[0], it[1]) }
-        .tap { bleeding_correction_input }
-
-    BAYESTME_FILTER_GENES.out.adata_filtered
-        .join( should_run_bleeding_correction )
-        .filter { it[-1] == false }
-        .map { tuple(it[0], it[1]) }
-        .join( ch_input.map { tuple(it[0], it[2]) } )
-        .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
-        .tap { not_bleed_corrected_deconvolution_input }
-
-    BAYESTME_BLEEDING_CORRECTION( bleeding_correction_input )
-    ch_versions = ch_versions.mix(BAYESTME_BLEEDING_CORRECTION.out.versions)
-
-    deconvolution_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
-        .join( ch_input.map { tuple(it[0], it[2]) } )
-        .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
-        .concat( not_bleed_corrected_deconvolution_input )
-        .combine( run_bayestme )
-        .filter { it -> it[-1] == true }   // run_bayestme
-        .map { tuple(it[0], //meta
-                     it[1], //dataset_filtered
-                     it[2], //n_cell_types
-                     it[3], //smoothing_parameter
-                     [])    //expression truth placeholder, see #65
-            }
-    BAYESTME_DECONVOLUTION( deconvolution_input )
-    ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
-
-    BAYESTME_DECONVOLUTION.out.adata_deconvolved
-        .join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
-        .join( spatial_transcriptional_programs )
-        .filter { it -> it[3] == true }                           // spatial_transcriptional_programs bool
-        .map { tuple(it[0], it[1], it[2], []) }
-    ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
-    ch_sm_inputs = ch_sm_inputs.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }
-        .join(data_directory))
-
+    // BayestME deconvolution and plots, run only if not hd as the tool does not support it
+    if(!params.hd) {
+        BAYESTME(ch_input)
+        ch_sm_inputs = ch_sm_inputs.mix(BAYESTME.out.ch_deconvolved.map { tuple(it[0], it[1]) }
+                                   .join(data_directory))
+    }
 
     // RCTD reference-based deconvolution and plots
     // plots are temporary as there is the idea to plot
@@ -206,9 +152,8 @@ workflow SPATIAL {
     ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
         .join(data_directory))
 
-    //cogaps - make use of the BTME preprocessing
-    ch_convert_adata = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
-        .concat( not_bleed_corrected_deconvolution_input )
+    //CoGAPS
+    ch_convert_adata = ch_adata
         .join(run_cogaps)
         .filter { it -> it[-1] == true }
         .map( it -> tuple(it[0], it[1]) )
@@ -255,7 +200,7 @@ workflow SPATIAL {
     ch_squidpy = RCTD.out.rctd_adata
         .map { tuple(it[0], it[1]) }
 
-    ch_squidpy = ch_squidpy.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved)
+    ch_squidpy = ch_squidpy.mix(BAYESTME.out.ch_deconvolved)
         .map { tuple(it[0], it[1]) }
     
     SQUIDPY_MORANS_I( ch_squidpy )
