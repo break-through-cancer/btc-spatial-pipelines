@@ -37,14 +37,14 @@ matching_index = adata_sc.var.index.intersection(adata_st.var.index)
 print(f"Found {len(matching_index)} matching genes in var.index")
 
 #look for adata_sc.index in var["gene_ids"] of adata_st
-if ('gene_ids' in adata_st.var.columns):
+if 'gene_ids' in adata_st.var.columns:
     matching_gene_ids = adata_sc.var.index.intersection(adata_st.var["gene_ids"])
     print(f"Found {len(matching_gene_ids)} matching genes in var[gene_ids]")
 else:
     matching_gene_ids = []
 
 #look for adata_st.index in adata_sc.var["feature_names"]
-if ('feature_name' in adata_sc.var.columns):
+if 'feature_name' in adata_sc.var.columns:
     matching_feature_names = adata_st.var.index.intersection(adata_sc.var["feature_name"])
     print(f"Found {len(matching_feature_names)} matching genes in var[feature_name]")
 else:
@@ -54,16 +54,15 @@ else:
 matching_lengths = [len(x) for x in [matching_index, matching_gene_ids, matching_feature_names]]
 which_matching = np.argmax(matching_lengths)
 
-if(matching_lengths[which_matching] == 0):
-    print("No matching genes found")
-    exit(1)
+if matching_lengths[which_matching] == 0:
+    raise RuntimeError("no matching genes found")
 
-if (which_matching == 0):
+if which_matching == 0:
     print("Matching by index")
     matching = matching_index
     adata_st[:, matching].write_h5ad("${prefix}/adata_matched.h5ad")
     print(f"Saved adata_st with {len(matching)} matching genes")
-elif (which_matching == 1):
+elif which_matching == 1:
     print("Matching by gene_ids")
     matching = matching_gene_ids
     adata_st.var.reset_index(drop=False, inplace=True)
@@ -71,7 +70,7 @@ elif (which_matching == 1):
     adata_st.var.index = adata_st.var.index.astype('object')
     adata_st[:, matching].write_h5ad("${prefix}/adata_matched.h5ad")
     print(f"Saved adata_st with {len(matching)} matching genes")
-elif (which_matching == 2):
+elif which_matching == 2:
     print("Matching by feature_name")
     matching = matching_feature_names
     m = {value: key for key, value in zip(adata_sc.var.index, adata_sc.var["feature_name"])}
@@ -83,8 +82,7 @@ elif (which_matching == 2):
     adata_st[:, adata_st.var.index].write_h5ad("${prefix}/adata_matched.h5ad")
     print(f"Saved adata_st with {len(matching)} matching genes")
 else:
-    print("More cases than expected")
-    exit(1)
+    raise RuntimeError("More cases than expected")
 
 adata_sc.file.close()
 adata_st.file.close()
@@ -117,13 +115,12 @@ import boto3
 myurl = "${url}"
 
 if not(myurl.endswith(".h5ad")):
-    print("URL does not end with .h5ad")
-    exit(1)
+    raise ValueError("URL must end with .h5ad")
 
 parsed_url = urlparse(myurl)
 file_key = parsed_url.path.lstrip('/')
 
-if (myurl.startswith("s3://")):
+if myurl.startswith("s3://"):
     print("Downloading from S3")
     bucket_name = parsed_url.netloc
     s3 = boto3.client('s3')
