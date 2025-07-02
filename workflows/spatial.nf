@@ -81,6 +81,9 @@ workflow SPATIAL {
     // Optional inputs to SpaceMarkers
     ch_sm_inputs = Channel.empty()
 
+    // Squidpy analysis ch stub
+    ch_squidpy = Channel.empty()
+
     INPUT_CHECK (
         file(params.input)
     )
@@ -136,6 +139,8 @@ workflow SPATIAL {
         BAYESTME(ch_input)
         ch_sm_inputs = ch_sm_inputs.mix(BAYESTME.out.ch_deconvolved.map { tuple(it[0], it[1]) }
                                    .join(data_directory))
+        ch_squidpy = ch_squidpy.mix(BAYESTME.out.ch_deconvolved)
+        .map { tuple(it[0], it[1]) }
     }
 
     // RCTD reference-based deconvolution and plots
@@ -200,8 +205,6 @@ workflow SPATIAL {
     ch_squidpy = RCTD.out.rctd_adata
         .map { tuple(it[0], it[1]) }
 
-    ch_squidpy = ch_squidpy.mix(BAYESTME.out.ch_deconvolved)
-        .map { tuple(it[0], it[1]) }
     
     SQUIDPY_MORANS_I( ch_squidpy )
     SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
