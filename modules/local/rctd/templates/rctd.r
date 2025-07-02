@@ -45,6 +45,7 @@ query <- spacexr::SpatialRNA(coords=spatial, counts=counts_st)
 ### prep reference object
 #1. counts - genes need to be in rows, cells in columns, opposite to anndata
 adata_sc <- ad[["read_h5ad"]](adata_sc_path, backed = "r")
+adata_sc[["obs_names_make_unique"]]()
 
 if (is.null(adata_sc[["raw"]])) {
   message('no raw data, using X from adata_sc')
