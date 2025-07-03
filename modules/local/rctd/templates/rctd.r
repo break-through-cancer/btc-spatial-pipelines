@@ -28,15 +28,10 @@ rownames(counts_st) <- as.character(adata_st[['var_names']][['values']])
 colnames(counts_st) <- as.character(adata_st[['obs_names']][['values']])
 
 #3. select top variable genes with less RAM footprint (as opposed to apply())
-if (n_top_genes < nrow(counts_st)){
-  gene_vars <- pbapply::pbsapply(rownames(counts_st), function(x){var(counts_st[x,])})
-  top_genes <- sort(gene_vars, decreasing = TRUE)[1:min(n_top_genes, length(gene_vars))]
-  counts_st <- counts_st[rownames(counts_st) %in% names(top_genes), ]
-} else{
-  top_genes <- rownames(counts_st)
-  names(top_genes) <- top_genes
-}
-
+gene_vars <- pbapply::pbsapply(rownames(counts_st), function(x){var(counts_st[x,])})
+gene_vars <- gene_vars[gene_vars > 0] #remove genes with zero variance
+top_genes <- sort(gene_vars, decreasing = TRUE)[1:min(n_top_genes, length(gene_vars))]
+counts_st <- counts_st[rownames(counts_st) %in% names(top_genes), ]
 
 #4. prep query object
 query <- spacexr::SpatialRNA(coords=spatial, counts=counts_st)
