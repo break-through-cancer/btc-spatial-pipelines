@@ -17,7 +17,7 @@ process SQUIDPY_MORANS_I {
 
 process SQUIDPY_SPATIAL_PLOTS {
     tag "$meta.id"
-    label 'process_single'
+    label 'process_medium'
     container 'ghcr.io/break-through-cancer/btc-containers/scverse:main'
 
     input:
