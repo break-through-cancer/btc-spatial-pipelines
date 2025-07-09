@@ -45,7 +45,7 @@ include { SPACEMARKERS;
         } from '../modules/local/spacemarkers/nextflow/main'
 
 include { COGAPS;
-          COGAPS_ADATA2DGC; } from '../modules/local/cogaps/nextflow/main'
+          COGAPS_ADATA2DGC; } from '../modules/local/cogaps/main'
 
 include { SQUIDPY_MORANS_I;
           SQUIDPY_SPATIAL_PLOTS; } from '../modules/local/squidpy/main'
