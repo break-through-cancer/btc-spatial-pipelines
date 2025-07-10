@@ -86,6 +86,7 @@ if (length(rare_cells) > 0) {
 }
 counts_sc <- counts_sc[, celltypes_sc %in% setdiff(all_cells, rare_cells)]
 celltypes_sc <- celltypes_sc[celltypes_sc %in% setdiff(all_cells, rare_cells)]
+celltypes_sc <- droplevels(celltypes_sc)
 counts_sc <- as(counts_sc, "CsparseMatrix")
 
 #4. create reference object and cleanup
