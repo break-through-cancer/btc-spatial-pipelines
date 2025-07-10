@@ -73,7 +73,19 @@ celltypes_sc <- gsub(pattern = " +", replacement = " ", x = celltypes_sc)       
 names(celltypes_sc) <- adata_sc[['obs_names']][['values']]
 celltypes_sc <- as.factor(celltypes_sc)
 
-#3. drop non-matching genes from atlas object & convert to column orientation
+#3. drop rare cells & convert to column orientation
+#counts_sc <- counts_sc[rownames(counts_sc) %in% rownames(counts_st), ] drop as redundant
+cell_stats <- table(celltypes_sc)
+all_cells <- names(cell_stats)
+rare_cells <- names(cell_stats[cell_stats < 25])
+if (length(rare_cells) > 0) {
+  message(sprintf("dropping %d rare cell types: %s", 
+                  length(rare_cells), paste(rare_cells, collapse = ", ")))
+} else {
+  message("no rare cell types found, proceeding with all cells")
+}
+counts_sc <- counts_sc[, celltypes_sc %in% setdiff(all_cells, rare_cells)]
+celltypes_sc <- celltypes_sc[celltypes_sc %in% setdiff(all_cells, rare_cells)]
 counts_sc <- as(counts_sc, "CsparseMatrix")
 
 #4. create reference object and cleanup
