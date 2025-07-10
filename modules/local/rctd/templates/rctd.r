@@ -46,15 +46,13 @@ if (is.null(adata_sc[["raw"]])) {
   message('no raw data, using X from adata_sc')
   gene_names <-rownames(adata_sc[["var"]])
   select_genes <- which(gene_names %in% names(top_genes))
-  select_genes <- as.integer(select_genes - 1) # -1 for 0-based index
-  counts_sc <- Matrix::t(adata_sc[["X"]][, select_genes])
+  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][, select_genes - 1]) # -1 for 0-based index
   rownames(counts_sc) <- gene_names[select_genes]
 } else {
   message('using raw.X from adata_sc')
   gene_names <- rownames(adata_sc[["raw"]][["var"]])
   select_genes <- which(gene_names %in% names(top_genes))
-  select_genes <- as.integer(select_genes - 1) # -1 for 0-based index
-  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][, select_genes])
+  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][, select_genes - 1]) # -1 for 0-based index
   rownames(counts_sc) <- gene_names[select_genes]
 }
 
