@@ -57,7 +57,6 @@ if (is.null(adata_sc[["raw"]])) {
 }
 
 #room for RAM improvement: read in at most 10K cells by index as RCTD limit
-counts_sc <- counts_sc[rownames(counts_sc) %in% names(top_genes), ]
 colnames(counts_sc) <- as.character(adata_sc[["obs_names"]][["values"]])
 
 #2. celltypes must be named factor
@@ -75,7 +74,6 @@ names(celltypes_sc) <- adata_sc[['obs_names']][['values']]
 celltypes_sc <- as.factor(celltypes_sc)
 
 #3. drop non-matching genes from atlas object & convert to column orientation
-counts_sc <- counts_sc[rownames(counts_sc) %in% rownames(counts_st), ]
 counts_sc <- as(counts_sc, "CsparseMatrix")
 
 #4. create reference object and cleanup
