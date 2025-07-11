@@ -30,4 +30,12 @@ nextflow run main.nf --input tests/BCsamplesheet-bayestme.csv \
                      --max_cpus 6 -profile docker \
                      -resume
 
+#run only CoGAPS
+nextflow run main.nf --input tests/BCsamplesheet-CoGAPS.csv \
+                     --outdir out \
+                     --max_memory 24.GB \
+                     --max_cpus 6 -profile docker \
+                     -resume
+
+
 

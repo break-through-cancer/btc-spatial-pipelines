@@ -168,12 +168,12 @@ workflow SPATIAL {
 
     ch_cogaps = COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) }
         .join(n_cell_types)
-        .map { tuple(it[0], it[1], [niterations:params.cogaps_niterations,
+        .map { tuple(it[0], it[1], [niterations:params.niterations,
                                            npatterns:it[-1],
-                                           sparse:params.cogaps_sparse,
-                                           distributed:params.cogaps_distributed,
-                                           nsets:params.cogaps_nsets,
-                                           nthreads:params.cogaps_nthreads]) }
+                                           sparse:params.sparse,
+                                           distributed:params.distributed,
+                                           nsets:params.nsets,
+                                           nthreads:params.nthreads]) }
 
     COGAPS(ch_cogaps)
     ch_versions = ch_versions.mix(COGAPS.out.versions)
