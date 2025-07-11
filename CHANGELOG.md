@@ -3,17 +3,25 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## v1.2.0 - 2025-07-11
 
 ### `Added`
-- optionally look for CODA annotation in the input and run spaceMarkers on that
+- optionally look for external (e.g. CODA) annotation in the input to run spaceMarkers on
 - spatial overlap and interaction plots for spaceMarkers
+- RCTD deconvolution with single cell atlas reference
+- Visium HD support (RCTD)
+- Squidpy module for plotting deconvolution results and spatial analysis
 
 ### `Fixed`
+- refactor: separate subworkflow for data loading
+- refactor: separate subworkflow for BayesTME to avoid it clashing with VisiumHD pipeline
 
 ### `Dependencies`
 
 ### `Deprecated`
+- spatial transcriptional programs from the BayesTME package
+- BAYESTME_LOAD_SPACERANGER deprecated to allow Visium HD (and possible more) input
+- do not reuse BayesTME preprocessing for CoGAPS
 
 
 ## v1.1.0 - 2024-12-16

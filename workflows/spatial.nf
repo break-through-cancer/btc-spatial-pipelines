@@ -37,27 +37,22 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
-include { BAYESTME_LOAD_SPACERANGER;
-          BAYESTME_FILTER_GENES;
-          BAYESTME_BLEEDING_CORRECTION;
-          BAYESTME_DECONVOLUTION;
-        } from '../modules/local/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
-        
+include { BAYESTME;} from '../subworkflows/local/deconvolve_bayestme'
+
 include { SPACEMARKERS; 
           SPACEMARKERS_MQC;
           SPACEMARKERS_PLOTS;
         } from '../modules/local/spacemarkers/nextflow/main'
 
 include { COGAPS;
-          COGAPS_ADATA2DGC; } from '../modules/local/cogaps/nextflow/main'
+          COGAPS_ADATA2DGC; } from '../modules/local/cogaps/main'
 
-include { SQUIDPY } from '../modules/local/squidpy/main'
-
-
-include { ATLAS_GET } from '../modules/local/util/util.nf'
-include { ATLAS_MATCH } from '../modules/local/util/util'
+include { SQUIDPY_MORANS_I;
+          SQUIDPY_SPATIAL_PLOTS; } from '../modules/local/squidpy/main'
 
 include { RCTD } from '../modules/local/rctd/rctd'
+
+include { LOAD_DATASET } from '../subworkflows/local/load_dataset'
 
 
 /*
@@ -85,6 +80,9 @@ workflow SPATIAL {
 
     // Optional inputs to SpaceMarkers
     ch_sm_inputs = Channel.empty()
+
+    // Squidpy analysis ch stub
+    ch_squidpy = Channel.empty()
 
     INPUT_CHECK (
         file(params.input)
@@ -125,118 +123,29 @@ workflow SPATIAL {
     }
     ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
 
-    // CODA annotation channel - or any other external annotaion
-    ch_coda = data_directory
-        .join(find_annotations)
-        .filter { it -> it[2]==true} // only run if find_annotations is true
-        .flatMap { item -> 
-            def meta = item[0]
-            def data_path = item[1]
-            def coda_files = []
-            data_path.eachFileRecurse { file ->
-                if (file.name.endsWith('tissue_positions_cellular_compositions.csv')) {
-                    coda_files.add(file)
-                }
-            }
-            coda_files.collect { file -> [meta: meta, coda: file] }
-        }
+    // Grab datasets
+    LOAD_DATASET(ch_input.map { tuple(it[0], it[1], it[4], it[10]) }) //[meta, data_directory, expression_profiles, find_annotations]
+    ch_adata = LOAD_DATASET.out.ch_adata
+    ch_scrna = LOAD_DATASET.out.ch_scrna
+    ch_coda = LOAD_DATASET.out.ch_coda
+    data_directory = LOAD_DATASET.out.data_directory
+    ch_matched_adata = LOAD_DATASET.out.ch_matched_adata
+
     ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
         .join(data_directory)
 
-    //If an atlas has been provided download and prepare it
-    if (params.reference_scrna) {
-        ATLAS_GET(params.reference_scrna)
-        ch_scrna = data_directory
-            .combine(ATLAS_GET.out.atlas)
-            .map { tuple(it[0], it[2]) } // meta, adata_sc
-    } else{
-    //else look for matched scRNA deconvolution files using file mask
-    //from expression_profiles column of the samplesheet
-        ch_scrna = data_directory
-            .join(expression_profiles)
-            .filter { it -> it[2].size()>0 } // only run if a profile is provided
-            .flatMap { item -> 
-                def meta = item[0]
-                def data_path = item[1]
-                def seach_expr = item[2]
-                def scrna_files = []
-                data_path.eachFileRecurse { file ->
-                    if (file.name.endsWith(seach_expr)) {
-                        scrna_files.add(file)
-                    }
-                }
-                scrna_files.collect { file -> [meta, file] } // meta, adata_sc
-            }
+    // BayestME deconvolution and plots, run only if not hd as the tool does not support it
+    if(!params.hd) {
+        BAYESTME(ch_input)
+        ch_sm_inputs = ch_sm_inputs.mix(BAYESTME.out.ch_deconvolved.map { tuple(it[0], it[1]) }
+                                   .join(data_directory))
+        ch_squidpy = ch_squidpy.mix(BAYESTME.out.ch_deconvolved)
+        .map { tuple(it[0], it[1]) }
     }
 
-    ch_btme = ch_input.map { tuple(it[0], it[1]) }
-
-    BAYESTME_LOAD_SPACERANGER( ch_btme )
-    ch_versions = ch_versions.mix(BAYESTME_LOAD_SPACERANGER.out.versions)
-
-    //match scRNA atlas to spatial data
-    ATLAS_MATCH(ch_scrna.join( BAYESTME_LOAD_SPACERANGER.out.adata ))
-    ch_matched_adata = ch_input.combine(ATLAS_MATCH.out.adata_matched)
-        .map(it -> tuple(it[0], it[-1])) // meta, adata_sc
-
-    filter_genes_input = BAYESTME_LOAD_SPACERANGER.out.adata
-        .join( n_top_genes )
-        .map { tuple(
-            it[0],               // sample_name
-            it[1],               // adata
-            true,                // filter_ribosomal_genes
-            it[2],               // n_top_genes
-            0.9,                 // spot_threshold
-            [])                  // disabled ch_scrna, see #65
-        }
-
-    BAYESTME_FILTER_GENES( filter_genes_input )
-    ch_versions = ch_versions.mix(BAYESTME_FILTER_GENES.out.versions)
-
-    BAYESTME_FILTER_GENES.out.adata_filtered
-        .join( should_run_bleeding_correction )
-        .filter { it[-1] == true }
-        .map { tuple(it[0], it[1]) }
-        .tap { bleeding_correction_input }
-
-    BAYESTME_FILTER_GENES.out.adata_filtered
-        .join( should_run_bleeding_correction )
-        .filter { it[-1] == false }
-        .map { tuple(it[0], it[1]) }
-        .join( ch_input.map { tuple(it[0], it[2]) } )
-        .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
-        .tap { not_bleed_corrected_deconvolution_input }
-
-    BAYESTME_BLEEDING_CORRECTION( bleeding_correction_input )
-    ch_versions = ch_versions.mix(BAYESTME_BLEEDING_CORRECTION.out.versions)
-
-    deconvolution_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
-        .join( ch_input.map { tuple(it[0], it[2]) } )
-        .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
-        .concat( not_bleed_corrected_deconvolution_input )
-        .combine( run_bayestme )
-        .filter { it -> it[-1] == true }   // run_bayestme
-        .map { tuple(it[0], //meta
-                     it[1], //dataset_filtered
-                     it[2], //n_cell_types
-                     it[3], //smoothing_parameter
-                     [])    //expression truth placeholder, see #65
-            }
-
-    BAYESTME_DECONVOLUTION( deconvolution_input )
-    ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
-
-    BAYESTME_DECONVOLUTION.out.adata_deconvolved
-        .join(BAYESTME_DECONVOLUTION.out.deconvolution_samples)
-        .join( spatial_transcriptional_programs )
-        .filter { it -> it[3] == true }                           // spatial_transcriptional_programs bool
-        .map { tuple(it[0], it[1], it[2], []) }
-    ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
-    ch_sm_inputs = ch_sm_inputs.mix(BAYESTME_DECONVOLUTION.out.adata_deconvolved.map { tuple(it[0], it[1]) }
-        .join(data_directory))
-
-    
-    // RCTD reference-based deconvolution
+    // RCTD reference-based deconvolution and plots
+    // plots are temporary as there is the idea to plot
+    // all deconvolution stats with the same process/workflow
     ch_rctd_input = data_directory
         .join( ch_scrna )
         .join( ch_matched_adata )
@@ -248,16 +157,8 @@ workflow SPATIAL {
     ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
         .join(data_directory))
 
-    // squidpy - spatially variable genes
-    ch_svgs = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
-        .concat( not_bleed_corrected_deconvolution_input )
-        .map { tuple(it[0], it[1]) }
-    SQUIDPY( ch_svgs )
-    ch_versions = ch_versions.mix(SQUIDPY.out.versions)
-
-    //cogaps - make use of the BTME preprocessing
-    ch_convert_adata = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
-        .concat( not_bleed_corrected_deconvolution_input )
+    //CoGAPS
+    ch_convert_adata = ch_adata
         .join(run_cogaps)
         .filter { it -> it[-1] == true }
         .map( it -> tuple(it[0], it[1]) )
@@ -267,12 +168,12 @@ workflow SPATIAL {
 
     ch_cogaps = COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) }
         .join(n_cell_types)
-        .map { tuple(it[0], it[1], [niterations:params.cogaps_niterations,
+        .map { tuple(it[0], it[1], [niterations:params.niterations,
                                            npatterns:it[-1],
-                                           sparse:params.cogaps_sparse,
-                                           distributed:params.cogaps_distributed,
-                                           nsets:params.cogaps_nsets,
-                                           nthreads:params.cogaps_nthreads]) }
+                                           sparse:params.sparse,
+                                           distributed:params.distributed,
+                                           nsets:params.nsets,
+                                           nthreads:params.nthreads]) }
 
     COGAPS(ch_cogaps)
     ch_versions = ch_versions.mix(COGAPS.out.versions)
@@ -300,23 +201,34 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
 
+    // squidpy analysis 
+    ch_squidpy = RCTD.out.rctd_adata
+        .map { tuple(it[0], it[1]) }
+
+    
+    SQUIDPY_MORANS_I( ch_squidpy )
+    SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
+
+
+    ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(SQUIDPY_MORANS_I.out.svgs.map { it[1] })
 
     //collate versions
     version_yaml = Channel.empty()
     version_yaml = softwareVersionsToYAML(ch_versions)
                    .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
     
-
     // MultiQC
     // NOTE - will fail to find spaceranger reports unless the full path is provided
-    MULTIQC (
-            ch_multiqc_files.collect().ifEmpty([]),[],[],[],[],[]
-            )
-    multiqc_report = MULTIQC.out.report.toList()
+    // multiqc does not find spaceranger report for VisiumHD, address with #24
+    // MULTIQC (
+    //         ch_multiqc_files.collect().ifEmpty([]),[],[],[],[],[]
+    //         )
+    // multiqc_report = MULTIQC.out.report.toList()
 
 
-    emit:
-    multiqc_report // channel: /path/to/multiqc_report.html
+    // emit:
+    // multiqc_report // channel: /path/to/multiqc_report.html
 
 }
 

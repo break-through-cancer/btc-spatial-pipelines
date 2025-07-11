@@ -1,15 +1,15 @@
 process ATLAS_MATCH {
-    //return adata1 with gene index matching adata2 by gene name or gene id
+    //return adata_sc with gene index matching adata_st by gene name or gene id
     tag "$meta.id"
-    label "process_high_memory"
-    container "ghcr.io/break-through-cancer/btc-containers/squidpy:main"
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
 
-    //adata_sc adata1
-    //adata_st adata2
+    //adata_sc adata_sc
+    //adata_st adata_st
     input:
-    tuple val(meta), path(adata1), path(adata2)
+    tuple val(meta), path(adata_sc), path(adata_st)
     output:
-    path("${prefix}/adata_matched.h5ad"),                  emit: adata_matched
+    tuple val(meta), path("${prefix}/adata_matched.h5ad"), emit: adata_matched
     path "versions.yml",                                   emit: versions
 
     script:
@@ -18,43 +18,74 @@ process ATLAS_MATCH {
 #!/usr/bin/env python3
 import os
 import anndata as ad
+import numpy as np
 
-print("Reading adata1 in the backed mode")
-adata1 = ad.read_h5ad("$adata1", backed='r')
-print("adata1:")
-print(adata1)
+print("Reading adata_sc in the backed mode")
+adata_sc = ad.read_h5ad("$adata_sc", backed='r')
+print("adata_sc:")
+print(adata_sc)
 
-print("Reading adata2")
-adata2 = ad.read_h5ad("$adata2")
-print("adata2:")
-print(adata2)
+print("Reading adata_st")
+adata_st = ad.read_h5ad("$adata_st")
+print("adata_st:")
+print(adata_st)
 
 os.makedirs("${prefix}", exist_ok=True)
 
-matching = adata2.var.index.intersection(adata1.var.index)
-print(f"Found {len(matching)} matching genes in var.index")
+#look for matching indices
+matching_index = adata_sc.var.index.intersection(adata_st.var.index)
+print(f"Found {len(matching_index)} matching genes in var.index")
 
-if (len(matching) > 0):
-    adata2[:, matching].write_h5ad("${prefix}/adata_matched.h5ad")
-    print(f"Saved adata2 with {len(matching)} matching genes")
+#look for adata_sc.index in var["gene_ids"] of adata_st
+if 'gene_ids' in adata_st.var.columns:
+    matching_gene_ids = adata_sc.var.index.intersection(adata_st.var["gene_ids"])
+    print(f"Found {len(matching_gene_ids)} matching genes in var[gene_ids]")
 else:
-    print("Trying to match by feature_name")
-    matching = adata2.var_names.intersection(adata1.var["feature_name"])
-    if (len(matching) > 0):
-        print(f"Found {len(matching)} matching genes in var[feature_name], resetting index.")
-        m = {value: key for key, value in zip(adata1.var.index, adata1.var["feature_name"])}
-        adata2.var["name_matched"] = adata2.var.index.map(m)
-        adata2.var.dropna(subset=["name_matched"], inplace=True)
-        adata2.var.reset_index(drop=False, inplace=True)
-        adata2.var.set_index("name_matched", inplace=True)
-        adata2.var.index = adata2.var.index.astype('object')
-        adata2[:, adata2.var.index].write_h5ad("${prefix}/adata_matched.h5ad")
-        print(f"Saved adata2 with {len(matching)} matching genes")
-    else:
-        print("No matching genes found")
+    matching_gene_ids = []
 
-adata1.file.close()
-adata2.file.close()
+#look for adata_st.index in adata_sc.var["feature_names"]
+if 'feature_name' in adata_sc.var.columns:
+    matching_feature_names = adata_st.var.index.intersection(adata_sc.var["feature_name"])
+    print(f"Found {len(matching_feature_names)} matching genes in var[feature_name]")
+else:
+    matching_feature_names = []
+
+#find largest matching case
+matching_lengths = [len(x) for x in [matching_index, matching_gene_ids, matching_feature_names]]
+which_matching = np.argmax(matching_lengths)
+
+if matching_lengths[which_matching] == 0:
+    raise RuntimeError("no matching genes found")
+
+if which_matching == 0:
+    print("Matching by index")
+    matching = matching_index
+    adata_st[:, matching].write_h5ad("${prefix}/adata_matched.h5ad")
+    print(f"Saved adata_st with {len(matching)} matching genes")
+elif which_matching == 1:
+    print("Matching by gene_ids")
+    matching = matching_gene_ids
+    adata_st.var.reset_index(drop=False, inplace=True)
+    adata_st.var.set_index("gene_ids", inplace=True)
+    adata_st.var.index = adata_st.var.index.astype('object')
+    adata_st[:, matching].write_h5ad("${prefix}/adata_matched.h5ad")
+    print(f"Saved adata_st with {len(matching)} matching genes")
+elif which_matching == 2:
+    print("Matching by feature_name")
+    matching = matching_feature_names
+    m = {value: key for key, value in zip(adata_sc.var.index, adata_sc.var["feature_name"])}
+    adata_st.var["name_matched"] = adata_st.var.index.map(m)
+    adata_st.var.dropna(subset=["name_matched"], inplace=True)
+    adata_st.var.reset_index(drop=False, inplace=True)
+    adata_st.var.set_index("name_matched", inplace=True)
+    adata_st.var.index = adata_st.var.index.astype('object')
+    adata_st[:, adata_st.var.index].write_h5ad("${prefix}/adata_matched.h5ad")
+    print(f"Saved adata_st with {len(matching)} matching genes")
+else:
+    raise RuntimeError("More cases than expected")
+
+adata_sc.file.close()
+adata_st.file.close()
 
 with open ("versions.yml", "w") as f:
     f.write("${task.process}:\\n")
@@ -65,7 +96,7 @@ with open ("versions.yml", "w") as f:
 process ATLAS_GET {
     //download an atlas anndata file from a url
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/squidpy:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
 
     input:
         val(url)
@@ -84,13 +115,12 @@ import boto3
 myurl = "${url}"
 
 if not(myurl.endswith(".h5ad")):
-    print("URL does not end with .h5ad")
-    exit(1)
+    raise ValueError("URL must end with .h5ad")
 
 parsed_url = urlparse(myurl)
 file_key = parsed_url.path.lstrip('/')
 
-if (myurl.startswith("s3://")):
+if myurl.startswith("s3://"):
     print("Downloading from S3")
     bucket_name = parsed_url.netloc
     s3 = boto3.client('s3')
@@ -102,5 +132,97 @@ else:
     with open(os.path.basename(file_key), "wb") as f:
         f.write(r.content)
 print(f"Downloaded atlas from {myurl}")
+"""
+}
+
+process ADATA_FROM_VISIUM_HD {
+    //convert vhd file to h5ad
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+
+    input:
+        tuple val(meta), path(data)
+    output:
+        tuple val(meta), path("${prefix}/${params.hd}.h5ad"),  emit: adata
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+"""
+#!/usr/bin/env python3
+
+import os
+from spatialdata_io import visium_hd
+from spatialdata_io.experimental import to_legacy_anndata
+from squidpy import gr
+import dask
+
+sample = "${prefix}"
+data = "${data}"
+table = "${params.hd}"
+os.makedirs(sample, exist_ok=True)
+
+#read visium_hd dataset
+ds = visium_hd(data, dataset_id=sample, var_names_make_unique=True)
+
+#convert to anndata
+adata = to_legacy_anndata(ds, coordinate_system=sample,
+                          table_name=table, include_images=True)
+adata.var_names_make_unique()
+
+#make compatible with BayesTME (uses an older, scanpy notation)
+adata.X = adata.X.astype(int)
+adata.uns['layout'] = 'IRREGULAR'
+gr.spatial_neighbors(adata)
+adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
+
+#save
+outname = os.path.join(sample, f"{table}.h5ad")
+adata.write_h5ad(filename=outname)
+"""
+}
+
+process ADATA_FROM_VISIUM {
+    //convert visium dir to h5ad
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+
+    input:
+        tuple val(meta), path(data)
+    output:
+        tuple val(meta), path("${prefix}/visium.h5ad"),  emit: adata
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+"""
+#!/usr/bin/env python3
+
+import os
+from spatialdata_io import visium
+from spatialdata_io.experimental import to_legacy_anndata
+from squidpy import gr
+import dask
+
+sample = "${prefix}"
+data = "${data}"
+
+os.makedirs(sample, exist_ok=True)
+
+#read visium dataset
+ds = visium(data, dataset_id=sample, var_names_make_unique=True)
+
+#convert to anndata
+adata = to_legacy_anndata(ds, coordinate_system=sample,
+                          include_images=True)
+adata.var_names_make_unique()
+
+#make compatible with BayesTME (uses an older, scanpy notation)
+adata.X = adata.X.astype(int)
+adata.uns['layout'] = 'IRREGULAR'
+gr.spatial_neighbors(adata)
+adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
+
+#save
+outname = os.path.join(sample, "visium.h5ad")
+adata.write_h5ad(filename=outname)
 """
 }
