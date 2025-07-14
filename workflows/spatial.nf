@@ -42,6 +42,7 @@ include { BAYESTME;} from '../subworkflows/local/deconvolve_bayestme'
 include { SPACEMARKERS; 
           SPACEMARKERS_MQC;
           SPACEMARKERS_PLOTS;
+          SPACEMARKERS_HD;  // temp - allow spacemarkers to run on dev
         } from '../modules/local/spacemarkers/nextflow/main'
 
 include { COGAPS;
