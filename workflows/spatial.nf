@@ -48,7 +48,8 @@ include { COGAPS;
           COGAPS_ADATA2DGC; } from '../modules/local/cogaps/main'
 
 include { SQUIDPY_MORANS_I;
-          SQUIDPY_SPATIAL_PLOTS; } from '../modules/local/squidpy/main'
+          SQUIDPY_SPATIAL_PLOTS;
+          SQUIDPY_LIGREC_ANALYSIS } from '../modules/local/squidpy/main'
 
 include { RCTD } from '../modules/local/rctd/rctd'
 
@@ -205,10 +206,9 @@ workflow SPATIAL {
     ch_squidpy = RCTD.out.rctd_adata
         .map { tuple(it[0], it[1]) }
 
-    
     SQUIDPY_MORANS_I( ch_squidpy )
     SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
-
+    SQUIDPY_LIGREC_ANALYSIS( ch_squidpy )
 
     ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(SQUIDPY_MORANS_I.out.svgs.map { it[1] })
