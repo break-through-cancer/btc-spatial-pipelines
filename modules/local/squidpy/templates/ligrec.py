@@ -29,10 +29,12 @@ log.info("normalizing and log1p transforming data")
 sc.pp.normalize_total(adata)
 sc.pp.log1p(adata)
 
-# try running ligrec
-res = None
-try:
-    res = sq.gr.ligrec(
+def default_ligrec(**kwargs):
+    if "gene_symbols" in kwargs:
+        gene_symbols = kwargs.pop("gene_symbols")
+    else:
+        gene_symbols = None
+    ligrec=sq.gr.ligrec(
         adata,
         n_perms=1000,
         cluster_key="cell_type",
@@ -41,10 +43,23 @@ try:
         corr_method="fdr_bh",
         transmitter_params={"categories": "ligand"},
         receiver_params={"categories": "receptor"},
-        alpha=0.01
+        alpha=0.01, 
+        gene_symbols=gene_symbols
     )
+    return ligrec
+    
+
+# try running ligrec
+res = None
+try:
+    res = default_ligrec()
 except Exception as e:
     log.error("ligrec failed: {}".format(e))
+    try:
+        log.error("trying ligrec without gene_symbols")
+        res = default_ligrec(gene_symbols="index")
+    except Exception as e2:
+        raise e2
 
 if res is None:
     log.error("ligrec did not return results, exiting.")
@@ -57,8 +72,7 @@ else:
     log.info("saving ligrec metadata")
     # just metadata, as it's easy to comprehend, one row per interaction
     res["metadata"].to_csv(
-        "ligrec_metadata.csv",
-        index=False
+        "ligrec_metadata.csv"
     )
 
     log.info("saving ligrec interaction plot")
