@@ -41,7 +41,7 @@ try:
         corr_method="fdr_bh",
         transmitter_params={"categories": "ligand"},
         receiver_params={"categories": "receptor"},
-        gene_symbols='index'
+        alpha=0.01
     )
 except Exception as e:
     log.error("ligrec failed: {}".format(e))
@@ -51,33 +51,25 @@ if res is None:
     exit(0)
 else:
     log.info("ligres completed successfully, saving to pickle")
+    # dictionary of pandas frames: means, pvalues, metadata
     pickle.dump(res, open("ligrec_interactions.pickle", "wb"))
-    
-    log.info("saving ligrec mean interation values")
-    res["means"].to_json(
-        "ligrec_means.json",
-        index=False
-    )
-
-    log.info("saving ligrec pvalues")
-    res["pvalues"].to_json(
-        "ligrec_pvalues.json",
-        index=False
-    )
 
     log.info("saving ligrec metadata")
-    res["metadata"].to_json(
-        "ligrec_metadata.json",
+    # just metadata, as it's easy to comprehend, one row per interaction
+    res["metadata"].to_csv(
+        "ligrec_metadata.csv",
         index=False
     )
 
     log.info("saving ligrec interaction plot")
     sq.pl.ligrec(res,
-                #source_groups=
+                #source_groups='DUCTAL',
                 dendrogram = 'interacting_clusters',
                 save="ligrec_interactions_{}.png".format(sample),
                 title="{} Ligand-Receptor Interaction".format(sample),
-                alpha=0.005,
+                alpha=0.01,
+                pvalue_threshold=0.05,
+                remove_nonsig_interactions=True,
                 swap_axes=True)
 
 os.chdir("..")
@@ -86,3 +78,4 @@ with open ("versions.yml", "w") as f:
     f.write("    squidpy: {}\\n".format(sq.__version__))
     f.write("    anndata: {}\\n".format(ad.__version__))
     f.write("    scanpy: {}\\n".format(sc.__version__))
+

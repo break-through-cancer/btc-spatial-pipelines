@@ -46,9 +46,7 @@ process SQUIDPY_LIGREC_ANALYSIS { //WIP
     output:
     tuple val(meta), path("${prefix}/figures/ligrec_interactions_${prefix}.png"),  emit: ligrec_plot
     tuple val(meta), path("${prefix}/ligrec_interactions.pickle"),                 emit: ligrec_interactions
-    tuple val(meta), path("${prefix}/ligrec_means.json"),                          emit: ligrec_means
-    tuple val(meta), path("${prefix}/ligrec_pvalues.json"),                        emit: ligrec_pvalues
-    tuple val(meta), path("${prefix}/ligrec_metadata.json"),                       emit: ligrec_metadata
+    tuple val(meta), path("${prefix}/ligrec_metadata.csv"),                        emit: ligrec_metadata
     path "versions.yml",                                                           emit: versions
 
     script:
