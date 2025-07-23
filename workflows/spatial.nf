@@ -117,11 +117,13 @@ workflow SPATIAL {
 
     // Grab datasets
     LOAD_DATASET(ch_input.map { tuple(it[0], it[1], it[4], it[10]) }) //[meta, data_directory, expression_profiles, find_annotations]
+
     ch_adata = LOAD_DATASET.out.ch_adata
     ch_scrna = LOAD_DATASET.out.ch_scrna
     ch_coda = LOAD_DATASET.out.ch_coda
     data_directory = LOAD_DATASET.out.data_directory
     ch_matched_adata = LOAD_DATASET.out.ch_matched_adata
+    ch_versions = ch_versions.mix(LOAD_DATASET.out.versions)
 
     ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
         .join(data_directory)
@@ -206,9 +208,14 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
 
     //collate versions
-    version_yaml = Channel.empty()
-    version_yaml = softwareVersionsToYAML(ch_versions)
-                   .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'versions.yml',
+            sort: true,
+            newLine: true
+        ).set { version_yaml }
+    ch_multiqc_files = ch_multiqc_files.mix(version_yaml)
 
     // MultiQC
     // NOTE - will fail to find spaceranger reports unless the full path is provided
@@ -226,7 +233,9 @@ workflow SPATIAL {
 
 
     // emit:
-    // multiqc_report // channel: /path/to/multiqc_report.html
+    // multiqc_report = multiqc_report // channel: /path/to/multiqc_report.html
+    //   versions       = ch_versions                 // channel: [ versions.yml ]
+
 
 }
 

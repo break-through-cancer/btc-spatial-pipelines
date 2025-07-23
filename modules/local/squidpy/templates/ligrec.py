@@ -12,6 +12,7 @@ log = logging.getLogger()
 
 adata_path = "${adata}"
 sample = "${prefix}"
+process = "${task.process}"
 
 sq_gr_ligrec_threshold = ${params.sq_gr_ligrec_threshold}
 sq_gr_ligrec_alpha = ${params.sq_gr_ligrec_alpha}
@@ -102,7 +103,7 @@ else:
 
 os.chdir("..")
 with open ("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
+    f.write("{}:\\n".format(process))
     f.write("    squidpy: {}\\n".format(sq.__version__))
     f.write("    anndata: {}\\n".format(ad.__version__))
     f.write("    scanpy: {}\\n".format(sc.__version__))

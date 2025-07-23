@@ -29,6 +29,7 @@ process SQUIDPY_SPATIAL_PLOTS {
     tuple val(meta), path("${prefix}/figures/nhood_enrichment.png"),    emit: nhood_enrichment_plot
     tuple val(meta), path("${prefix}/figures/centrality_scores.png"),   emit: centrality_scores_plot
     tuple val(meta), path("${prefix}/squidpy.h5ad"),                    emit: adata
+    path "versions.yml",                                                emit: versions
 
 
     script:

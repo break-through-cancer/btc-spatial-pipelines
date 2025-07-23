@@ -13,15 +13,19 @@ workflow LOAD_DATASET {
         expression_profiles = ch_input.map { it -> tuple(it[0], it[2]) } // expression_profiles column from samplesheet
         find_annotations = ch_input.map { it -> tuple(it[0], it[3]) }    // find_annotations flag from samplesheet
 
+        versions = Channel.empty() // Channel to collect versions of the tools used
+
         // Load visium HD or standard data
         if(params.hd) {
             ADATA_FROM_VISIUM_HD( ch_input.map { tuple(it[0], it[1]) } )
             ch_adata = ADATA_FROM_VISIUM_HD.out.adata
             data_directory = ch_input.map{ it -> tuple(it[0], it[1] + "/binned_outputs/${params.hd}") }
+            versions = versions.mix(ADATA_FROM_VISIUM_HD.out.versions)
         } else {
             ADATA_FROM_VISIUM( ch_input.map { tuple(it[0], it[1]) } )
             ch_adata = ADATA_FROM_VISIUM.out.adata
             data_directory = ch_input.map{ it -> tuple(it[0], it[1]) }
+            versions = versions.mix(ADATA_FROM_VISIUM.out.versions)
         }
 
 
@@ -31,6 +35,7 @@ workflow LOAD_DATASET {
             ch_scrna = ch_input.map { tuple(it[0], it[1]) }
                 .combine(ATLAS_GET.out.atlas)
                 .map { tuple(it[0], it[2]) } // meta, adata_sc
+            versions = versions.mix(ATLAS_GET.out.versions)
         } else{
         // Look for matched scRNA deconvolution files using file mask
         // from expression_profiles column of the samplesheet
@@ -55,6 +60,7 @@ workflow LOAD_DATASET {
         ATLAS_MATCH(ch_scrna.join( ch_adata ))
         ch_matched_adata = ch_input.join(ATLAS_MATCH.out.adata_matched)
             .map(it -> tuple(it[0], it[-1])) // meta, adata_sc
+        versions = versions.mix(ATLAS_MATCH.out.versions)
 
         // CODA annotation channel - or any other external csv annotaion
         ch_coda = ch_input.map { tuple(it[0], it[1]) }
@@ -78,4 +84,5 @@ workflow LOAD_DATASET {
         ch_scrna
         ch_coda
         data_directory
+        versions
 }

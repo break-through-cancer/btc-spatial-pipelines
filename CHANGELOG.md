@@ -3,6 +3,13 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### `Added`
+- squdpy ligand-receptor interactions
+
+### `Fixed`
+- refactor: collect versions from utils subworkflow
+
 ## v1.2.0 - 2025-07-11
 
 ### `Added`
@@ -15,8 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 - refactor: separate subworkflow for data loading
 - refactor: separate subworkflow for BayesTME to avoid it clashing with VisiumHD pipeline
-
-### `Dependencies`
 
 ### `Deprecated`
 - spatial transcriptional programs from the BayesTME package
