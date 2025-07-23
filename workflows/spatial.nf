@@ -21,7 +21,7 @@ WorkflowSpatial.initialise(params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+ch_multiqc_config          = Channel.fromPath(params.multiqc_config, checkIfExists: true)
 ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
 ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
 ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
@@ -115,15 +115,6 @@ workflow SPATIAL {
     ch_input.map { tuple(it[0], it[9]) }.tap { run_spacemarkers }
     ch_input.map { tuple(it[0], it[10]) }.tap { find_annotations }
 
-    // A channel that contains *.html spaceranger reports for multiqc
-    ch_sr_reports = data_directory.flatMap { item ->
-        def meta = item[0]
-        def data_path = item[1]
-        def html_files = file(data_path).listFiles().findAll { it.name.endsWith('.html') }
-        html_files.collect { file -> [meta: meta, sr_report: file] }
-    }
-    ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
-
     // Grab datasets
     LOAD_DATASET(ch_input.map { tuple(it[0], it[1], it[4], it[10]) }) //[meta, data_directory, expression_profiles, find_annotations]
     ch_adata = LOAD_DATASET.out.ch_adata
@@ -200,7 +191,7 @@ workflow SPATIAL {
     //spacemarkers - mqc
     SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1], it[2]) } )
     ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
-    ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
+    //ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
 
     // squidpy analysis 
     ch_squidpy = RCTD.out.rctd_adata
@@ -210,20 +201,27 @@ workflow SPATIAL {
     SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
     SQUIDPY_LIGREC_ANALYSIS( ch_squidpy )
 
+    //ch_multiqc_files = ch_multiqc_files.mix(SQUIDPY_LIGREC_ANALYSIS.out.ligrec_metadata.map { it[1] })
+
     ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
-    ch_multiqc_files = ch_multiqc_files.mix(SQUIDPY_MORANS_I.out.svgs.map { it[1] })
 
     //collate versions
     version_yaml = Channel.empty()
     version_yaml = softwareVersionsToYAML(ch_versions)
                    .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
-    
+
     // MultiQC
     // NOTE - will fail to find spaceranger reports unless the full path is provided
     // multiqc does not find spaceranger report for VisiumHD, address with #24
+    // ch_multiqc_files.view()
     // MULTIQC (
-    //         ch_multiqc_files.collect().ifEmpty([]),[],[],[],[],[]
-    //         )
+    //          ch_multiqc_files.collect().ifEmpty([]),
+    //          ch_multiqc_config,
+    //          [],
+    //          [],
+    //          [],
+    //          []
+    //          )
     // multiqc_report = MULTIQC.out.report.toList()
 
 
