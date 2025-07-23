@@ -13,6 +13,12 @@ log = logging.getLogger()
 adata_path = "${adata}"
 sample = "${prefix}"
 
+sq_gr_ligrec_threshold = ${params.sq_gr_ligrec_threshold}
+sq_gr_ligrec_alpha = ${params.sq_gr_ligrec_alpha}
+sq_gr_ligrec_nperms = ${params.sq_gr_ligrec_nperms}
+sq_pl_ligrec_pvalue = ${params.sq_pl_ligrec_pvalue}
+
+
 log.info("loading {}".format(adata_path))
 adata = ad.read_h5ad(adata_path)
 log.info("adata is {}".format(adata))
@@ -36,15 +42,16 @@ def default_ligrec(**kwargs):
         gene_symbols = None
     ligrec=sq.gr.ligrec(
         adata,
-        n_perms=1000,
+        n_perms=sq_gr_ligrec_nperms,
         cluster_key="cell_type",
         copy=True,
         use_raw=False,
         corr_method="fdr_bh",
         transmitter_params={"categories": "ligand"},
         receiver_params={"categories": "receptor"},
-        alpha=0.01, 
-        gene_symbols=gene_symbols
+        alpha=sq_gr_ligrec_alpha,
+        gene_symbols=gene_symbols,
+        threshold=sq_gr_ligrec_threshold
     )
     return ligrec
     
@@ -77,14 +84,21 @@ else:
 
     log.info("saving ligrec interaction plot")
     sq.pl.ligrec(res,
-                #source_groups='DUCTAL',
                 dendrogram = 'interacting_clusters',
-                save="ligrec_interactions_{}.png".format(sample),
+                save="ligrec_interactions_by_clusters_{}.png".format(sample),
                 title="{} Ligand-Receptor Interaction".format(sample),
                 alpha=0.01,
-                pvalue_threshold=0.05,
+                pvalue_threshold=sq_pl_ligrec_pvalue,
                 remove_nonsig_interactions=True,
                 swap_axes=True)
+    sq.pl.ligrec(res,
+                dendrogram = 'interacting_molecules',
+                save="ligrec_interactions_by_molecules_{}.png".format(sample),
+                title="{} Ligand-Receptor Interaction".format(sample),
+                alpha=0.01,
+                pvalue_threshold=sq_pl_ligrec_pvalue,
+                remove_nonsig_interactions=True,
+                swap_axes=False)
 
 os.chdir("..")
 with open ("versions.yml", "w") as f:
