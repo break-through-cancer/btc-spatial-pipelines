@@ -26,11 +26,14 @@ adata = ad.read_h5ad(adata_path)
 log.info("adata is {}".format(adata))
 
 #squidpy insists on figure dir naming, not creating plot outdir as usually
-os.makedirs(sample, exist_ok=True)
-os.chdir(sample)
+base_path = os.getcwd()
+save_path = os.path.join(sample, "ligrec")
+os.makedirs(save_path, exist_ok=True)
+os.chdir(save_path)
 
 #filter non-na cell_types
 adata = adata[~adata.obs["cell_type"].isna()]
+clusters = adata.obs["cell_type"].unique()
 
 #normalize and log1p
 log.info("normalizing and log1p transforming data")
@@ -57,6 +60,21 @@ def default_ligrec(**kwargs):
         threshold=sq_gr_ligrec_threshold
     )
     return ligrec
+
+def default_ligrec_pl(**kwargs): 
+    source_groups = kwargs.pop("source_groups")
+    target_groups = kwargs.pop("target_groups")
+    save = kwargs.pop("save")
+
+    sq.pl.ligrec(res,
+            source_groups=source_groups,
+            target_groups=target_groups,
+            save=save,
+            title="", # cell names and title overlap sometimes
+            alpha=0.01,
+            pvalue_threshold=sq_pl_ligrec_pvalue,
+            remove_nonsig_interactions=True,
+            swap_axes=False)
     
 
 # try running ligrec
@@ -86,24 +104,23 @@ else:
     )
 
     log.info("saving ligrec interaction plot")
-    sq.pl.ligrec(res,
-                dendrogram = 'interacting_clusters',
-                save="ligrec_interactions_by_clusters_{}.png".format(sample),
-                title="{} Ligand-Receptor Interaction".format(sample),
-                alpha=0.01,
-                pvalue_threshold=sq_pl_ligrec_pvalue,
-                remove_nonsig_interactions=True,
-                swap_axes=True)
-    sq.pl.ligrec(res,
-                dendrogram = 'interacting_molecules',
-                save="ligrec_interactions_by_molecules_{}.png".format(sample),
-                title="{} Ligand-Receptor Interaction".format(sample),
-                alpha=0.01,
-                pvalue_threshold=sq_pl_ligrec_pvalue,
-                remove_nonsig_interactions=True,
-                swap_axes=False)
+    for s in clusters:
+        try:
+            log.info("plotting ligrec for source cluster {}".format(s))
+            default_ligrec_pl(source_groups=s, target_groups=clusters, save="source_{}.png".format(s))
+        except Exception as e:
+            log.error("ligrec plot for source {} failed: {}".format(s, e))
+            continue
+    
+    for t in clusters:
+        try:
+            log.info("plotting ligrec for target cluster {}".format(t))
+            default_ligrec_pl(source_groups=clusters, target_groups=t, save="target_{}.png".format(t))
+        except Exception as e:
+            log.error("ligrec plot for target {} failed: {}".format(t, e))
+            continue
 
-os.chdir("..")
+os.chdir(base_path)
 with open ("versions.yml", "w") as f:
     f.write("{}:\\n".format(process))
     f.write("    squidpy: {}\\n".format(sq.__version__))
