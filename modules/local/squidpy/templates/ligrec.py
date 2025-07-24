@@ -13,6 +13,7 @@ log = logging.getLogger()
 adata_path = "${adata}"
 sample = "${prefix}"
 process = "${task.process}"
+cpus = ${task.cpus}
 
 sq_gr_ligrec_threshold = ${params.sq_gr_ligrec_threshold}
 sq_gr_ligrec_alpha = ${params.sq_gr_ligrec_alpha}
@@ -44,6 +45,7 @@ def default_ligrec(**kwargs):
     ligrec=sq.gr.ligrec(
         adata,
         n_perms=sq_gr_ligrec_nperms,
+        n_jobs=cpus,
         cluster_key="cell_type",
         copy=True,
         use_raw=False,
