@@ -10,6 +10,7 @@ log = logging.getLogger()
 
 adata_path = "${adata}"
 sample = "${prefix}"
+process = "${task.process}"
 cell_type = "cell_type"
 
 os.makedirs(sample, exist_ok=True)
@@ -111,3 +112,12 @@ sq.pl.centrality_scores(adata,
 
 #save the object with newly calculated attributes
 adata.write_h5ad("squidpy.h5ad", compression="gzip")
+
+#versions
+os.chdir('..')
+with open("versions.yml", "w") as f:
+    f.write("{}:\\n".format(process))
+    f.write("    squidpy: {}\\n".format(sq.__version__))
+    f.write("    anndata: {}\\n".format(ad.__version__))
+    f.write("    numpy: {}\\n".format(np.__version__))
+    f.write("    python: {}\\n".format(os.sys.version.split()[0]))

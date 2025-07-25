@@ -139,8 +139,8 @@ adata_st[['write_h5ad']](file.path(outdir, 'rctd.h5ad'), compression = 0)
 #versions
 message("reading session info")
 sinfo <- sessionInfo()
-versions <- lapply(sinfo[["otherPkgs"]], function(x) {sprintf("  %s: %s",x[["Package"]],x[["Version"]])})
-versions[['R']] <- sprintf("  R: %s
+versions <- lapply(sinfo[["otherPkgs"]], function(x) {sprintf("    %s: %s",x[["Package"]],x[["Version"]])})
+versions[['R']] <- sprintf("    R: %s
 ",packageVersion("base"))
 cat(paste0(process,":
 "), file="versions.yml")

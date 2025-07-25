@@ -90,6 +90,7 @@ adata_st.file.close()
 with open ("versions.yml", "w") as f:
     f.write("${task.process}:\\n")
     f.write("    anndata: {}\\n".format(ad.__version__))
+    f.write("    numpy: {}\\n".format(np.__version__))
 """
 }
 
@@ -101,7 +102,8 @@ process ATLAS_GET {
     input:
         val(url)
     output:
-        path("*.h5ad"),  emit: atlas
+        path("*.h5ad"),         emit: atlas
+        path("versions.yml"),   emit: versions
 
     script:
     prefix = task.ext.prefix
@@ -132,6 +134,12 @@ else:
     with open(os.path.basename(file_key), "wb") as f:
         f.write(r.content)
 print(f"Downloaded atlas from {myurl}")
+
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    requests: {}\\n".format(requests.__version__))
+    f.write("    boto3: {}\\n".format(boto3.__version__))
 """
 }
 
@@ -143,7 +151,8 @@ process ADATA_FROM_VISIUM_HD {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/${params.hd}.h5ad"),  emit: adata
+        tuple val(meta), path("${prefix}/${params.hd}.h5ad"),   emit: adata
+        path("versions.yml"),                                   emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -151,10 +160,9 @@ process ADATA_FROM_VISIUM_HD {
 #!/usr/bin/env python3
 
 import os
-from spatialdata_io import visium_hd
+import spatialdata_io as sd
 from spatialdata_io.experimental import to_legacy_anndata
-from squidpy import gr
-import dask
+import squidpy as sq
 
 sample = "${prefix}"
 data = "${data}"
@@ -162,7 +170,7 @@ table = "${params.hd}"
 os.makedirs(sample, exist_ok=True)
 
 #read visium_hd dataset
-ds = visium_hd(data, dataset_id=sample, var_names_make_unique=True)
+ds = sd.visium_hd(data, dataset_id=sample, var_names_make_unique=True)
 
 #convert to anndata
 adata = to_legacy_anndata(ds, coordinate_system=sample,
@@ -172,12 +180,18 @@ adata.var_names_make_unique()
 #make compatible with BayesTME (uses an older, scanpy notation)
 adata.X = adata.X.astype(int)
 adata.uns['layout'] = 'IRREGULAR'
-gr.spatial_neighbors(adata)
+sq.gr.spatial_neighbors(adata)
 adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 
 #save
 outname = os.path.join(sample, f"{table}.h5ad")
 adata.write_h5ad(filename=outname)
+
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
+    f.write("    squidpy: {}\\n".format(sq.__version__))
 """
 }
 
@@ -189,7 +203,8 @@ process ADATA_FROM_VISIUM {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/visium.h5ad"),  emit: adata
+        tuple val(meta), path("${prefix}/visium.h5ad"),         emit: adata
+        path("versions.yml"),                                   emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -197,10 +212,9 @@ process ADATA_FROM_VISIUM {
 #!/usr/bin/env python3
 
 import os
-from spatialdata_io import visium
+import spatialdata_io as sd
 from spatialdata_io.experimental import to_legacy_anndata
-from squidpy import gr
-import dask
+import squidpy as sq
 
 sample = "${prefix}"
 data = "${data}"
@@ -208,7 +222,7 @@ data = "${data}"
 os.makedirs(sample, exist_ok=True)
 
 #read visium dataset
-ds = visium(data, dataset_id=sample, var_names_make_unique=True)
+ds = sd.visium(data, dataset_id=sample, var_names_make_unique=True)
 
 #convert to anndata
 adata = to_legacy_anndata(ds, coordinate_system=sample,
@@ -218,11 +232,17 @@ adata.var_names_make_unique()
 #make compatible with BayesTME (uses an older, scanpy notation)
 adata.X = adata.X.astype(int)
 adata.uns['layout'] = 'IRREGULAR'
-gr.spatial_neighbors(adata)
+sq.gr.spatial_neighbors(adata)
 adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 
 #save
 outname = os.path.join(sample, "visium.h5ad")
 adata.write_h5ad(filename=outname)
+
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
+    f.write("    squidpy: {}\\n".format(sq.__version__))
 """
 }
