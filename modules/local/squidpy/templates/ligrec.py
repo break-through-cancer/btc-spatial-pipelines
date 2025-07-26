@@ -91,7 +91,6 @@ except Exception as e:
 
 if res is None:
     log.error("ligrec did not return results, exiting.")
-    exit(0)
 else:
     log.info("ligres completed successfully, saving to pickle")
     # dictionary of pandas frames: means, pvalues, metadata
