@@ -39,7 +39,7 @@ process SQUIDPY_SPATIAL_PLOTS {
 
 process SQUIDPY_LIGREC_ANALYSIS { //WIP
     tag "$meta.id"
-    label 'process_single'
+    label 'process_medium'
     container 'ghcr.io/break-through-cancer/btc-containers/scverse:main'
 
     input:
