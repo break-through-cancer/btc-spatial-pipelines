@@ -82,15 +82,14 @@ res = None
 try:
     res = default_ligrec()
 except Exception as e:
-    log.error("ligrec failed: {}".format(e))
+    log.error("default ligrec failed: {}".format(e))
     try:
-        log.error("trying ligrec without gene_symbols")
         res = default_ligrec(gene_symbols="index")
     except Exception as e2:
-        raise e2
+        log.error("ligrec without gene_symbols failed: {}".format(e2))
 
 if res is None:
-    log.error("ligrec did not return results, exiting.")
+    log.error("ligrec did not return results.")
 else:
     log.info("ligres completed successfully, saving to pickle")
     # dictionary of pandas frames: means, pvalues, metadata
