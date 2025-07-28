@@ -26,7 +26,8 @@ def default_ligrec(adata, **kwargs):
         alpha=par["sq_gr_ligrec_alpha"],
         gene_symbols=gene_symbols,
         threshold=par["sq_gr_ligrec_threshold"],
-        numba_parallel=False)
+        numba_parallel=False,
+        backend='threading')
     
     return ligrec
 
