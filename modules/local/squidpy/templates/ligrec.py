@@ -5,6 +5,7 @@ import logging
 import scanpy as sc
 import os
 import pickle
+from matplotlib import pyplot as plt
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
@@ -15,11 +16,12 @@ sample = "${prefix}"
 process = "${task.process}"
 cpus = ${task.cpus}
 
-sq_gr_ligrec_threshold = ${params.sq_gr_ligrec_threshold}
-sq_gr_ligrec_alpha = ${params.sq_gr_ligrec_alpha}
-sq_gr_ligrec_nperms = ${params.sq_gr_ligrec_nperms}
-sq_pl_ligrec_pvalue = ${params.sq_pl_ligrec_pvalue}
+par = {"sq_gr_ligrec_threshold": ${params.sq_gr_ligrec_threshold},
+       "sq_gr_ligrec_alpha": ${params.sq_gr_ligrec_alpha},
+       "sq_gr_ligrec_nperms": ${params.sq_gr_ligrec_nperms},
+       "sq_pl_ligrec_pvalue": ${params.sq_pl_ligrec_pvalue}}
 
+log.info("received params:{}".format(par))
 
 log.info("loading {}".format(adata_path))
 adata = ad.read_h5ad(adata_path)
@@ -32,7 +34,7 @@ os.makedirs(save_path, exist_ok=True)
 os.chdir(save_path)
 
 #filter non-na cell_types
-adata = adata[~adata.obs["cell_type"].isna()]
+adata = adata[~adata.obs["cell_type"].isna()].copy()
 clusters = adata.obs["cell_type"].unique()
 
 #normalize and log1p
@@ -47,7 +49,7 @@ def default_ligrec(**kwargs):
         gene_symbols = None
     ligrec=sq.gr.ligrec(
         adata,
-        n_perms=sq_gr_ligrec_nperms,
+        n_perms=par["sq_gr_ligrec_nperms"],
         n_jobs=cpus,
         cluster_key="cell_type",
         copy=True,
@@ -55,9 +57,9 @@ def default_ligrec(**kwargs):
         corr_method="fdr_bh",
         transmitter_params={"categories": "ligand"},
         receiver_params={"categories": "receptor"},
-        alpha=sq_gr_ligrec_alpha,
+        alpha=par["sq_gr_ligrec_alpha"],
         gene_symbols=gene_symbols,
-        threshold=sq_gr_ligrec_threshold
+        threshold=par["sq_gr_ligrec_threshold"]
     )
     return ligrec
 
@@ -72,7 +74,7 @@ def default_ligrec_pl(**kwargs):
             save=save,
             title="", # cell names and title overlap sometimes
             alpha=0.01,
-            pvalue_threshold=sq_pl_ligrec_pvalue,
+            pvalue_threshold=par["sq_pl_ligrec_pvalue"],
             remove_nonsig_interactions=True,
             swap_axes=False)
     
@@ -106,6 +108,7 @@ else:
         try:
             log.info("plotting ligrec for source cluster {}".format(s))
             default_ligrec_pl(source_groups=s, target_groups=clusters, save="source_{}.png".format(s))
+            plt.close('all')
         except Exception as e:
             log.error("ligrec plot for source {} failed: {}".format(s, e))
             continue
@@ -114,6 +117,7 @@ else:
         try:
             log.info("plotting ligrec for target cluster {}".format(t))
             default_ligrec_pl(source_groups=clusters, target_groups=t, save="target_{}.png".format(t))
+            plt.close('all')
         except Exception as e:
             log.error("ligrec plot for target {} failed: {}".format(t, e))
             continue
