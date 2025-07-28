@@ -59,7 +59,9 @@ def default_ligrec(**kwargs):
         receiver_params={"categories": "receptor"},
         alpha=par["sq_gr_ligrec_alpha"],
         gene_symbols=gene_symbols,
-        threshold=par["sq_gr_ligrec_threshold"]
+        threshold=par["sq_gr_ligrec_threshold"],
+        numba_parallel=False
+        
     )
     return ligrec
 
