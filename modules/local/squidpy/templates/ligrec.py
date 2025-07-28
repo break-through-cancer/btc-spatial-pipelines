@@ -85,11 +85,11 @@ if __name__ == "__main__":
     # try running ligrec
     res = None
     try:
-        res = default_ligrec()
+        res = default_ligrec(adata)
     except Exception as e:
         log.error("default ligrec failed: {}".format(e))
         try:
-            res = default_ligrec(gene_symbols="index")
+            res = default_ligrec(adata, gene_symbols="index")
         except Exception as e2:
             log.error("ligrec without gene_symbols failed: {}".format(e2))
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         for s in clusters:
             try:
                 log.info("plotting ligrec for source cluster {}".format(s))
-                default_ligrec_pl(source_groups=s, target_groups=clusters, save="source_{}.png".format(s))
+                default_ligrec_pl(ligrec=res, source_groups=s, target_groups=clusters, save="source_{}.png".format(s))
             except Exception as e:
                 log.error("ligrec plot for source {} failed: {}".format(s, e))
                 continue
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         for t in clusters:
             try:
                 log.info("plotting ligrec for target cluster {}".format(t))
-                default_ligrec_pl(source_groups=clusters, target_groups=t, save="target_{}.png".format(t))
+                default_ligrec_pl(ligrec=res, source_groups=clusters, target_groups=t, save="target_{}.png".format(t))
             except Exception as e:
                 log.error("ligrec plot for target {} failed: {}".format(t, e))
                 continue
