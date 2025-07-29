@@ -27,7 +27,7 @@ def default_ligrec(adata, **kwargs):
         gene_symbols=gene_symbols,
         threshold=par["sq_gr_ligrec_threshold"],
         numba_parallel=False,
-        backend='threading')
+        backend='multiprocessing')
     
     return ligrec
 
