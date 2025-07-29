@@ -8,7 +8,7 @@ import pickle
 from matplotlib import pyplot as plt
 
 
-def default_ligrec(adata, **kwargs):
+def default_ligrec(adata, par, **kwargs):
     if "gene_symbols" in kwargs:
         gene_symbols = kwargs.pop("gene_symbols")
     else:
@@ -16,7 +16,7 @@ def default_ligrec(adata, **kwargs):
     ligrec=sq.gr.ligrec(
         adata,
         n_perms=par["sq_gr_ligrec_nperms"],
-        n_jobs=1,
+        n_jobs=cpus,
         cluster_key="cell_type",
         copy=True,
         use_raw=False,
@@ -25,12 +25,11 @@ def default_ligrec(adata, **kwargs):
         receiver_params={"categories": "receptor"},
         alpha=par["sq_gr_ligrec_alpha"],
         gene_symbols=gene_symbols,
-        threshold=par["sq_gr_ligrec_threshold"],
-        numba_parallel=False)
+        threshold=par["sq_gr_ligrec_threshold"])
     
     return ligrec
 
-def default_ligrec_pl(ligrec, **kwargs): 
+def default_ligrec_pl(ligrec, par, **kwargs):
     source_groups = kwargs.pop("source_groups")
     target_groups = kwargs.pop("target_groups")
     save = kwargs.pop("save")
@@ -50,7 +49,6 @@ def default_ligrec_pl(ligrec, **kwargs):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     log = logging.getLogger()
-
 
     adata_path = "${adata}"
     sample = "${prefix}"
@@ -85,11 +83,11 @@ if __name__ == "__main__":
     # try running ligrec
     res = None
     try:
-        res = default_ligrec(adata)
+        res = default_ligrec(adata, par)
     except Exception as e:
         log.error("default ligrec failed: {}".format(e))
         try:
-            res = default_ligrec(adata, gene_symbols="index")
+            res = default_ligrec(adata, par, gene_symbols="index")
         except Exception as e2:
             log.error("ligrec without gene_symbols failed: {}".format(e2))
 
@@ -110,7 +108,7 @@ if __name__ == "__main__":
         for s in clusters:
             try:
                 log.info("plotting ligrec for source cluster {}".format(s))
-                default_ligrec_pl(ligrec=res, source_groups=s, target_groups=clusters, save="source_{}.png".format(s))
+                default_ligrec_pl(ligrec=res, source_groups=s, target_groups=clusters, par=par, save="source_{}.png".format(s))
             except Exception as e:
                 log.error("ligrec plot for source {} failed: {}".format(s, e))
                 continue
@@ -118,7 +116,7 @@ if __name__ == "__main__":
         for t in clusters:
             try:
                 log.info("plotting ligrec for target cluster {}".format(t))
-                default_ligrec_pl(ligrec=res, source_groups=clusters, target_groups=t, save="target_{}.png".format(t))
+                default_ligrec_pl(ligrec=res, source_groups=clusters, target_groups=t, par=par, save="target_{}.png".format(t))
             except Exception as e:
                 log.error("ligrec plot for target {} failed: {}".format(t, e))
                 continue
