@@ -16,7 +16,7 @@ def default_ligrec(adata, **kwargs):
     ligrec=sq.gr.ligrec(
         adata,
         n_perms=par["sq_gr_ligrec_nperms"],
-        n_jobs=cpus,
+        n_jobs=1,
         cluster_key="cell_type",
         copy=True,
         use_raw=False,
@@ -26,8 +26,7 @@ def default_ligrec(adata, **kwargs):
         alpha=par["sq_gr_ligrec_alpha"],
         gene_symbols=gene_symbols,
         threshold=par["sq_gr_ligrec_threshold"],
-        numba_parallel=False,
-        backend='multiprocessing')
+        numba_parallel=False)
     
     return ligrec
 
