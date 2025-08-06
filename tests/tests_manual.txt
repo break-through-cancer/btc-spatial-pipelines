@@ -23,6 +23,13 @@ nextflow run main.nf --input tests/BCsamplesheet-w-ref.csv \
                      --max_cpus 6 -profile docker \
                      -resume
 
+#run multiple samples on visium with reference as file
+nextflow run main.nf --input tests/BCsamplesheet-w-ref-many.csv \
+                     --outdir out \
+                     --max_memory 24.GB \
+                     --max_cpus 6 -profile docker \
+                     -resume
+
 #run only BayesTME deconvolution
 nextflow run main.nf --input tests/BCsamplesheet-bayestme.csv \
                      --outdir out \
