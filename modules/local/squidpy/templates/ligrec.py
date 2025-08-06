@@ -60,7 +60,7 @@ if __name__ == "__main__":
         "sq_gr_ligrec_nperms": ${params.sq_gr_ligrec_nperms},
         "sq_pl_ligrec_pvalue": ${params.sq_pl_ligrec_pvalue}}
 
-    log.info("received params:{}".format(par))
+    log.info(f"received params:{par}")
 
     log.info("loading {}".format(adata_path))
     adata = ad.read_h5ad(adata_path)
