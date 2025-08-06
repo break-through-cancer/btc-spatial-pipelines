@@ -116,7 +116,7 @@ if __name__ == "__main__":
         for t in clusters:
             try:
                 log.info("plotting ligrec for target cluster {}".format(t))
-                default_ligrec_pl(ligrec=res, source_groups=clusters, target_groups=t, par=par, save="target_{}.png".format(t))
+                default_ligrec_pl(ligrec=res, source_groups=clusters, target_groups=t, par=par, save=f"target_{t}.png")
             except Exception as e:
                 log.error("ligrec plot for target {} failed: {}".format(t, e))
                 continue
