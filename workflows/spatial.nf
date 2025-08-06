@@ -209,7 +209,6 @@ workflow SPATIAL {
     ch_versions = ch_versions.mix(SQUIDPY_LIGREC_ANALYSIS.out.versions)
 
     ch_ligrec_output = SQUIDPY_LIGREC_ANALYSIS.out.ligrec_interactions.collect()
-    ch_ligrec_output.view()
 
     //collate versions
     softwareVersionsToYAML(ch_versions)
