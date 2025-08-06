@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     log.info("loading {}".format(adata_path))
     adata = ad.read_h5ad(adata_path)
-    log.info("adata is {}".format(adata))
+    log.info(f"adata is {adata}")
 
     #squidpy insists on figure dir naming, not creating plot outdir as usually
     base_path = os.getcwd()
