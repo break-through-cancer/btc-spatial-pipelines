@@ -200,12 +200,16 @@ workflow SPATIAL {
         .map { tuple(it[0], it[1]) }
 
     SQUIDPY_MORANS_I( ch_squidpy )
-    SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
-    SQUIDPY_LIGREC_ANALYSIS( ch_squidpy )
-
-    //ch_multiqc_files = ch_multiqc_files.mix(SQUIDPY_LIGREC_ANALYSIS.out.ligrec_metadata.map { it[1] })
-
     ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
+
+    SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
+    ch_versions = ch_versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)
+
+    SQUIDPY_LIGREC_ANALYSIS( ch_squidpy )
+    ch_versions = ch_versions.mix(SQUIDPY_LIGREC_ANALYSIS.out.versions)
+
+    ch_ligrec_output = SQUIDPY_LIGREC_ANALYSIS.out.ligrec_interactions.collect()
+    ch_ligrec_output.view()
 
     //collate versions
     softwareVersionsToYAML(ch_versions)
