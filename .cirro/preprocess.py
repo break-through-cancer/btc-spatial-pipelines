@@ -36,7 +36,7 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     if 'reference_scrna' in ds.params and not is_url(ds.params['reference_scrna']):
         ds.params['expression_profile'] = ds.params['reference_scrna']
     
-    samplesheet = df_from_params(ds.params)
+    samplesheet = df_from_params(ds.params, ds)
 
     for colname in SAMPLESHEET_REQUIRED_COLUMNS:
         if colname not in samplesheet.columns:
