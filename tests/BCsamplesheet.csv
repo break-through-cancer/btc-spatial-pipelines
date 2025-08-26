@@ -1,2 +1,0 @@
-sample,data_directory,n_cell_types,n_top_genes,bleeding_correction,expression_profile,run_bayestme,run_cogaps,run_spacemarkers,find_annotations
-"sample1","/Users/dlvovs/data/breastcancer-renamed",5,1000,0,,0,0,0,0
