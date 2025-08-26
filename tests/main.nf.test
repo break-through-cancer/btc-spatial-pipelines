@@ -5,6 +5,8 @@ nextflow_pipeline {
 
     test("RCTD on Visium SD with reference as URL") {
 
+        tag "basic-sd"
+
         when {
             params {
                 input = "../../../tests/test.csv"
@@ -23,6 +25,8 @@ nextflow_pipeline {
 
     test("RCTD on Visium HD with reference as URL") {
 
+        tag "basic-hd"
+
         when {
             params {
                 input = "../../../tests/hdtest.csv"
@@ -31,6 +35,28 @@ nextflow_pipeline {
                 max_cpus = 4
                 reference_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
                 hd = "square_016um"
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+    
+    test("RCTD on Visium HD in Doublet mode") {
+
+        tag "doublet-hd"
+
+        when {
+            params {
+                input = "../../../tests/hdtest.csv"
+                outdir = "tests/results"
+                max_memory = "8.GB"
+                max_cpus = 4
+                reference_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
+                hd = "square_016um"
+                doublet_mode = 'doublet'
             }
         }
 

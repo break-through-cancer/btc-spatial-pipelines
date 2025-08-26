@@ -15,6 +15,7 @@ process <- '${task.process}'
 
 cell_type_col <- '${params.type_col_scrna}'
 n_top_genes <- as.numeric('${n_top_genes}')
+doublet_mode <- '${params.doublet_mode}'
 
 ### prep spatial (query) object
 #1. coords need to be present in anndata.obsm['spatial']
@@ -97,7 +98,7 @@ gc()
 message('run rctd')
 rctd_res <- tryCatch({
   spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores),
-                    doublet_mode = 'full')
+                    doublet_mode = doublet_mode)
 }, error = function(e) {
   message('RCTD threw error: "',e[["message"]],'"')
   if(grep(pattern="UMI_min_sigma", x=e[["message"]])){
