@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 - squidpy ligand-receptor interactions
 - pipeline tests for visium SD and HD
+- SpaceMarkers support for visium HD
+- doublet_mode param for rctd
 
 ### `Fixed`
 - collect versions from utils subworkflow (missing before)
