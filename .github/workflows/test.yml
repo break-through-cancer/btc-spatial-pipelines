@@ -1,5 +1,5 @@
 #inspired by https://docs.cirro.bio/pipelines/development/#automated-testing
-name: minimal-example
+name: test
 
 on:
   pull_request:
