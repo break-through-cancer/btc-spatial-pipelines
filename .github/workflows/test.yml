@@ -34,4 +34,4 @@ jobs:
           sudo mv nf-test /usr/local/bin
 
       - name: run tests
-        run: nf-test version
+        run: nf-test test
