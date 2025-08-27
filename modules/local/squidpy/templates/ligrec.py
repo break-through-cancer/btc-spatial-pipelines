@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     log.info(f"received params:{par}")
 
-    log.info("loading {}".format(adata_path))
+    log.info(f"loading {adata_path}")
     adata = ad.read_h5ad(adata_path)
     log.info(f"adata is {adata}")
 
@@ -85,16 +85,16 @@ if __name__ == "__main__":
     try:
         res = default_ligrec(adata, par)
     except Exception as e:
-        log.error("default ligrec failed: {}".format(e))
+        log.error(f"default ligrec failed: {e}")
         try:
             res = default_ligrec(adata, par, gene_symbols="index")
         except Exception as e2:
-            log.error("ligrec without gene_symbols failed: {}".format(e2))
+            log.error(f"ligrec without gene_symbols failed: {e2}")
 
     if res is None:
         log.error("ligrec did not return results.")
     else:
-        log.info("ligres completed successfully, saving to pickle")
+        log.info("ligrec completed successfully, saving to pickle")
         # dictionary of pandas frames: means, pvalues, metadata
         pickle.dump(res, open("ligrec_interactions.pickle", "wb"))
 
@@ -107,18 +107,18 @@ if __name__ == "__main__":
         log.info("saving ligrec interaction plot")
         for s in clusters:
             try:
-                log.info("plotting ligrec for source cluster {}".format(s))
+                log.info(f"plotting ligrec for source cluster {s}")
                 default_ligrec_pl(ligrec=res, source_groups=s, target_groups=clusters, par=par, save=f"source_{s}.png")
             except Exception as e:
-                log.error("ligrec plot for source {} failed: {}".format(s, e))
+                log.error(f"ligrec plot for source {s} failed: {e}")
                 continue
         
         for t in clusters:
             try:
-                log.info("plotting ligrec for target cluster {}".format(t))
+                log.info(f"plotting ligrec for target cluster {t}")
                 default_ligrec_pl(ligrec=res, source_groups=clusters, target_groups=t, par=par, save=f"target_{t}.png")
             except Exception as e:
-                log.error("ligrec plot for target {} failed: {}".format(t, e))
+                log.error(f"ligrec plot for target {t} failed: {e}")
                 continue
 
     os.chdir(base_path)
