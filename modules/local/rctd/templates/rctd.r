@@ -15,6 +15,7 @@ process <- '${task.process}'
 
 cell_type_col <- '${params.type_col_scrna}'
 n_top_genes <- as.numeric('${n_top_genes}')
+doublet_mode <- '${params.doublet_mode}'
 
 ### prep spatial (query) object
 #1. coords need to be present in anndata.obsm['spatial']
@@ -46,7 +47,7 @@ if (is.null(adata_sc[["raw"]])) {
   message('no raw data, using X from adata_sc')
   gene_names <-rownames(adata_sc[["var"]])
   select_genes <- which(gene_names %in% names(top_genes))
-  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][, select_genes - 1]) # -1 for 0-based index
+  counts_sc <- Matrix::t(adata_sc[["X"]][, select_genes - 1]) # -1 for 0-based index
   rownames(counts_sc) <- gene_names[select_genes]
 } else {
   message('using raw.X from adata_sc')
@@ -97,7 +98,7 @@ gc()
 message('run rctd')
 rctd_res <- tryCatch({
   spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores),
-                    doublet_mode = 'full')
+                    doublet_mode = doublet_mode)
 }, error = function(e) {
   message('RCTD threw error: "',e[["message"]],'"')
   if(grep(pattern="UMI_min_sigma", x=e[["message"]])){
@@ -139,8 +140,8 @@ adata_st[['write_h5ad']](file.path(outdir, 'rctd.h5ad'), compression = 0)
 #versions
 message("reading session info")
 sinfo <- sessionInfo()
-versions <- lapply(sinfo[["otherPkgs"]], function(x) {sprintf("  %s: %s",x[["Package"]],x[["Version"]])})
-versions[['R']] <- sprintf("  R: %s
+versions <- lapply(sinfo[["otherPkgs"]], function(x) {sprintf("    %s: %s",x[["Package"]],x[["Version"]])})
+versions[['R']] <- sprintf("    R: %s
 ",packageVersion("base"))
 cat(paste0(process,":
 "), file="versions.yml")

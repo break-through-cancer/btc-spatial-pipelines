@@ -1,2 +1,2 @@
 sample,data_directory,n_cell_types,n_top_genes,bleeding_correction,expression_profile,run_bayestme,run_cogaps,run_spacemarkers,find_annotations
-"sample1","/Users/dlvovs/data/btc/HC01BTC_visiumHD",5,200,0,,0,0,0,0
+"sample1","../../../tests/data/visium",5,100,0,,0,0,1,0

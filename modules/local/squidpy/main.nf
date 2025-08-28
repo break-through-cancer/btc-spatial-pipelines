@@ -29,6 +29,7 @@ process SQUIDPY_SPATIAL_PLOTS {
     tuple val(meta), path("${prefix}/figures/nhood_enrichment.png"),    emit: nhood_enrichment_plot
     tuple val(meta), path("${prefix}/figures/centrality_scores.png"),   emit: centrality_scores_plot
     tuple val(meta), path("${prefix}/squidpy.h5ad"),                    emit: adata
+    path "versions.yml",                                                emit: versions
 
 
     script:
@@ -38,15 +39,16 @@ process SQUIDPY_SPATIAL_PLOTS {
 
 process SQUIDPY_LIGREC_ANALYSIS { //WIP
     tag "$meta.id"
-    label 'process_single'
+    label 'process_medium'
     container 'ghcr.io/break-through-cancer/btc-containers/scverse:main'
 
     input:
     tuple val(meta), path(adata)
     output:
-    tuple val(meta), path("figures/ligrec_interactions_${prefix}.png"),  emit: ligrec_plot
-    tuple val(meta), path("${prefix}/ligrec_interactions.csv"),          emit: ligrec_csv
-    path "versions.yml",                                                 emit: versions
+    tuple val(meta), path("${prefix}/**.png"),                            emit: ligrec_plots, optional: true
+    tuple val(meta), path("${prefix}/**ligrec_interactions.pickle"),      emit: ligrec_interactions
+    tuple val(meta), path("${prefix}/**ligrec_metadata.csv"),             emit: ligrec_metadata
+    path "versions.yml",                                                  emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"

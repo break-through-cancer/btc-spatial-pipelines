@@ -21,7 +21,7 @@ WorkflowSpatial.initialise(params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+ch_multiqc_config          = Channel.fromPath(params.multiqc_config, checkIfExists: true)
 ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
 ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
 ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
@@ -44,11 +44,17 @@ include { SPACEMARKERS;
           SPACEMARKERS_PLOTS;
         } from '../modules/local/spacemarkers/nextflow/main'
 
+include {
+          SPACEMARKERS_HD;  // temp - allow spacemarkers to run on dev
+          SPACEMARKERS_HD_PLOTS;
+        } from '../modules/local/spacemarkers/nextflow/main_hd'
+
 include { COGAPS;
           COGAPS_ADATA2DGC; } from '../modules/local/cogaps/main'
 
 include { SQUIDPY_MORANS_I;
-          SQUIDPY_SPATIAL_PLOTS; } from '../modules/local/squidpy/main'
+          SQUIDPY_SPATIAL_PLOTS;
+          SQUIDPY_LIGREC_ANALYSIS } from '../modules/local/squidpy/main'
 
 include { RCTD } from '../modules/local/rctd/rctd'
 
@@ -114,22 +120,15 @@ workflow SPATIAL {
     ch_input.map { tuple(it[0], it[9]) }.tap { run_spacemarkers }
     ch_input.map { tuple(it[0], it[10]) }.tap { find_annotations }
 
-    // A channel that contains *.html spaceranger reports for multiqc
-    ch_sr_reports = data_directory.flatMap { item ->
-        def meta = item[0]
-        def data_path = item[1]
-        def html_files = file(data_path).listFiles().findAll { it.name.endsWith('.html') }
-        html_files.collect { file -> [meta: meta, sr_report: file] }
-    }
-    ch_multiqc_files = ch_multiqc_files.mix(ch_sr_reports.map { it.sr_report })
-
     // Grab datasets
     LOAD_DATASET(ch_input.map { tuple(it[0], it[1], it[4], it[10]) }) //[meta, data_directory, expression_profiles, find_annotations]
+
     ch_adata = LOAD_DATASET.out.ch_adata
     ch_scrna = LOAD_DATASET.out.ch_scrna
     ch_coda = LOAD_DATASET.out.ch_coda
     data_directory = LOAD_DATASET.out.data_directory
     ch_matched_adata = LOAD_DATASET.out.ch_matched_adata
+    ch_versions = ch_versions.mix(LOAD_DATASET.out.versions)
 
     ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
         .join(data_directory)
@@ -183,52 +182,75 @@ workflow SPATIAL {
         .map { tuple(it[0], it[1], it[2]) }
     
     //spacemarkers - main
-    SPACEMARKERS( ch_sm_inputs )
-    ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
+    if(params.hd) {
 
+        SPACEMARKERS_HD( ch_sm_inputs )   //temp - allow spacemarkers to run on dev
 
-    //spacemarkers - plots
-    ch_plotting_input = SPACEMARKERS.out.spaceMarkersScores
-        .map { tuple(it[0], it[1]) }
-    ch_plotting_input = ch_plotting_input.join(SPACEMARKERS.out.overlapScores)
-        .map { tuple(it[0], it[1], it[2], it[3]) }
-    
-    SPACEMARKERS_PLOTS( ch_plotting_input)
-    ch_versions = ch_versions.mix(SPACEMARKERS_PLOTS.out.versions)
+    } else {
 
-    //spacemarkers - mqc
-    SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1], it[2]) } )
-    ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
-    ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
+        SPACEMARKERS( ch_sm_inputs )
+        ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
+
+        //spacemarkers - plots
+        ch_plotting_input = SPACEMARKERS.out.spaceMarkersScores
+            .map { tuple(it[0], it[1]) }
+        ch_plotting_input = ch_plotting_input.join(SPACEMARKERS.out.overlapScores)
+            .map { tuple(it[0], it[1], it[2], it[3]) }
+        
+        SPACEMARKERS_PLOTS( ch_plotting_input)
+        ch_versions = ch_versions.mix(SPACEMARKERS_PLOTS.out.versions)
+
+        //spacemarkers - mqc
+        SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1], it[2]) } )
+        ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
+        ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
+
+    }
 
     // squidpy analysis 
     ch_squidpy = RCTD.out.rctd_adata
         .map { tuple(it[0], it[1]) }
 
-    
     SQUIDPY_MORANS_I( ch_squidpy )
-    SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
-
-
     ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
-    ch_multiqc_files = ch_multiqc_files.mix(SQUIDPY_MORANS_I.out.svgs.map { it[1] })
+
+    SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
+    ch_versions = ch_versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)
+
+    SQUIDPY_LIGREC_ANALYSIS( ch_squidpy )
+    ch_versions = ch_versions.mix(SQUIDPY_LIGREC_ANALYSIS.out.versions)
+
+    ch_ligrec_output = SQUIDPY_LIGREC_ANALYSIS.out.ligrec_interactions.collect()
 
     //collate versions
-    version_yaml = Channel.empty()
-    version_yaml = softwareVersionsToYAML(ch_versions)
-                   .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'versions.yml', sort: true, newLine: true)
-    
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'versions.yml',
+            sort: true,
+            newLine: true
+        ).set { version_yaml }
+    ch_multiqc_files = ch_multiqc_files.mix(version_yaml)
+
     // MultiQC
     // NOTE - will fail to find spaceranger reports unless the full path is provided
     // multiqc does not find spaceranger report for VisiumHD, address with #24
+    // ch_multiqc_files.view()
     // MULTIQC (
-    //         ch_multiqc_files.collect().ifEmpty([]),[],[],[],[],[]
-    //         )
+    //          ch_multiqc_files.collect().ifEmpty([]),
+    //          ch_multiqc_config,
+    //          [],
+    //          [],
+    //          [],
+    //          []
+    //          )
     // multiqc_report = MULTIQC.out.report.toList()
 
 
     // emit:
-    // multiqc_report // channel: /path/to/multiqc_report.html
+    // multiqc_report = multiqc_report // channel: /path/to/multiqc_report.html
+    //   versions       = ch_versions                 // channel: [ versions.yml ]
+
 
 }
 
