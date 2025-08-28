@@ -3,10 +3,10 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v1.3.0 - 2025-08-06
+## v1.3.0 - 2025-08-28
 
 ### `Added`
-- squidpy ligand-receptor interactions
+- squidpy ligand-receptor interactions (including plot of top 25)
 - pipeline tests for visium SD and HD
 - SpaceMarkers support for visium HD
 - doublet_mode param for rctd
@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - collect versions from all squidpy submodules
 - RCTD module trying to use `adata.raw.X` when no `adata.X` present
 - refactor config files
+- refactor nextflow schema
 
 ## v1.2.0 - 2025-07-11
 
