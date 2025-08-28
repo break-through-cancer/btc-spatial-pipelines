@@ -6,6 +6,7 @@ import scanpy as sc
 import os
 import pickle
 from matplotlib import pyplot as plt
+import numpy as np
 
 
 def default_ligrec(adata, par, **kwargs):
@@ -26,7 +27,7 @@ def default_ligrec(adata, par, **kwargs):
         alpha=par["sq_gr_ligrec_alpha"],
         gene_symbols=gene_symbols,
         threshold=par["sq_gr_ligrec_threshold"])
-    
+
     return ligrec
 
 def default_ligrec_pl(ligrec, par, **kwargs):
@@ -34,18 +35,29 @@ def default_ligrec_pl(ligrec, par, **kwargs):
     target_groups = kwargs.pop("target_groups")
     save = kwargs.pop("save")
 
-    sq.pl.ligrec(ligrec,
+    #reduce to sq_pl_ligrec_max_interactions for plotting
+    n_top = par["sq_pl_ligrec_max_interactions"]-1
+    sig_ligrec = ligrec["pvalues"][source_groups][target_groups].apply(min, axis=1) <= par["sq_pl_ligrec_pvalue"]
+    sig_where = np.where(sig_ligrec)
+    sig_means = ligrec["means"][source_groups][target_groups].iloc[sig_where].apply(max, axis=1)
+    min_mean = sorted(sig_means, reverse=True)[n_top] if len(sig_means) > n_top else sig_means.min()
+    ind = ligrec["means"][source_groups][target_groups].iloc[sig_where][sig_means>min_mean].index
+
+    repacked = ligrec.copy()
+    for k in ["means", "pvalues", "metadata"]:
+        repacked[k] = repacked[k].loc[ind]
+
+    sq.pl.ligrec(repacked,
             source_groups=source_groups,
             target_groups=target_groups,
             save=save,
             title="", # cell names and title overlap sometimes
             alpha=0.01,
-            pvalue_threshold=par["sq_pl_ligrec_pvalue"],
-            remove_nonsig_interactions=True,
             swap_axes=False)
     plt.close('all')
     return None
-    
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     log = logging.getLogger()
@@ -58,7 +70,9 @@ if __name__ == "__main__":
     par = {"sq_gr_ligrec_threshold": ${params.sq_gr_ligrec_threshold},
         "sq_gr_ligrec_alpha": ${params.sq_gr_ligrec_alpha},
         "sq_gr_ligrec_nperms": ${params.sq_gr_ligrec_nperms},
-        "sq_pl_ligrec_pvalue": ${params.sq_pl_ligrec_pvalue}}
+        "sq_pl_ligrec_pvalue": ${params.sq_pl_ligrec_pvalue},
+        "sq_pl_ligrec_max_interactions": ${params.sq_pl_ligrec_max_interactions}
+    }
 
     log.info(f"received params:{par}")
 
