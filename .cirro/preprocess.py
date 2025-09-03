@@ -27,7 +27,7 @@ def is_url(string):
         return False
 
 
-def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
+def prepare_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.logger.info([ds.params])
     
     # If the reference_scrna is not a URL, we assume it is a file mask string
@@ -35,33 +35,35 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     if 'reference_scrna' in ds.params and not is_url(ds.params['reference_scrna']):
         ds.params['expression_profile'] = ds.params['reference_scrna']
     
-    samplesheet = df_from_params(ds.params, ds)
+    samplesheet = draft_samplesheet(ds.params, ds)
     
     # Ensure all required columns are present (populate missing)
     for colname in SAMPLESHEET_REQUIRED_COLUMNS:
         if colname not in samplesheet.columns:
+            ds.logger.warning(f"Samplesheet is missing required column '{colname}'. Populating with NaN.")
             samplesheet[colname] = np.nan
 
     # Save to a file
-    samplesheet.to_csv("samplesheet.csv", index=None)
+    samplesheet.to_csv("cirro-samplesheet.csv", index=None)
 
     # Clear params that we wrote to the samplesheet
     # cleared params will not overload the nextflow.params
     to_remove = []
     for k in ds.params:
         if k in SAMPLESHEET_REQUIRED_COLUMNS:
+            ds.logger.info(f"Removing param '{k}' from dataset params as it is now in the samplesheet.")
             to_remove.append(k)
 
     for k in to_remove:
         ds.remove_param(k)
 
-    ds.add_param("input", "samplesheet.csv")
+    ds.add_param("input", "cirro-samplesheet.csv")
 
     # Log the samplesheet
     ds.logger.info(samplesheet.to_dict())
 
 
-def df_from_params(params, ds):
+def draft_samplesheet(params, ds):
     pipeline_param_names = [c for c in SAMPLESHEET_REQUIRED_COLUMNS]
     pipeline_params = { k: [params[k]] for k in pipeline_param_names if k in params.keys()}
 
@@ -81,7 +83,7 @@ def df_from_params(params, ds):
 def main():
     ds = PreprocessDataset.from_running()
 
-    set_params_as_samplesheet(ds)
+    prepare_samplesheet(ds)
 
     # log
     ds.logger.info(ds.params)
