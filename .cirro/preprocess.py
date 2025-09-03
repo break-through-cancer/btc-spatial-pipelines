@@ -36,6 +36,11 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
         ds.params['expression_profile'] = ds.params['reference_scrna']
     
     samplesheet = df_from_params(ds.params, ds)
+    
+    # Ensure all required columns are present (populate missing)
+    for colname in SAMPLESHEET_REQUIRED_COLUMNS:
+        if colname not in samplesheet.columns:
+            samplesheet[colname] = np.nan
 
     # Save to a file
     samplesheet.to_csv("samplesheet.csv", index=None)
