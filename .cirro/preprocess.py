@@ -15,9 +15,8 @@ SAMPLESHEET_REQUIRED_COLUMNS = ("sample",
                                 "run_cogaps",
                                 "n_top_genes",
                                 "run_spacemarkers",
-                                "find_annotations",
-                                "response"
-                                )
+                                "find_annotations"
+)
 
 # Helper function to check if a string is a URL
 def is_url(string):
@@ -37,14 +36,6 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
         ds.params['expression_profile'] = ds.params['reference_scrna']
     
     samplesheet = df_from_params(ds.params, ds)
-
-    for colname in SAMPLESHEET_REQUIRED_COLUMNS:
-        if colname not in samplesheet.columns:
-            samplesheet[colname] = np.nan
-
-    for colname in samplesheet.columns:
-        if colname not in SAMPLESHEET_REQUIRED_COLUMNS:
-            del samplesheet[colname]
 
     # Save to a file
     samplesheet.to_csv("samplesheet.csv", index=None)

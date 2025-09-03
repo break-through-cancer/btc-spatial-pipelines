@@ -3,13 +3,51 @@ nextflow_pipeline {
     name "Test Workflow main.nf"
     script "main.nf"
 
-    test("RCTD on Visium SD with reference as URL") {
+    test("Just check samplesheet and read visium to adata") {
 
-        tag "basic-sd"
+        tag "samplesheet"
 
         when {
             params {
-                input = "../../../tests/test.csv"
+                input = "../../../tests/samplesheet-test.csv"
+                outdir = "tests/results"
+                max_memory = "8.GB"
+                max_cpus = 4
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+        test("Fail on empty samplesheet") {
+
+        tag "samplesheet"
+
+        when {
+            params {
+                input = "../../../tests/samplesheet-empty-test.csv"
+                outdir = "tests/results"
+                max_memory = "8.GB"
+                max_cpus = 4
+            }
+        }
+
+        then {
+            assert workflow.success == false
+        }
+
+    }
+
+    test("RCTD on Visium SD with reference as URL") {
+
+        tag "visiumsd"
+
+        when {
+            params {
+                input = "../../../tests/sdvisium-test.csv"
                 outdir = "tests/results"
                 max_memory = "8.GB"
                 max_cpus = 4
@@ -25,11 +63,11 @@ nextflow_pipeline {
 
     test("RCTD on Visium HD with reference as URL") {
 
-        tag "basic-hd"
+        tag "visiumhd"
 
         when {
             params {
-                input = "../../../tests/hdtest.csv"
+                input = "../../../tests/hdvisium-test.csv"
                 outdir = "tests/results"
                 max_memory = "8.GB"
                 max_cpus = 4
