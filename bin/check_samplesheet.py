@@ -63,7 +63,7 @@ def check_samplesheet(file_in, file_out):
         # Validate the existence of the expected header columns.
         if not REQUIRED_COLUMNS.issubset(samplesheet_names):
             req_cols = ", ".join(REQUIRED_COLUMNS)
-            logger.critical(f"The sample sheet must contain these column headers: {req_cols}.")
+            logger.critical(f"The sample sheet must contain these column headers: {req_cols} but contains these: {samplesheet_names}.")
             sys.exit(1)
 
         # Validate each row.
