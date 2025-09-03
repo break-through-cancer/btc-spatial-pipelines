@@ -20,7 +20,8 @@ REQUIRED_COLUMNS = frozenset({"sample",
                               "run_cogaps",
                               "n_top_genes",
                               "run_spacemarkers",
-                              "find_annotations"
+                              "find_annotations",
+                              "response"
                               })
 
 class RowChecker:
