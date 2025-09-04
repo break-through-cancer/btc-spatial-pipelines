@@ -15,6 +15,8 @@ workflow LOAD_DATASET {
 
         versions = Channel.empty() // Channel to collect versions of the tools used
 
+        ch_input.view()
+
         // Load visium HD or standard data
         if(params.hd) {
             ADATA_FROM_VISIUM_HD( ch_input.map { tuple(it[0], it[1]) } )

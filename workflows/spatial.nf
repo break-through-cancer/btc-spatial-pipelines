@@ -78,7 +78,6 @@ include { MULTIQC } from '../modules/nf-core/multiqc'
 
 
 workflow SPATIAL {
-
     //gather all QC reports for MultiQC
     ch_multiqc_files = Channel.empty()
     multiqc_report   = Channel.empty()
@@ -94,34 +93,14 @@ workflow SPATIAL {
         file(params.input)
     )
 
-    // NOTE: append to the list to avoid other indices being off
-    ch_input = INPUT_CHECK.out.datasets.map { tuple(
-        id:it.sample_name,
-        it.data_directory,
-        it.n_cell_types,
-        it.bleeding_correction,
-        it.expression_profile,
-        it.run_bayestme,
-        it.run_cogaps,
-        it.n_top_genes,
-        it.spatial_transcriptional_programs,
-        it.run_spacemarkers,
-        it.find_annotations
-    ) }
-
-    ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
-    ch_input.map { tuple(it[0], it[2]) }.tap { n_cell_types }
-    ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
-    ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
-    ch_input.map { tuple(it[0], it[5]) }.tap { run_bayestme }
-    ch_input.map { tuple(it[0], it[6]) }.tap { run_cogaps }
-    ch_input.map { tuple(it[0], it[7]) }.tap { n_top_genes }
-    ch_input.map { tuple(it[0], it[8]) }.tap { spatial_transcriptional_programs }
-    ch_input.map { tuple(it[0], it[9]) }.tap { run_spacemarkers }
-    ch_input.map { tuple(it[0], it[10]) }.tap { find_annotations }
+    ch_datasets = INPUT_CHECK.out.datasets
+    ch_datasets.map { tuple(it.id, it.n_cell_types) }.tap { n_cell_types }
+    ch_datasets.map { tuple(it.id, it.run_cogaps) }.tap { run_cogaps }
+    ch_datasets.map { tuple(it.id, it.n_top_genes) }.tap { n_top_genes }
+    ch_datasets.map { tuple(it.id, it.run_spacemarkers) }.tap { run_spacemarkers }
 
     // Grab datasets
-    LOAD_DATASET(ch_input.map { tuple(it[0], it[1], it[4], it[10]) }) //[meta, data_directory, expression_profiles, find_annotations]
+    LOAD_DATASET(ch_datasets.map { tuple(id:it.id, it.data_directory, it.expression_profile, it.find_annotations) })
 
     ch_adata = LOAD_DATASET.out.ch_adata
     ch_scrna = LOAD_DATASET.out.ch_scrna
@@ -135,7 +114,7 @@ workflow SPATIAL {
 
     // BayestME deconvolution and plots, run only if not hd as the tool does not support it
     if(!params.hd) {
-        BAYESTME(ch_input)
+        BAYESTME(ch_datasets)
         ch_sm_inputs = ch_sm_inputs.mix(BAYESTME.out.ch_deconvolved.map { tuple(it[0], it[1]) }
                                    .join(data_directory))
         ch_squidpy = ch_squidpy.mix(BAYESTME.out.ch_deconvolved)
