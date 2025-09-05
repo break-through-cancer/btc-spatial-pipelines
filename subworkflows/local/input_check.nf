@@ -8,9 +8,7 @@ workflow INPUT_CHECK {
         SAMPLESHEET_CHECK(samplesheet)
             .csv
             .splitCsv(header:true, sep:',')
-            .map{it + [id: it.sample]
-                 it.remove('sample')
-                 it}
+            .map{it + [id: it.sample]}
             .map{it + [data_directory: file(it.data_directory)]}
             .map{it + [expression_profile: (it.expression_profile == null || it.expression_profile == "") ? [] : file(it.expression_profile)]}
             .map{it + [bleeding_correction: it.bleeding_correction.toBoolean()]}
