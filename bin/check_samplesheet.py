@@ -13,14 +13,7 @@ logger = logging.getLogger()
 
 REQUIRED_COLUMNS = frozenset({"sample", 
                               "data_directory", 
-                              "n_cell_types", 
-                              "bleeding_correction", 
-                              "expression_profile",
-                              "run_bayestme",
-                              "run_cogaps",
-                              "n_top_genes",
-                              "run_spacemarkers",
-                              "find_annotations"
+                              "expression_profile"
                               })
 
 class RowChecker:

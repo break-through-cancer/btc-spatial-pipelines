@@ -44,8 +44,7 @@ include { SPACEMARKERS;
           SPACEMARKERS_PLOTS;
         } from '../modules/local/spacemarkers/nextflow/main'
 
-include {
-          SPACEMARKERS_HD;  // temp - allow spacemarkers to run on dev
+include { SPACEMARKERS_HD;  // temp - allow spacemarkers to run on dev
           SPACEMARKERS_HD_PLOTS;
         } from '../modules/local/spacemarkers/nextflow/main_hd'
 
@@ -94,10 +93,6 @@ workflow SPATIAL {
     )
 
     ch_datasets = INPUT_CHECK.out.datasets
-    ch_datasets.map { tuple(it.id, it.n_cell_types) }.tap { n_cell_types }
-    ch_datasets.map { tuple(it.id, it.run_cogaps) }.tap { run_cogaps }
-    ch_datasets.map { tuple(it.id, it.n_top_genes) }.tap { n_top_genes }
-    ch_datasets.map { tuple(it.id, it.run_spacemarkers) }.tap { run_spacemarkers }
 
     // Grab datasets
     LOAD_DATASET(ch_datasets.map { tuple(id:it.id, it.data_directory, it.expression_profile, it.find_annotations) })
@@ -113,7 +108,7 @@ workflow SPATIAL {
         .join(data_directory)
 
     // BayestME deconvolution and plots, run only if not hd as the tool does not support it
-    if(!params.hd) {
+    if(!params.hd && params.deconvolve.bayestme) {
         BAYESTME(ch_datasets)
         ch_sm_inputs = ch_sm_inputs.mix(BAYESTME.out.ch_deconvolved.map { tuple(it[0], it[1]) }
                                    .join(data_directory))
@@ -124,82 +119,83 @@ workflow SPATIAL {
     // RCTD reference-based deconvolution and plots
     // plots are temporary as there is the idea to plot
     // all deconvolution stats with the same process/workflow
-    ch_rctd_input = data_directory
-        .join( ch_scrna )
-        .join( ch_matched_adata )
-        .map { tuple(it[0], it[2], it[-1]) }
-        .join( n_top_genes)
-    
-    RCTD( ch_rctd_input )
-    ch_versions = ch_versions.mix(RCTD.out.versions)
-    ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
-        .join(data_directory))
-
-    //CoGAPS
-    ch_convert_adata = ch_adata
-        .join(run_cogaps)
-        .filter { it -> it[-1] == true }
-        .map( it -> tuple(it[0], it[1]) )
-    
-    COGAPS_ADATA2DGC( ch_convert_adata )
-    ch_versions = ch_versions.mix(COGAPS_ADATA2DGC.out.versions)
-
-    ch_cogaps = COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) }
-        .join(n_cell_types)
-        .map { tuple(it[0], it[1], [niterations:params.niterations,
-                                           npatterns:it[-1],
-                                           sparse:params.sparse,
-                                           distributed:params.distributed,
-                                           nsets:params.nsets,
-                                           nthreads:params.nthreads]) }
-
-    COGAPS(ch_cogaps)
-    ch_versions = ch_versions.mix(COGAPS.out.versions)
-    ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(data_directory))
-    ch_sm_inputs = ch_sm_inputs.combine(run_spacemarkers, by:0)
-        .filter { it -> it[-1] == true }                             // make spacemarkers optional
-        .map { tuple(it[0], it[1], it[2]) }
-    
-    //spacemarkers - main
-    if(params.hd) {
-
-        SPACEMARKERS_HD( ch_sm_inputs )   //temp - allow spacemarkers to run on dev
-
-    } else {
-
-        SPACEMARKERS( ch_sm_inputs )
-        ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
-
-        //spacemarkers - plots
-        ch_plotting_input = SPACEMARKERS.out.spaceMarkersScores
-            .map { tuple(it[0], it[1]) }
-        ch_plotting_input = ch_plotting_input.join(SPACEMARKERS.out.overlapScores)
-            .map { tuple(it[0], it[1], it[2], it[3]) }
+    if(params.deconvolve.rctd) {
+        ch_rctd_input = data_directory
+            .join( ch_scrna )
+            .join( ch_matched_adata )
+            .map { tuple(it[0], it[2], it[-1]) }
         
-        SPACEMARKERS_PLOTS( ch_plotting_input)
-        ch_versions = ch_versions.mix(SPACEMARKERS_PLOTS.out.versions)
-
-        //spacemarkers - mqc
-        SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1], it[2]) } )
-        ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
-        ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
-
+        RCTD( ch_rctd_input )
+        ch_versions = ch_versions.mix(RCTD.out.versions)
+        ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
+            .join(data_directory))
+        
+        ch_squidpy = ch_squidpy.mix(RCTD.out.rctd_adata)
+            .map { tuple(it[0], it[1]) }
     }
 
-    // squidpy analysis 
-    ch_squidpy = RCTD.out.rctd_adata
-        .map { tuple(it[0], it[1]) }
+    //CoGAPS reference-free spatially unaware deconvolution
+    if(params.deconvolve.cogaps) {
+        ch_convert_adata = ch_adata
+    
+        COGAPS_ADATA2DGC( ch_convert_adata )
+        ch_versions = ch_versions.mix(COGAPS_ADATA2DGC.out.versions)
 
-    SQUIDPY_MORANS_I( ch_squidpy )
-    ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
+        ch_cogaps = COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) }
+            .map { tuple(it[0], it[1], [niterations:params.niterations,
+                                            npatterns:it[-1],
+                                            sparse:params.sparse,
+                                            distributed:params.distributed,
+                                            nsets:params.nsets,
+                                            nthreads:params.nthreads]) }
 
-    SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
-    ch_versions = ch_versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)
+        COGAPS(ch_cogaps)
+        ch_versions = ch_versions.mix(COGAPS.out.versions)
+        ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(data_directory))
+    }
 
-    SQUIDPY_LIGREC_ANALYSIS( ch_squidpy )
-    ch_versions = ch_versions.mix(SQUIDPY_LIGREC_ANALYSIS.out.versions)
+    //spacemarkers - main
+    if (params.spatial.spacemarkers){
+        if(params.hd) {
 
-    ch_ligrec_output = SQUIDPY_LIGREC_ANALYSIS.out.ligrec_interactions.collect()
+            SPACEMARKERS_HD( ch_sm_inputs )   //temp - allow spacemarkers to run on dev
+
+        } else {
+
+            SPACEMARKERS( ch_sm_inputs )
+            ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
+
+            //spacemarkers - plots
+            ch_plotting_input = SPACEMARKERS.out.spaceMarkersScores
+                .map { tuple(it[0], it[1]) }
+            ch_plotting_input = ch_plotting_input.join(SPACEMARKERS.out.overlapScores)
+                .map { tuple(it[0], it[1], it[2], it[3]) }
+            
+            SPACEMARKERS_PLOTS( ch_plotting_input)
+            ch_versions = ch_versions.mix(SPACEMARKERS_PLOTS.out.versions)
+
+            //spacemarkers - mqc
+            SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1], it[2]) } )
+            ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
+            ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
+
+        }
+    }
+
+
+    // squidpy analysis
+    if (params.spatial.squidpy){
+        SQUIDPY_MORANS_I( ch_squidpy )
+        ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
+
+        SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
+        ch_versions = ch_versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)
+
+        SQUIDPY_LIGREC_ANALYSIS( ch_squidpy )
+        ch_versions = ch_versions.mix(SQUIDPY_LIGREC_ANALYSIS.out.versions)
+
+        ch_ligrec_output = SQUIDPY_LIGREC_ANALYSIS.out.ligrec_interactions.collect()
+    }
 
     //collate versions
     softwareVersionsToYAML(ch_versions)
