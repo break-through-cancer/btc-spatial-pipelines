@@ -61,6 +61,7 @@ nextflow_pipeline {
 
     }
 
+
     test("RCTD on Visium HD with reference as URL") {
 
         tag "visiumhd"
@@ -80,6 +81,25 @@ nextflow_pipeline {
             assert workflow.success
         }
 
+    }
+
+    test("Multisample Visium SD with reference as URL") {
+
+        tag "visiumsd"
+
+        when {
+            params {
+                input = "../../../tests/multisample-test.csv"
+                outdir = "tests/results"
+                max_memory = "8.GB"
+                max_cpus = 4
+                reference_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
     }
 
 }
