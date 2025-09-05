@@ -8,21 +8,17 @@ workflow INPUT_CHECK {
         SAMPLESHEET_CHECK(samplesheet)
             .csv
             .splitCsv(header:true, sep:',')
-            .map{ row -> [
-                id: row.sample,
-                data_directory: file(row.data_directory),
-                n_cell_types: row.n_cell_types,
-                bleeding_correction: row.bleeding_correction.toBoolean(),
-                expression_profile: (row.expression_profile == null || row.expression_profile == "") ? [] : row.expression_profile,
-                run_bayestme: row.run_bayestme.toBoolean(),
-                run_cogaps: row.run_cogaps.toBoolean(),
-                cogaps_niterations: row.cogaps_niterations,
-                n_top_genes: row.n_top_genes,
-                run_spacemarkers: row.run_spacemarkers.toBoolean(),
-                find_annotations: row.find_annotations.toBoolean()
-            ] }
+            .map{it + [id: it.sample]
+                 it.remove('sample')
+                 it}
+            .map{it + [data_directory: file(it.data_directory)]}
+            .map{it + [expression_profile: (it.expression_profile == null || it.expression_profile == "") ? [] : file(it.expression_profile)]}
+            .map{it + [bleeding_correction: it.bleeding_correction.toBoolean()]}
+            .map{it + [run_bayestme: it.run_bayestme.toBoolean()]}
+            .map{it + [run_cogaps: it.run_cogaps.toBoolean()]}
+            .map{it + [run_spacemarkers: it.run_spacemarkers.toBoolean()]}
+            .map{it + [find_annotations: it.find_annotations.toBoolean()]}
             .set{ datasets }
-
 
     emit:
         datasets
