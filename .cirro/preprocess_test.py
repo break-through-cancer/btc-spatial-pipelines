@@ -17,11 +17,7 @@ def test_preprocess(mocker):
         "sample": "sample",
         "outdir": "s3://bucket/output",
         "data_directory": "s3://bucket/data",
-        "bleeding_correction": True,
-        "n_cell_types": 4,
-        "expression_profile": "expression_profile",
-        "run_bayestme": True,
-        "run_cogaps": True
+        "expression_profile": "expression_profile"
     }
 
     try:

@@ -6,16 +6,9 @@ import numpy as np
 from urllib.parse import urlparse
 from pathlib import Path
 
-SAMPLESHEET_REQUIRED_COLUMNS = ("sample", 
-                                "data_directory", 
-                                "n_cell_types", 
-                                "bleeding_correction", 
-                                "expression_profile",
-                                "run_bayestme",
-                                "run_cogaps",
-                                "n_top_genes",
-                                "run_spacemarkers",
-                                "find_annotations"
+SAMPLESHEET_REQUIRED_COLUMNS = ("sample",
+                                "data_directory",
+                                "expression_profile"
 )
 
 # Helper function to check if a string is a URL
