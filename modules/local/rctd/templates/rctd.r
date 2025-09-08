@@ -14,7 +14,7 @@ outdir <- '${prefix}'
 process <- '${task.process}'
 
 cell_type_col <- '${params.type_col_scrna}'
-n_top_genes <- as.numeric('${params.n_top_genes}')
+n_top_genes <- as.numeric('${params.deconvolve.n_top_genes}')
 doublet_mode <- '${params.doublet_mode}'
 
 ### prep spatial (query) object
