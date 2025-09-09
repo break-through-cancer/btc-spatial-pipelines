@@ -28,7 +28,15 @@ def prepare_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     if 'reference_scrna' in ds.params and not is_url(ds.params['reference_scrna']):
         ds.params['expression_profile'] = ds.params['reference_scrna']
     
-    samplesheet = draft_samplesheet(ds.params, ds)
+    samplesheet = samplesheet_from_files(ds.params, ds)
+    
+    #check is pipeline uses Cirro samplesheet, and if not prepare it from params
+    if samplesheet.empty:
+        ds.logger.warning("No files found in dataset. Preparing samplesheet from params.")
+        samplesheet = samplesheet_from_params(ds.params)
+        if samplesheet.empty:
+            raise ValueError("No files found in dataset and unable to prepare samplesheet from params.")
+        ds.logger.info("Prepared samplesheet from params.")
     
     # Ensure all required columns are present (populate missing)
     for colname in SAMPLESHEET_REQUIRED_COLUMNS:
@@ -56,7 +64,7 @@ def prepare_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.logger.info(samplesheet.to_dict())
 
 
-def draft_samplesheet(params, ds):
+def samplesheet_from_files(params, ds):
     pipeline_param_names = [c for c in SAMPLESHEET_REQUIRED_COLUMNS]
     pipeline_params = { k: [params[k]] for k in pipeline_param_names if k in params.keys()}
 
@@ -69,6 +77,19 @@ def draft_samplesheet(params, ds):
     files = files[['sample','data_directory']]
 
     data_params = pd.merge(ds.samplesheet,files,on='sample', how='left')
+    samplesheet = data_params.join(pd.DataFrame(pipeline_params), how='cross')
+
+    return samplesheet
+
+def samplesheet_from_params(params):
+    pipeline_param_names = [c for c in SAMPLESHEET_REQUIRED_COLUMNS]
+    pipeline_params = { k: [params[k]] for k in pipeline_param_names if k in params.keys()}
+
+    data_params = pd.DataFrame({
+        'sample':[x['name'] for x in params['cirro_input']],
+        'data_directory': [x['s3']+'/data' for x in params['cirro_input']]
+        })
+    
     samplesheet = data_params.join(pd.DataFrame(pipeline_params), how='cross')
 
     return samplesheet
