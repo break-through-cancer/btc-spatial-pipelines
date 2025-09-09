@@ -82,15 +82,13 @@ def samplesheet_from_files(params, ds):
     return samplesheet
 
 def samplesheet_from_params(params):
-    pipeline_param_names = [c for c in SAMPLESHEET_REQUIRED_COLUMNS]
-    pipeline_params = { k: [params[k]] for k in pipeline_param_names if k in params.keys()}
 
     data_params = pd.DataFrame({
         'sample':[x['name'] for x in params['cirro_input']],
         'data_directory': [x['s3']+'/data' for x in params['cirro_input']]
         })
     
-    samplesheet = data_params.join(pd.DataFrame(pipeline_params), how='cross')
+    samplesheet = data_params
 
     return samplesheet
 
