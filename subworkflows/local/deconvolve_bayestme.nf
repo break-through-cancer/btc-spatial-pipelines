@@ -11,33 +11,24 @@ workflow BAYESTME {
 
     main:
 
-        ch_input.map { tuple(it[0], it[1]) }.tap { data_directory }
-        ch_input.map { tuple(it[0], it[2]) }.tap { n_cell_types }
-        ch_input.map { tuple(it[0], it[3]) }.tap { should_run_bleeding_correction }
-        ch_input.map { tuple(it[0], it[4]) }.tap { expression_profiles }
-        ch_input.map { tuple(it[0], it[5]) }.tap { run_bayestme }
-        ch_input.map { tuple(it[0], it[6]) }.tap { run_cogaps }
-        ch_input.map { tuple(it[0], it[7]) }.tap { n_top_genes }
-        ch_input.map { tuple(it[0], it[8]) }.tap { spatial_transcriptional_programs }
-        ch_input.map { tuple(it[0], it[9]) }.tap { run_spacemarkers }
-        ch_input.map { tuple(it[0], it[10]) }.tap { find_annotations }
 
-        ch_btme = ch_input.map { tuple(it[0], it[1], it[2]) } // meta, data_directory
-                          .join( run_bayestme )
-                          .filter { it -> it[-1] == true }   // run_bayestme
+        ch_input.map { tuple(id:it.id, params.should_run_bleeding_correction) }.tap { should_run_bleeding_correction }
+
+
+        // construct bayestme input from params
+        ch_btme = ch_input.map {tuple([id:it.id], it.data_directory) }
 
         BAYESTME_LOAD_SPACERANGER( ch_btme )
         ch_adata = BAYESTME_LOAD_SPACERANGER.out.adata
 
         filter_genes_input = ch_adata
-        .join( n_top_genes )
         .map { tuple(
-            it[0],               // sample_name
-            it[1],               // adata
-            true,                // filter_ribosomal_genes
-            it[2],               // n_top_genes
-            0.9,                 // spot_threshold
-            [])                  // disabled ch_scrna, see #65
+            it[0],                          // sample_name
+            it[1],                          // adata
+            true,                           // filter_ribosomal_genes
+            params.deconvolve.n_top_genes,  // n_top_genes
+            0.9,                            // spot_threshold
+            [])                             // disabled ch_scrna, see #65
         }
 
         BAYESTME_FILTER_GENES( filter_genes_input )
@@ -52,9 +43,11 @@ workflow BAYESTME {
         BAYESTME_FILTER_GENES.out.adata_filtered
             .join( should_run_bleeding_correction )
             .filter { it[-1] == false }
-            .map { tuple(it[0], it[1]) }
-            .join( ch_input.map { tuple(it[0], it[2]) } )
-            .map { tuple(it[0], it[1], it[2], params.bayestme_spatial_smoothing_parameter) }
+            .map { tuple(it[0], 
+                         it[1], 
+                         params.n_cell_types, 
+                         params.bayestme_spatial_smoothing_parameter,
+                         []) }
             .tap { not_bleed_corrected_deconvolution_input }
 
         BAYESTME_BLEEDING_CORRECTION( bleeding_correction_input )
@@ -70,6 +63,7 @@ workflow BAYESTME {
                         it[3], //smoothing_parameter
                         [])    //expression truth placeholder, see #65
                 }
+
         BAYESTME_DECONVOLUTION( deconvolution_input )
         ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
 

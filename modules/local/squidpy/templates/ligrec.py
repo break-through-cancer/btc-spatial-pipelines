@@ -79,6 +79,14 @@ if __name__ == "__main__":
     log.info(f"loading {adata_path}")
     adata = ad.read_h5ad(adata_path)
     log.info(f"adata is {adata}")
+    
+    #get most abundant cell type from bayestme
+    if 'cell_type' not in adata.obs.columns and 'bayestme_cell_type_counts' in adata.obsm:
+        log.info("cell_type {} not found in adata.obs, calculating from bayestme_cell_type_counts")
+        most_abundant = np.argmax(adata.obsm['bayestme_cell_type_counts'], axis=1)
+        adata.obs['cell_type'] = most_abundant
+        adata.obs['cell_type'] = adata.obs['cell_type'].astype('category')
+        
 
     #squidpy insists on figure dir naming, not creating plot outdir as usually
     base_path = os.getcwd()
