@@ -48,7 +48,7 @@ workflow LOAD_DATASET {
 
 
         // CODA annotation channel - or any other external csv annotaion
-        if (params.deconvolve.external){
+        if (params.external){
             ch_coda = ch_input.map { tuple(it[0], it[1]) }
                 .flatMap { item -> 
                     def meta = item[0]
