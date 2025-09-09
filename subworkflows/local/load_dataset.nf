@@ -16,10 +16,10 @@ workflow LOAD_DATASET {
         ch_coda = Channel.empty() // Channel for CODA or other external annotation files
 
         // Load visium HD or standard data
-        if(params.hd) {
+        if(params.visium_hd) {
             ADATA_FROM_VISIUM_HD( ch_input.map { tuple(it[0], it[1]) } )
             ch_adata = ADATA_FROM_VISIUM_HD.out.adata
-            data_directory = ch_input.map{ it -> tuple(it[0], it[1] + "/binned_outputs/${params.hd}") }
+            data_directory = ch_input.map{ it -> tuple(it[0], it[1] + "/binned_outputs/${params.visium_hd}") }
             versions = versions.mix(ADATA_FROM_VISIUM_HD.out.versions)
         } else {
             ADATA_FROM_VISIUM( ch_input.map { tuple(it[0], it[1]) } )

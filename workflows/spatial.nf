@@ -108,7 +108,7 @@ workflow SPATIAL {
         .join(data_directory)
 
     // BayestME deconvolution and plots, run only if not hd as the tool does not support it
-    if(!params.hd && params.deconvolve.bayestme) {
+    if(!params.visium_hd && params.deconvolve.bayestme) {
         BAYESTME(ch_datasets)
         ch_sm_inputs = ch_sm_inputs.mix(BAYESTME.out.ch_deconvolved.map { tuple(it[0], it[1]) }
                                    .join(data_directory))
@@ -155,8 +155,8 @@ workflow SPATIAL {
     }
 
     //spacemarkers - main
-    if (params.spatial.spacemarkers){
-        if(params.hd) {
+    if (params.analyze.spacemarkers){
+        if(params.visium_hd) {
 
             SPACEMARKERS_HD( ch_sm_inputs )   //temp - allow spacemarkers to run on dev
 
@@ -184,7 +184,7 @@ workflow SPATIAL {
 
 
     // squidpy analysis
-    if (params.spatial.squidpy){
+    if (params.analyze.squidpy){
         SQUIDPY_MORANS_I( ch_squidpy )
         ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
 

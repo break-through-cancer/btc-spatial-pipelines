@@ -60,7 +60,7 @@ nextflow_pipeline {
                     rctd = true
                     external = false
                 }
-                spatial {
+                analyze {
                     spacemarkers = false
                     squidpy = false
                 }
@@ -89,7 +89,7 @@ nextflow_pipeline {
                     cogaps = false
                     rctd = true
                 }
-                spatial {
+                analyze {
                     spacemarkers = false
                     squidpy = false
                 }
@@ -119,12 +119,12 @@ nextflow_pipeline {
                     rctd = true
                     external = false
                 }
-                spatial {
+                analyze {
                     spacemarkers = true
                     squidpy = true
                 }
 
-                reference_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
+                ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
             }
         }
 
@@ -150,12 +150,12 @@ nextflow_pipeline {
                     rctd = true
                     external = false
                 }
-                spatial {
+                analyze {
                     spacemarkers = true
                     squidpy = true
                 }
-                reference_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
-                hd = "square_016um"
+                ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
+                visium_hd = "square_016um"
             }
         }
 

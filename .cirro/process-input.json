@@ -9,7 +9,7 @@
     "deconvolve.external": "$.params.dataset.paramJson.deconvolution.find_annotations",
     "deconvolve.rctd": "true",
     "spatial.run_spacemarkers": "$.params.dataset.paramJson.spatial.run_spacemarkers",
-    "reference_scrna": "$.params.dataset.paramJson.deconvolution.reference_scrna",
-    "type_col_scrna": "$.params.dataset.paramJson.deconvolution.type_col_scrna",
-    "hd": "$.params.dataset.paramJson.data.hd"
+    "ref_scrna": "$.params.dataset.paramJson.deconvolution.reference_scrna",
+    "ref_scrna_type_col": "$.params.dataset.paramJson.deconvolution.type_col_scrna",
+    "visium_hd": "$.params.dataset.paramJson.data.hd"
 }
