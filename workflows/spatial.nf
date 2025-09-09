@@ -108,7 +108,7 @@ workflow SPATIAL {
         .join(data_directory)
 
     // BayestME deconvolution and plots, run only if not hd as the tool does not support it
-    if(!params.hd && params.deconvolve.bayestme) {
+    if(!params.hd && params.bayestme) {
         BAYESTME(ch_datasets)
         ch_sm_inputs = ch_sm_inputs.mix(BAYESTME.out.ch_deconvolved.map { tuple(it[0], it[1]) }
                                    .join(data_directory))
@@ -119,7 +119,7 @@ workflow SPATIAL {
     // RCTD reference-based deconvolution and plots
     // plots are temporary as there is the idea to plot
     // all deconvolution stats with the same process/workflow
-    if(params.deconvolve.rctd) {
+    if(params.rctd) {
         ch_rctd_input = data_directory
             .join( ch_scrna )
             .join( ch_matched_adata )
@@ -135,7 +135,7 @@ workflow SPATIAL {
     }
 
     //CoGAPS reference-free spatially unaware deconvolution
-    if(params.deconvolve.cogaps) {
+    if(params.cogaps) {
         ch_convert_adata = ch_adata
     
         COGAPS_ADATA2DGC( ch_convert_adata )
@@ -155,7 +155,7 @@ workflow SPATIAL {
     }
 
     //spacemarkers - main
-    if (params.spatial.spacemarkers){
+    if (params.spacemarkers){
         if(params.hd) {
 
             SPACEMARKERS_HD( ch_sm_inputs )   //temp - allow spacemarkers to run on dev
@@ -184,7 +184,7 @@ workflow SPATIAL {
 
 
     // squidpy analysis
-    if (params.spatial.squidpy){
+    if (params.squidpy){
         SQUIDPY_MORANS_I( ch_squidpy )
         ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
 
