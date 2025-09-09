@@ -68,7 +68,7 @@ def draft_samplesheet(params, ds):
     files['data_directory'] = files['file'].apply(lambda x: str(Path(x).parent).replace('s3:/', 's3://'))
     files = files[['sample','data_directory']]
 
-    data_params = pd.merge(ds.samplesheet,files,on='sample')
+    data_params = pd.merge(ds.samplesheet,files,on='sample', how='left')
     samplesheet = data_params.join(pd.DataFrame(pipeline_params), how='cross')
 
     return samplesheet
