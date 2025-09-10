@@ -4,18 +4,12 @@ from cirro.helpers.preprocess_dataset import PreprocessDataset
 import pandas as pd
 import numpy as np
 from urllib.parse import urlparse
+from pathlib import Path
 
-SAMPLESHEET_REQUIRED_COLUMNS = ("sample", 
-                                "data_directory", 
-                                "n_cell_types", 
-                                "bleeding_correction", 
-                                "expression_profile",
-                                "run_bayestme",
-                                "run_cogaps",
-                                "n_top_genes",
-                                "run_spacemarkers",
-                                "find_annotations"
-                                )
+SAMPLESHEET_REQUIRED_COLUMNS = ("sample",
+                                "data_directory",
+                                "expression_profile"
+)
 
 # Helper function to check if a string is a URL
 def is_url(string):
@@ -26,7 +20,7 @@ def is_url(string):
         return False
 
 
-def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
+def prepare_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.logger.info([ds.params])
     
     # If the reference_scrna is not a URL, we assume it is a file mask string
@@ -34,52 +28,74 @@ def set_params_as_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     if 'reference_scrna' in ds.params and not is_url(ds.params['reference_scrna']):
         ds.params['expression_profile'] = ds.params['reference_scrna']
     
-    samplesheet = df_from_params(ds.params)
-
+    samplesheet = samplesheet_from_files(ds.params, ds)
+    
+    #check is pipeline uses Cirro samplesheet, and if not prepare it from params
+    if samplesheet.empty:
+        ds.logger.warning("No files found in dataset. Preparing samplesheet from params.")
+        samplesheet = samplesheet_from_params(ds.params)
+        if samplesheet.empty:
+            raise ValueError("No files found in dataset and unable to prepare samplesheet from params.")
+        ds.logger.info("Prepared samplesheet from params.")
+    
+    # Ensure all required columns are present (populate missing)
     for colname in SAMPLESHEET_REQUIRED_COLUMNS:
         if colname not in samplesheet.columns:
+            ds.logger.warning(f"Samplesheet is missing required column '{colname}'. Populating with NaN.")
             samplesheet[colname] = np.nan
 
-    for colname in samplesheet.columns:
-        if colname not in SAMPLESHEET_REQUIRED_COLUMNS:
-            del samplesheet[colname]
-
     # Save to a file
-    samplesheet.to_csv("samplesheet.csv", index=None)
+    samplesheet.to_csv("cirro-samplesheet.csv", index=None)
 
     # Clear params that we wrote to the samplesheet
     # cleared params will not overload the nextflow.params
     to_remove = []
     for k in ds.params:
         if k in SAMPLESHEET_REQUIRED_COLUMNS:
+            ds.logger.info(f"Removing param '{k}' from dataset params as it is now in the samplesheet.")
             to_remove.append(k)
 
     for k in to_remove:
         ds.remove_param(k)
 
-    ds.add_param("input", "samplesheet.csv")
+    ds.add_param("input", "cirro-samplesheet.csv")
 
     # Log the samplesheet
     ds.logger.info(samplesheet.to_dict())
 
 
-def df_from_params(params):
+def samplesheet_from_files(params, ds):
     pipeline_param_names = [c for c in SAMPLESHEET_REQUIRED_COLUMNS]
     pipeline_params = { k: [params[k]] for k in pipeline_param_names if k in params.keys()}
+
+    files = ds.files
+
+    # Assumes samplesheet associates sample with a file in the sample's root directory
+    # Convert s3 link to PosixPath and derive parent; convert back into string
+    # Path converts s3:// to s3:/, so revert proper s3 prefix afterwards
+    files['data_directory'] = files['file'].apply(lambda x: str(Path(x).parent).replace('s3:/', 's3://'))
+    files = files[['sample','data_directory']]
+
+    data_params = pd.merge(ds.samplesheet,files,on='sample', how='left')
+    samplesheet = data_params.join(pd.DataFrame(pipeline_params), how='cross')
+
+    return samplesheet
+
+def samplesheet_from_params(params):
 
     data_params = pd.DataFrame({
         'sample':[x['name'] for x in params['cirro_input']],
         'data_directory': [x['s3']+'/data' for x in params['cirro_input']]
         })
     
-    samplesheet = data_params.join(pd.DataFrame(pipeline_params), how='cross')
+    samplesheet = data_params
 
     return samplesheet
 
 def main():
     ds = PreprocessDataset.from_running()
 
-    set_params_as_samplesheet(ds)
+    prepare_samplesheet(ds)
 
     # log
     ds.logger.info(ds.params)

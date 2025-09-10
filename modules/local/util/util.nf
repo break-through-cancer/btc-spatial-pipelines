@@ -151,8 +151,8 @@ process ADATA_FROM_VISIUM_HD {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/${params.hd}.h5ad"),   emit: adata
-        path("versions.yml"),                                   emit: versions
+        tuple val(meta), path("${prefix}/${params.visium_hd}.h5ad"),   emit: adata
+        path("versions.yml"),                                          emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -166,7 +166,7 @@ import squidpy as sq
 
 sample = "${prefix}"
 data = "${data}"
-table = "${params.hd}"
+table = "${params.visium_hd}"
 os.makedirs(sample, exist_ok=True)
 
 #read visium_hd dataset

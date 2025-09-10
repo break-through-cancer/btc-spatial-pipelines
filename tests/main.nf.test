@@ -3,17 +3,21 @@ nextflow_pipeline {
     name "Test Workflow main.nf"
     script "main.nf"
 
-    test("RCTD on Visium SD with reference as URL") {
+    test("Just check samplesheet and read visium to adata") {
 
-        tag "basic-sd"
+        tag "samplesheet"
 
         when {
             params {
-                input = "../../../tests/test.csv"
-                outdir = "tests/results"
+                input = "../../../tests/samplesheet-test.csv"
+                deconvolve {
+                    external = false
+                    bayestme = false
+                    cogaps   = false
+                    rctd     = false
+                }
                 max_memory = "8.GB"
                 max_cpus = 4
-                reference_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
             }
         }
 
@@ -23,18 +27,164 @@ nextflow_pipeline {
 
     }
 
-    test("RCTD on Visium HD with reference as URL") {
+        test("Fail on empty samplesheet") {
 
-        tag "basic-hd"
+        tag "samplesheet"
 
         when {
             params {
-                input = "../../../tests/hdtest.csv"
-                outdir = "tests/results"
+                input = "../../../tests/samplesheet-empty-test.csv"
                 max_memory = "8.GB"
                 max_cpus = 4
-                reference_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
-                hd = "square_016um"
+            }
+        }
+
+        then {
+            assert workflow.success == false
+        }
+
+    }
+
+    test("RCTD on Visium SD with reference as local file per sample") {
+
+        tag "local"
+
+        when {
+            params {
+                input = "../../../tests/localatlas-test.csv"
+                max_memory = "8.GB"
+                max_cpus = 4
+                deconvolve {
+                    bayestme = false
+                    cogaps = false
+                    rctd = true
+                    external = false
+                }
+                analyze {
+                    spacemarkers = false
+                    squidpy = false
+                }
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success }
+            )
+
+        }
+    }
+
+    test("RCTD on Multisample Visium SD with reference as local file per sample") {
+
+        tag "multisample"
+
+        when {
+            params {
+                input = "../../../tests/multisample-test.csv"
+                max_memory = "8.GB"
+                max_cpus = 4
+                deconvolve {
+                    bayestme = false
+                    cogaps = false
+                    rctd = true
+                }
+                analyze {
+                    spacemarkers = false
+                    squidpy = false
+                }
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success }
+            )
+
+        }
+    }
+
+    test("Full pipeline on Visium SD with reference as URL") {
+
+        tag "visiumsd"
+
+        when {
+            params {
+                input = "../../../tests/sdvisium-test.csv"
+                max_memory = "8.GB"
+                max_cpus = 4
+                deconvolve {
+                    bayestme = false
+                    cogaps = false
+                    rctd = true
+                    external = false
+                }
+                analyze {
+                    spacemarkers = true
+                    squidpy = true
+                }
+
+                ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+
+    test("Full pipeline on Visium HD with reference as URL") {
+
+        tag "visiumhd"
+
+        when {
+            params {
+                input = "../../../tests/hdvisium-test.csv"
+                max_memory = "8.GB"
+                max_cpus = 4
+                deconvolve {
+                    bayestme = false
+                    cogaps = false
+                    rctd = true
+                    external = false
+                }
+                analyze {
+                    spacemarkers = true
+                    squidpy = true
+                }
+                ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
+                visium_hd = "square_016um"
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+
+    test("BayesTME pipeline on Visium SD") {
+
+        tag "bayestme"
+
+        when {
+            params {
+                input = "../../../tests/sdvisium-test.csv"
+                max_memory = "8.GB"
+                max_cpus = 4
+                deconvolve {
+                    bayestme = true
+                    cogaps = false
+                    rctd = false
+                    external = false
+                }
+                analyze {
+                    spacemarkers = false
+                    squidpy = false
+                }
             }
         }
 

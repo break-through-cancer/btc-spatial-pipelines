@@ -1,0 +1,2 @@
+sample,data_directory,expression_profile
+"sample","../../../tests/data/hdvisium","../../../tests/data/atlas_small.h5ad"

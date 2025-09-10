@@ -13,14 +13,7 @@ logger = logging.getLogger()
 
 REQUIRED_COLUMNS = frozenset({"sample", 
                               "data_directory", 
-                              "n_cell_types", 
-                              "bleeding_correction", 
-                              "expression_profile",
-                              "run_bayestme",
-                              "run_cogaps",
-                              "n_top_genes",
-                              "run_spacemarkers",
-                              "find_annotations"
+                              "expression_profile"
                               })
 
 class RowChecker:
@@ -38,7 +31,7 @@ class RowChecker:
     def check_row_structure(self, row):
         """
         Check if the row has the required structure.
-        In this case, we are only checking if the two required columns are present.
+        In this case, we are only checking if the required columns are present.
 
         Args:
             row (dict): A mapping from column headers (keys) to elements of that row
@@ -59,10 +52,11 @@ def check_samplesheet(file_in, file_out):
 
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle)
+        samplesheet_names = reader.fieldnames
         # Validate the existence of the expected header columns.
-        if not REQUIRED_COLUMNS.issubset(reader.fieldnames):
+        if not REQUIRED_COLUMNS.issubset(samplesheet_names):
             req_cols = ", ".join(REQUIRED_COLUMNS)
-            logger.critical(f"The sample sheet must contain these column headers: {req_cols}.")
+            logger.critical(f"The sample sheet must contain these column headers: {req_cols} but contains these: {samplesheet_names}.")
             sys.exit(1)
 
         # Validate each row.
@@ -72,7 +66,7 @@ def check_samplesheet(file_in, file_out):
 
     # Writing rows to the output file.
     with file_out.open(mode="w", newline="") as out_handle:
-        writer = csv.DictWriter(out_handle, REQUIRED_COLUMNS, delimiter=",")
+        writer = csv.DictWriter(out_handle, samplesheet_names, delimiter=",")
         writer.writeheader()
         writer.writerows(checker.rows)
 
