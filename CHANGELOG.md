@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.0.0 - unreleased
+
+### `Fixed`
+- samplesheet only stores data paths/meta, params moved to params
+
+### `Added`
+- metamap extends with every column from samplesheet except data paths
+
+### `Deprecated`
+- all params except `sample,data_directory,expression_profile` from samplesheet
+  
+
 ## v1.3.1 - 2025-09-06
 
 ### `Fixed`

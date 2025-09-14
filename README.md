@@ -20,44 +20,42 @@ Each row represents a spatial transcriptomics sample and configuration parameter
 
 `data_directory`: The path to the directory containing the output of the spaceranger pipeline.
 
-`n_cell_types`: This parameter controls how many cell types to deconvolve into. If you pass `expression_profile` this value will be ignored, we will determine number of cell types from the matched scRNA data.
-
-`bleeding_correction`: set to `true` if you want to enable bleeding correction for that sample.
-
-`expression_profile`: Optional reference expression profiles (leave blank if not using) if you have known cell types in your Visium data (perhaps from matched scRNA). See more info about how to generate this file here: https://bayestme.readthedocs.io/en/latest/fine_mapping_workflow.html
-
-`run_bayestme`: boolean, whether to run BayesTME deconvolution.
-
-`run_cogaps`: boolean, whether to run BayesTME deconvolution.
-
-`run_spacemarkers`: boolean, whether to run SpaceMarkers
-
-`find_annotations`: boolean, if `true`, CODA annotations will be sought by `*tissue_positions_cellular_compositions.csv` string and the data will be fed to SpaceMarkers. This has potential to run any external annotation from a `csv`.
+`expression_profile`: Optional reference expression profiles (leave blank if not using) if you have known cell types in your Visium data from matched scRNA (different local path to each scRNA atlas) or a local scRNA atals (same path for each sample). If using a remotely stored atlas (such as CellXGene), rather pass `params.ref_scrna` and the atlas will be downloaded from the web.
 
 
 >[!IMPORTANT]
 `export NXF_SINGULARITY_HOME_MOUNT=true` in order to allow matplotlib to write its logs (and avoid related error) if using singularity.
 
-Simple run without reference deconvolution:
+Simple Visium SD run with reference-free deconvolution:
+
+```bash
+nextflow run break-through-cancer/btc-spatial-pipelines \
+   -profile <docker/singularity/.../institute> \
+   --input samplesheet.csv \
+   --outdir <OUTDIR> \
+   --deconvolve.bayestme \
+```
+
+Run on Visium SD with local reference atlas specified in the samplesheet:
 
 ```bash
 nextflow run break-through-cancer/btc-spatial-pipelines \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
    --outdir <OUTDIR>
+   --deconvolve.rctd
+   --ref_scrna_type_col cell_type_column_name
 ```
 
 
-Run with Visium HD support and reference atlas annotation
+Run with Visium HD support and remote reference atlas annotation
 ```
-nextflow run break-through-cancer/btc-spatial-pipelines 
-   -profile docker
-   --input samplesheet.csv 
-   --outdir out
-   --hd 'square_016um' 
+nextflow run break-through-cancer/btc-spatial-pipelines \
+   -profile <docker/singularity/.../institute> \
+   --input samplesheet.csv \ 
+   --outdir out \
+   --visium_hd 'square_016um' \
    --reference_scrna https://datasets.cellxgene.cziscience.com/d1d90d18-2109-412f-8dc0-e014e8abb338.h5ad
-   --type_col_scrna Clusters
-   -resume
 ```
 
 >[!WARNING]

@@ -88,14 +88,15 @@ workflow SPATIAL {
     // Squidpy analysis ch stub
     ch_squidpy = Channel.empty()
 
+
+    // Load input paths and metadata
     INPUT_CHECK (
         file(params.input)
     )
 
-    ch_datasets = INPUT_CHECK.out.datasets
-
     // Grab datasets
-    LOAD_DATASET(ch_datasets.map { tuple(id:it.id, it.data_directory, it.expression_profile, it.find_annotations) })
+    ch_datasets = INPUT_CHECK.out.datasets
+    LOAD_DATASET(ch_datasets)
 
     ch_adata = LOAD_DATASET.out.ch_adata
     ch_scrna = LOAD_DATASET.out.ch_scrna
@@ -124,7 +125,7 @@ workflow SPATIAL {
             .join( ch_scrna )
             .join( ch_matched_adata )
             .map { tuple(it[0], it[2], it[-1]) }
-        
+
         RCTD( ch_rctd_input )
         ch_versions = ch_versions.mix(RCTD.out.versions)
         ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
