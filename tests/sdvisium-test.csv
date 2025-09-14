@@ -1,2 +1,2 @@
 sample,data_directory,expression_profile
-"sample1","../../../tests/data/visium","../../../tests/data/atlas_small.h5ad"
+"sample1","../../../tests/data/visium",

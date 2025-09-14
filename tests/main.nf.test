@@ -16,13 +16,18 @@ nextflow_pipeline {
                     cogaps   = false
                     rctd     = false
                 }
+                outdir = "output"
                 max_memory = "8.GB"
                 max_cpus = 4
             }
         }
 
         then {
-            assert workflow.success
+            assertAll (
+                { assert workflow.success },
+                { assert file("${outputDir}/pipeline_info/samplesheet.valid.csv").exists() }
+            )
+
         }
 
     }
@@ -45,7 +50,7 @@ nextflow_pipeline {
 
     }
 
-    test("RCTD on Visium SD with reference as local file per sample") {
+    test("RCTD on Visium SD with local ref") {
 
         tag "local"
 
@@ -68,14 +73,15 @@ nextflow_pipeline {
         }
 
         then {
-            assertAll(
-                { assert workflow.success }
-            )
+            assertAll { 
+                assert workflow.success 
+            }
+
 
         }
     }
 
-    test("RCTD on Multisample Visium SD with reference as local file per sample") {
+    test("RCTD on Multisample Visium SD with local ref") {
 
         tag "multisample"
 
@@ -91,7 +97,7 @@ nextflow_pipeline {
                 }
                 analyze {
                     spacemarkers = false
-                    squidpy = false
+                    squidpy = true
                 }
             }
         }
@@ -104,7 +110,7 @@ nextflow_pipeline {
         }
     }
 
-    test("Full pipeline on Visium SD with reference as URL") {
+    test("Full pipeline on Visium SD with remote ref") {
 
         tag "visiumsd"
 
@@ -123,19 +129,27 @@ nextflow_pipeline {
                     spacemarkers = true
                     squidpy = true
                 }
-
+                outdir = "output"
                 ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
             }
         }
 
         then {
-            assert workflow.success
+            assertAll(
+                { assert workflow.success },
+                { assert file("${outputDir}/adata/sample1/visium.h5ad").exists() },
+                { assert file("${outputDir}/atlas/${params.ref_scrna.tokenize("/")[-1]}").exists() },
+                { assert file("${outputDir}/atlas/sample1/adata_matched.h5ad").exists() },
+                { assert file("${outputDir}/rctd/sample1/rctd_cell_types.csv").exists() },
+                { assert file("${outputDir}/spacemarkers/sample1/rctd_cell_types/spacemarkers.csv").exists() },
+                { assert file("${outputDir}/squidpy/sample1/figures/spatial_scatter.png").exists() }
+            )
         }
 
     }
 
 
-    test("Full pipeline on Visium HD with reference as URL") {
+    test("Full pipeline on Visium HD with remote ref") {
 
         tag "visiumhd"
 
@@ -154,15 +168,23 @@ nextflow_pipeline {
                     spacemarkers = true
                     squidpy = true
                 }
-                ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
                 visium_hd = "square_016um"
+                outdir = "output"
+                ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
             }
         }
 
         then {
-            assert workflow.success
+            assertAll(
+                { assert workflow.success },
+                { assert file("${outputDir}/adata/sample1/${params.visium_hd}.h5ad").exists() },
+                { assert file("${outputDir}/atlas/${params.ref_scrna.tokenize("/")[-1]}").exists() },
+                { assert file("${outputDir}/atlas/sample1/adata_matched.h5ad").exists() },
+                { assert file("${outputDir}/rctd/sample1/rctd_cell_types.csv").exists() },
+                { assert file("${outputDir}/spacemarkers/sample1/rctd_cell_types/LRscores.rds").exists() },
+                { assert file("${outputDir}/squidpy/sample1/figures/spatial_scatter.png").exists() }
+            )
         }
-
     }
 
 
