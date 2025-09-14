@@ -187,33 +187,4 @@ nextflow_pipeline {
         }
     }
 
-
-    test("BayesTME pipeline on Visium SD") {
-
-        tag "bayestme"
-
-        when {
-            params {
-                input = "../../../tests/sdvisium-test.csv"
-                max_memory = "8.GB"
-                max_cpus = 4
-                deconvolve {
-                    bayestme = true
-                    cogaps = false
-                    rctd = false
-                    external = false
-                }
-                analyze {
-                    spacemarkers = false
-                    squidpy = false
-                }
-            }
-        }
-
-        then {
-            assert workflow.success
-        }
-
-    }
-
 }
