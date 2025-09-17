@@ -110,7 +110,7 @@ nextflow_pipeline {
         }
     }
 
-    test("Full pipeline on Visium SD with local ref") {
+    test("Full pipeline on Visium SD with remote ref") {
 
         tag "visiumsd"
 
@@ -130,6 +130,7 @@ nextflow_pipeline {
                     squidpy = true
                 }
                 outdir = "output"
+                ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
             }
         }
 
@@ -148,7 +149,7 @@ nextflow_pipeline {
     }
 
 
-    test("Full pipeline on Visium HD with local ref") {
+    test("Full pipeline on Visium HD with remote ref") {
 
         tag "visiumhd"
 
@@ -169,6 +170,7 @@ nextflow_pipeline {
                 }
                 visium_hd = "square_016um"
                 outdir = "output"
+                ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
             }
         }
 
