@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 - metamap extends with every column from samplesheet except data paths
+- random seed to SpaceMarkers, RCTD, Squidpy modules
 
 ### `Deprecated`
 - all params except `sample,data_directory,expression_profile` from samplesheet
