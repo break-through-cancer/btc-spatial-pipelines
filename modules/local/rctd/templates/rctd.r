@@ -13,6 +13,8 @@ ncores <- ${task.cpus}
 outdir <- '${prefix}'
 process <- '${task.process}'
 
+set.seed(${params.seed})
+
 cell_type_col <- '${params.ref_scrna_type_col}'
 n_top_genes <- as.numeric('${params.deconvolve.n_top_genes}')
 doublet_mode <- '${params.doublet_mode}'

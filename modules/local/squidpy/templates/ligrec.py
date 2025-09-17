@@ -42,6 +42,7 @@ def default_ligrec_pl(ligrec, par, **kwargs):
     sig_means = ligrec["means"][source_groups][target_groups].iloc[sig_where].apply(max, axis=1)
     min_mean = sorted(sig_means, reverse=True)[n_top] if len(sig_means) > n_top else sig_means.min()
     ind = ligrec["means"][source_groups][target_groups].iloc[sig_where][sig_means>min_mean].index
+    seed = par["seed"]
 
     repacked = ligrec.copy()
     for k in ["means", "pvalues", "metadata"]:
@@ -53,7 +54,8 @@ def default_ligrec_pl(ligrec, par, **kwargs):
             save=save,
             title="", # cell names and title overlap sometimes
             alpha=0.01,
-            swap_axes=False)
+            swap_axes=False,
+            seed=seed)
     plt.close('all')
     return None
 
@@ -71,7 +73,8 @@ if __name__ == "__main__":
         "sq_gr_ligrec_alpha": ${params.sq_gr_ligrec_alpha},
         "sq_gr_ligrec_nperms": ${params.sq_gr_ligrec_nperms},
         "sq_pl_ligrec_pvalue": ${params.sq_pl_ligrec_pvalue},
-        "sq_pl_ligrec_max_interactions": ${params.sq_pl_ligrec_max_interactions}
+        "sq_pl_ligrec_max_interactions": ${params.sq_pl_ligrec_max_interactions},
+        "seed": ${params.seed}
     }
 
     log.info(f"received params:{par}")
