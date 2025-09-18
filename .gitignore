@@ -1,6 +1,6 @@
 .nextflow*
 work/
-data/
+^data/
 results/
 notebook/dev
 notebook/data

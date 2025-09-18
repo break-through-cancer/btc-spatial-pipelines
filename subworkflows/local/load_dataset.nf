@@ -46,13 +46,13 @@ workflow LOAD_DATASET {
 
         // CODA annotation channel - or any other external csv annotaion
         if (params.deconvolve.external){
-            ch_coda = ch_input.map { tuple(it[0], it[1]) }
+            ch_coda = ch_input.map { tuple(it.meta, it.data_directory) }
                 .flatMap { item -> 
                     def meta = item[0]
                     def data_path = item[1]
                     def coda_files = []
                     data_path.eachFileRecurse { file ->
-                        if (file.name.endsWith('tissue_positions_cellular_compositions.csv')) {
+                        if (file.name.endsWith('cellular_compositions.csv')) {
                             coda_files.add(file)
                         }
                     }

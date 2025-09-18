@@ -187,4 +187,37 @@ nextflow_pipeline {
         }
     }
 
+    test("Visium SD with external deconvolution") {
+
+        tag "external"
+
+        when {
+            params {
+                input = "../../../tests/sdvisium-test.csv"
+                max_memory = "8.GB"
+                max_cpus = 4
+                deconvolve {
+                    bayestme = false
+                    cogaps = false
+                    rctd = false
+                    external = true
+                }
+                analyze {
+                    spacemarkers = true
+                    squidpy = true
+                }
+                outdir = "output"
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file("${outputDir}/adata/sample1/visium.h5ad").exists() },
+                { assert file("${outputDir}/spacemarkers/sample1/visium_cellular_compositions/spaceMarkers.csv").exists() }
+            )
+        }
+
+    }
+
 }
