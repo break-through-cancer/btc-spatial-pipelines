@@ -38,6 +38,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
 include { BAYESTME;} from '../subworkflows/local/deconvolve_bayestme'
+include { COGAPS } from '../subworkflows/local/deconvolve_cogaps'
 
 include { SPACEMARKERS; 
           SPACEMARKERS_MQC;
@@ -47,9 +48,6 @@ include { SPACEMARKERS;
 include { SPACEMARKERS_HD;  // temp - allow spacemarkers to run on dev
           SPACEMARKERS_HD_PLOTS;
         } from '../modules/local/spacemarkers/nextflow/main_hd'
-
-include { COGAPS;
-          COGAPS_ADATA2DGC; } from '../modules/local/cogaps/main'
 
 include { SQUIDPY_MORANS_I;
           SQUIDPY_SPATIAL_PLOTS;
@@ -137,22 +135,9 @@ workflow SPATIAL {
 
     //CoGAPS reference-free spatially unaware deconvolution
     if(params.deconvolve.cogaps) {
-        ch_convert_adata = ch_adata
-    
-        COGAPS_ADATA2DGC( ch_convert_adata )
-        ch_versions = ch_versions.mix(COGAPS_ADATA2DGC.out.versions)
-
-        ch_cogaps = COGAPS_ADATA2DGC.out.dgCMatrix.map { tuple(it[0], it[1]) }
-            .map { tuple(it[0], it[1], [niterations:params.niterations,
-                                            npatterns:it[-1],
-                                            sparse:params.sparse,
-                                            distributed:params.distributed,
-                                            nsets:params.nsets,
-                                            nthreads:params.nthreads]) }
-
-        COGAPS(ch_cogaps)
-        ch_versions = ch_versions.mix(COGAPS.out.versions)
-        ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.cogapsResult.map { tuple(it[0], it[1]) }.join(data_directory))
+        COGAPS( ch_adata )
+        ch_versions = ch_versions.mix(COGAPS.out.ch_versions)
+        ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.ch_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory))
     }
 
     //spacemarkers - main
