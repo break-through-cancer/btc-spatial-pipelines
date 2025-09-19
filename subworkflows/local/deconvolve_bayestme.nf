@@ -1,17 +1,13 @@
-include { BAYESTME_FILTER_GENES;
-          BAYESTME_BLEEDING_CORRECTION;
-          BAYESTME_DECONVOLUTION;
-          BAYESTME_LOAD_SPACERANGER;
-        } from '../../modules/local/bayestme/nextflow/subworkflows/bayestme/bayestme_basic_visium_analysis/main'
-
+include { BAYESTME_FILTER_GENES } from '../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_filter_genes/main'
+include { BAYESTME_BLEEDING_CORRECTION } from '../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_bleeding_correction/main'
+include { BAYESTME_DECONVOLUTION } from '../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_deconvolution/main'
+include { BAYESTME_LOAD_SPACERANGER } from '../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_load_spaceranger/main'
 
 workflow BAYESTME {
     take:
         ch_input // Channel of tuples: (meta, adata_sc, adata_spatial, coda_annotations)
 
     main:
-
-
         ch_input.map { tuple(id:it.id, params.should_run_bleeding_correction) }.tap { should_run_bleeding_correction }
 
 
