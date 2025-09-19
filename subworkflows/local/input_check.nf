@@ -8,22 +8,12 @@ workflow INPUT_CHECK {
         SAMPLESHEET_CHECK(samplesheet)
             .csv
             .splitCsv(header:true, sep:',')
-            .map{ row -> [
-                sample_name: row.sample,
-                data_directory: file(row.data_directory),
-                n_cell_types: row.n_cell_types,
-                bleeding_correction: row.bleeding_correction.toBoolean(),
-                expression_profile: (row.expression_profile == null || row.expression_profile == "") ? [] : row.expression_profile,
-                run_bayestme: row.run_bayestme.toBoolean(),
-                run_cogaps: row.run_cogaps.toBoolean(),
-                cogaps_niterations: row.cogaps_niterations,
-                n_top_genes: row.n_top_genes,
-                run_spacemarkers: row.run_spacemarkers.toBoolean(),
-                find_annotations: row.find_annotations.toBoolean()
-            ] }
+            .map{it + [id:it.sample]}                   //place everything except data_directory and expression_profile into meta map
+            .map{[meta: it.findAll{ k, _v -> !(k in ['sample','data_directory','expression_profile']) },
+                  data_directory: file(it.data_directory),
+                  expression_profile: (it.expression_profile == null || it.expression_profile == "") ? [] : file(it.expression_profile)
+                  ]}
             .set{ datasets }
-
-
     emit:
         datasets
 }

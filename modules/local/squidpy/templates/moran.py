@@ -6,9 +6,10 @@ import squidpy as sq
 os.makedirs("${prefix}", exist_ok=True)
 adata = ad.read_h5ad("$adata")
 process = "${task.process}"
+seed = ${params.seed}
 
 sq.gr.spatial_neighbors(adata)
-sq.gr.spatial_autocorr(adata, mode="moran")
+sq.gr.spatial_autocorr(adata, mode="moran", seed=seed)
 
 svgs = adata.uns["moranI"]
 svgs = svgs[svgs["pval_norm"] < 0.05]
