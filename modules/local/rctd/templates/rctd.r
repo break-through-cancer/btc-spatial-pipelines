@@ -77,7 +77,6 @@ names(celltypes_sc) <- adata_sc[['obs_names']][['values']]
 celltypes_sc <- as.factor(celltypes_sc)
 
 #3. drop rare cells & convert to column orientation
-#counts_sc <- counts_sc[rownames(counts_sc) %in% rownames(counts_st), ] drop as redundant
 cell_stats <- table(celltypes_sc)
 all_cells <- names(cell_stats)
 rare_cells <- names(cell_stats[cell_stats < 25])
