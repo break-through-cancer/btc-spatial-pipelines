@@ -10,7 +10,6 @@ workflow LOAD_DATASET {
 
     main:
         versions = Channel.empty() // Channel to collect versions of the tools used
-        ch_coda = Channel.empty() // Channel for CODA or other external annotation files
 
         // Load visium HD or standard data
         if(params.visium_hd) {
@@ -44,27 +43,10 @@ workflow LOAD_DATASET {
         versions = versions.mix(ATLAS_MATCH.out.versions)
 
 
-        // CODA annotation channel - or any other external csv annotaion
-        if (params.deconvolve.external){
-            ch_coda = ch_input.map { tuple(it.meta, it.data_directory) }
-                .flatMap { item -> 
-                    def meta = item[0]
-                    def data_path = item[1]
-                    def coda_files = []
-                    data_path.eachFileRecurse { file ->
-                        if (file.name.endsWith('cellular_compositions.csv')) {
-                            coda_files.add(file)
-                        }
-                    }
-                    coda_files.collect { file -> [meta: meta, coda: file] }
-                }
-        }
-
     emit:
         ch_adata
         ch_matched_adata
         ch_scrna
-        ch_coda
         data_directory
         versions
 }

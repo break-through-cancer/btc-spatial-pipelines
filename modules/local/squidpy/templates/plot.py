@@ -9,11 +9,12 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
 
 adata_path = "${adata}"
-sample = "${prefix}"
+sample = "${sample}"
+out = "${prefix}"
 process = "${task.process}"
 cell_type = "cell_type"
 
-os.makedirs(sample, exist_ok=True)
+os.makedirs(out, exist_ok=True)
 
 log.info("loading {}".format(adata_path))
 adata = ad.read_h5ad(adata_path)
@@ -26,7 +27,8 @@ if cell_type not in adata.obs.columns:
     adata.obs[cell_type] = most_abundant.astype('str')
 
 #squidpy insists on dir naming, not creating outdir as usually
-os.chdir(sample)
+main_dir = os.getcwd()
+os.chdir(out)
 
 # Extract spatial coordinates from the AnnData object
 spatial_coords = adata.obsm['spatial']
@@ -114,7 +116,7 @@ sq.pl.centrality_scores(adata,
 adata.write_h5ad("squidpy.h5ad", compression="gzip")
 
 #versions
-os.chdir('..')
+os.chdir(main_dir)
 with open("versions.yml", "w") as f:
     f.write("{}:\\n".format(process))
     f.write("    squidpy: {}\\n".format(sq.__version__))

@@ -20,8 +20,7 @@ include { paramsSummaryLog; paramsSummaryMap } from 'plugin/nf-validation'
 
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
-include { BAYESTME;} from '../subworkflows/local/deconvolve_bayestme'
-include { COGAPS } from '../subworkflows/local/deconvolve_cogaps'
+include { DECONVOLVE } from '../subworkflows/local/deconvolve'
 
 include { SPACEMARKERS; 
           SPACEMARKERS_MQC;
@@ -63,13 +62,6 @@ workflow SPATIAL {
     //multiqc_report   = Channel.empty()
     ch_versions = Channel.empty()
 
-    // Optional inputs to SpaceMarkers
-    ch_sm_inputs = Channel.empty()
-
-    // Squidpy analysis ch stub
-    ch_squidpy = Channel.empty()
-
-
     // Load input paths and metadata
     INPUT_CHECK (
         file(params.input)
@@ -81,53 +73,25 @@ workflow SPATIAL {
 
     ch_adata = LOAD_DATASET.out.ch_adata
     ch_scrna = LOAD_DATASET.out.ch_scrna
-    ch_coda = LOAD_DATASET.out.ch_coda
-    data_directory = LOAD_DATASET.out.data_directory
     ch_matched_adata = LOAD_DATASET.out.ch_matched_adata
     ch_versions = ch_versions.mix(LOAD_DATASET.out.versions)
 
-    ch_sm_inputs = ch_sm_inputs.mix(ch_coda.map { coda -> tuple(coda.meta, coda.coda) })
-        .join(data_directory)
-
-    // BayestME deconvolution and plots, run only if not hd as the tool does not support it
-    if(!params.visium_hd && params.deconvolve.bayestme) {
-        BAYESTME(ch_datasets)
-        ch_sm_inputs = ch_sm_inputs.mix(BAYESTME.out.ch_deconvolved.map { tuple(it[0], it[1]) }
-                                   .join(data_directory))
-        ch_squidpy = ch_squidpy.mix(BAYESTME.out.ch_deconvolved)
-        .map { tuple(it[0], it[1]) }
-    }
-
-    // RCTD reference-based deconvolution and plots
-    // plots are temporary as there is the idea to plot
-    // all deconvolution stats with the same process/workflow
-    if(params.deconvolve.rctd) {
-        ch_rctd_input = data_directory
-            .join( ch_scrna )
-            .join( ch_matched_adata )
-            .map { tuple(it[0], it[2], it[-1]) }
-
-        RCTD( ch_rctd_input )
-        ch_versions = ch_versions.mix(RCTD.out.versions)
-        ch_sm_inputs = ch_sm_inputs.mix(RCTD.out.rctd_cell_types.map { tuple(it[0], it[1]) }
-            .join(data_directory))
-        
-        ch_squidpy = ch_squidpy.mix(RCTD.out.rctd_adata)
-            .map { tuple(it[0], it[1]) }
-    }
-
-    //CoGAPS reference-free spatially unaware deconvolution
-    if(params.deconvolve.cogaps) {
-        COGAPS( ch_adata )
-        ch_versions = ch_versions.mix(COGAPS.out.ch_versions)
-        ch_sm_inputs = ch_sm_inputs.mix(COGAPS.out.ch_deconvolved.map { tuple(it[0], it[1]) }.join(data_directory))
-    }
-
-    //spacemarkers - main
+    // Deconvolve / cell type / use external
+    DECONVOLVE (ch_datasets, ch_matched_adata, ch_scrna, ch_adata)
+    ch_versions = ch_versions.mix(DECONVOLVE.out.ch_versions)
+  
+    ch_squidpy = Channel.empty()
+    //Analyze - spacemarkers
     if (params.analyze.spacemarkers){
-        if(params.visium_hd) {
 
-            SPACEMARKERS_HD( ch_sm_inputs )   //temp - allow spacemarkers to run on dev
+        //csv if available, otherwise deconvolution object - SpaceMarkers knows how to handle both
+        ch_sm_inputs = DECONVOLVE.out.ch_deconvolved
+                        .map { [it.meta, it.cell_probs?:it.obj] }
+                        .combine( ch_datasets.map { [it.meta, it.data_directory] }, by:0 )
+
+        if(params.visium_hd) {
+        
+            SPACEMARKERS_HD( ch_sm_inputs.map {[it[0], it[1], it[2]+"/binned_outputs/${params.visium_hd}" ]} )   //temp - allow spacemarkers to run on dev
 
         } else {
 
@@ -154,8 +118,15 @@ workflow SPATIAL {
 
     // squidpy analysis
     if (params.analyze.squidpy){
-        SQUIDPY_MORANS_I( ch_squidpy )
+        // spatially variable genes do not depend on deconvolution
+        SQUIDPY_MORANS_I( ch_adata )
         ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
+
+        // squidpy now anndata to plot spatial plots and ligrec
+        ch_squidpy = DECONVOLVE.out.ch_deconvolved
+                            .filter { it -> it.obj != null }
+                            .filter { it -> it.obj.name.endsWith('.h5ad') }
+                            .map { [it.meta, it.obj] }
 
         SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
         ch_versions = ch_versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)

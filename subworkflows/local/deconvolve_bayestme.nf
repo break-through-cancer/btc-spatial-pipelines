@@ -8,11 +8,11 @@ workflow BAYESTME {
         ch_input // Channel of tuples: (meta, adata_sc, adata_spatial, coda_annotations)
 
     main:
-        ch_input.map { tuple(id:it.id, params.should_run_bleeding_correction) }.tap { should_run_bleeding_correction }
+        ch_input.map { [it.meta, params.should_run_bleeding_correction] }.tap { should_run_bleeding_correction }
 
 
         // construct bayestme input from params
-        ch_btme = ch_input.map {tuple([id:it.id], it.data_directory) }
+        ch_btme = ch_input.map { [it.meta, it.data_directory] }
 
         BAYESTME_LOAD_SPACERANGER( ch_btme )
         ch_adata = BAYESTME_LOAD_SPACERANGER.out.adata
@@ -59,6 +59,7 @@ workflow BAYESTME {
                         it[3], //smoothing_parameter
                         [])    //expression truth placeholder, see #65
                 }
+
 
         BAYESTME_DECONVOLUTION( deconvolution_input )
         ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)

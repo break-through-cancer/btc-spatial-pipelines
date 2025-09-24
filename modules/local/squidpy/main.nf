@@ -33,7 +33,10 @@ process SQUIDPY_SPATIAL_PLOTS {
 
 
     script:
-    prefix = task.ext.prefix ?: "${meta.id}"
+    // we may want to run for multiple deconvolution results and same sample
+    source = adata.simpleName
+    sample = "${meta.id}"
+    prefix = task.ext.prefix ?: "${sample}/${source}"
     template 'plot.py'
 }
 
@@ -51,6 +54,9 @@ process SQUIDPY_LIGREC_ANALYSIS { //WIP
     path "versions.yml",                                                  emit: versions
 
     script:
-    prefix = task.ext.prefix ?: "${meta.id}"
+    // we may want to run for multiple deconvolution results and same sample
+    source = adata.simpleName
+    sample = "${meta.id}"
+    prefix = task.ext.prefix ?: "${sample}/${source}"
     template 'ligrec.py'
 }
