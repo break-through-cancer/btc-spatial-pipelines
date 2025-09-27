@@ -16,6 +16,10 @@ nextflow_pipeline {
                     cogaps   = false
                     rctd     = false
                 }
+                analyze {
+                    spacemarkers = false
+                    squidpy = false
+                }
                 outdir = "output"
                 max_memory = "8.GB"
                 max_cpus = 4
