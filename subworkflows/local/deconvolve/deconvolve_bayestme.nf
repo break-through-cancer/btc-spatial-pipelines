@@ -1,7 +1,7 @@
-include { BAYESTME_FILTER_GENES } from '../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_filter_genes/main'
-include { BAYESTME_BLEEDING_CORRECTION } from '../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_bleeding_correction/main'
-include { BAYESTME_DECONVOLUTION } from '../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_deconvolution/main'
-include { BAYESTME_LOAD_SPACERANGER } from '../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_load_spaceranger/main'
+include { BAYESTME_FILTER_GENES } from '../../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_filter_genes/main'
+include { BAYESTME_BLEEDING_CORRECTION } from '../../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_bleeding_correction/main'
+include { BAYESTME_DECONVOLUTION } from '../../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_deconvolution/main'
+include { BAYESTME_LOAD_SPACERANGER } from '../../../modules/local/bayestme/nextflow/modules/bayestme/bayestme_load_spaceranger/main'
 
 workflow BAYESTME {
     take:
@@ -16,6 +16,7 @@ workflow BAYESTME {
 
         BAYESTME_LOAD_SPACERANGER( ch_btme )
         ch_adata = BAYESTME_LOAD_SPACERANGER.out.adata
+        versions = BAYESTME_LOAD_SPACERANGER.out.versions
 
         filter_genes_input = ch_adata
         .map { tuple(
@@ -28,7 +29,7 @@ workflow BAYESTME {
         }
 
         BAYESTME_FILTER_GENES( filter_genes_input )
-        ch_versions = BAYESTME_FILTER_GENES.out.versions
+        versions = versions.mix(BAYESTME_FILTER_GENES.out.versions)
 
         BAYESTME_FILTER_GENES.out.adata_filtered
             .join( should_run_bleeding_correction )
@@ -47,7 +48,7 @@ workflow BAYESTME {
             .tap { not_bleed_corrected_deconvolution_input }
 
         BAYESTME_BLEEDING_CORRECTION( bleeding_correction_input )
-        ch_versions = ch_versions.mix(BAYESTME_BLEEDING_CORRECTION.out.versions)
+        versions = versions.mix(BAYESTME_BLEEDING_CORRECTION.out.versions)
 
         deconvolution_input = BAYESTME_BLEEDING_CORRECTION.out.adata_corrected
             .join( ch_input.map { tuple(it[0], it[2]) } )
@@ -62,12 +63,12 @@ workflow BAYESTME {
 
 
         BAYESTME_DECONVOLUTION( deconvolution_input )
-        ch_versions = ch_versions.mix(BAYESTME_DECONVOLUTION.out.versions)
+        versions = versions.mix(BAYESTME_DECONVOLUTION.out.versions)
 
         // Output the deconvolved data
         ch_deconvolved = BAYESTME_DECONVOLUTION.out.adata_deconvolved
 
     emit:
         ch_deconvolved
-        ch_versions
+        versions
 }

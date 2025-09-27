@@ -1,7 +1,7 @@
 
 include { BAYESTME } from './deconvolve_bayestme'
 include { COGAPS } from './deconvolve_cogaps'
-include { RCTD } from '../../modules/local/rctd/rctd'
+include { RCTD } from '../../../modules/local/rctd/rctd'
 
 workflow DECONVOLVE {
     take:
@@ -11,7 +11,7 @@ workflow DECONVOLVE {
         ch_adata             // from LOAD_DATASET, for CoGAPS
     main:
 
-    ch_versions = Channel.empty()
+    versions = Channel.empty()
     ch_deconvolved = Channel.empty()  //outputs: meta, optional cell type probs, optional deconvolution object
 
     // Grab external deconvolution results
@@ -35,7 +35,7 @@ workflow DECONVOLVE {
     if(!params.visium_hd && params.deconvolve.bayestme) {
         BAYESTME(ch_datasets)
         ch_deconvolved = ch_deconvolved.mix(BAYESTME.out.ch_deconvolved.map { [meta:it[0], cell_probs:null, obj:it[1]] })
-        ch_versions = ch_versions.mix(BAYESTME.out.ch_versions)
+        versions = versions.mix(BAYESTME.out.versions)
     }
 
     // RCTD reference-based deconvolution and plots
@@ -44,18 +44,18 @@ workflow DECONVOLVE {
     if(params.deconvolve.rctd) {
         ch_rctd_input = ch_scrna.join(ch_matched_adata)
         RCTD( ch_rctd_input )
-        ch_versions = ch_versions.mix(RCTD.out.versions)
+        versions = versions.mix(RCTD.out.versions)
         ch_rctd_output = RCTD.out.rctd_cell_types
                             .join(RCTD.out.rctd_adata)
                             .map { [meta:it[0], cell_probs:it[1], obj:it[2]] }
         ch_deconvolved = ch_deconvolved.mix(ch_rctd_output)
-        ch_versions = ch_versions.mix(RCTD.out.versions)
+        versions = versions.mix(RCTD.out.versions)
     }
 
     //CoGAPS reference-free spatially unaware deconvolution
     if(params.deconvolve.cogaps) {
         COGAPS( ch_adata )
-        ch_versions = ch_versions.mix(COGAPS.out.ch_versions)
+        versions = versions.mix(COGAPS.out.versions)
         ch_cogaps_output = COGAPS.out.ch_deconvolved
                                 .map { [meta:it[0], cell_probs:null, obj:it[1]] }
         ch_deconvolved = ch_deconvolved.mix(ch_cogaps_output) //need to add csv with cell type probs
@@ -63,5 +63,5 @@ workflow DECONVOLVE {
 
     emit:
         ch_deconvolved
-        ch_versions
+        versions
 }
