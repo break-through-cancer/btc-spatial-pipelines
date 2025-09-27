@@ -23,12 +23,9 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { DECONVOLVE } from '../subworkflows/local/deconvolve'
 
 include { SPACEMARKERS; 
-          SPACEMARKERS_MQC;
-          SPACEMARKERS_PLOTS;
         } from '../modules/local/spacemarkers/nextflow/main'
 
-include { SPACEMARKERS_HD;  // temp - allow spacemarkers to run on dev
-          SPACEMARKERS_HD_PLOTS;
+include { SPACEMARKERS_HD;  // temp - spacemarkers hd runs on dev
         } from '../modules/local/spacemarkers/nextflow/main_hd'
 
 include { SQUIDPY_MORANS_I;
@@ -97,20 +94,6 @@ workflow SPATIAL {
 
             SPACEMARKERS( ch_sm_inputs )
             ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
-
-            //spacemarkers - plots
-            ch_plotting_input = SPACEMARKERS.out.spaceMarkersScores
-                .map { tuple(it[0], it[1]) }
-            ch_plotting_input = ch_plotting_input.join(SPACEMARKERS.out.overlapScores)
-                .map { tuple(it[0], it[1], it[2], it[3]) }
-            
-            SPACEMARKERS_PLOTS( ch_plotting_input)
-            ch_versions = ch_versions.mix(SPACEMARKERS_PLOTS.out.versions)
-
-            //spacemarkers - mqc
-            SPACEMARKERS_MQC( SPACEMARKERS.out.spaceMarkers.map { tuple(it[0], it[1], it[2]) } )
-            ch_versions = ch_versions.mix(SPACEMARKERS_MQC.out.versions)
-            ch_multiqc_files = ch_multiqc_files.mix(SPACEMARKERS_MQC.out.spacemarkers_mqc.map { it[1] })
 
         }
     }
