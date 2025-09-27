@@ -57,7 +57,7 @@ workflow SPATIAL {
     //gather all QC reports for MultiQC
     ch_multiqc_files = Channel.empty()
     //multiqc_report   = Channel.empty()
-    ch_versions = Channel.empty()
+    versions = Channel.empty()
 
     // Load input paths and metadata
     INPUT_CHECK (
@@ -71,11 +71,11 @@ workflow SPATIAL {
     ch_adata = LOAD_DATASET.out.ch_adata
     ch_scrna = LOAD_DATASET.out.ch_scrna
     ch_matched_adata = LOAD_DATASET.out.ch_matched_adata
-    ch_versions = ch_versions.mix(LOAD_DATASET.out.versions)
+    versions = versions.mix(LOAD_DATASET.out.versions)
 
     // Deconvolve / cell type / use external
     DECONVOLVE (ch_datasets, ch_matched_adata, ch_scrna, ch_adata)
-    ch_versions = ch_versions.mix(DECONVOLVE.out.ch_versions)
+    versions = versions.mix(DECONVOLVE.out.versions)
   
     ch_squidpy = Channel.empty()
     //Analyze - spacemarkers
@@ -93,7 +93,7 @@ workflow SPATIAL {
         } else {
 
             SPACEMARKERS( ch_sm_inputs )
-            ch_versions = ch_versions.mix(SPACEMARKERS.out.versions)
+            versions = versions.mix(SPACEMARKERS.out.versions)
 
         }
     }
@@ -103,7 +103,7 @@ workflow SPATIAL {
     if (params.analyze.squidpy){
         // spatially variable genes do not depend on deconvolution
         SQUIDPY_MORANS_I( ch_adata )
-        ch_versions = ch_versions.mix(SQUIDPY_MORANS_I.out.versions)
+        versions = versions.mix(SQUIDPY_MORANS_I.out.versions)
 
         // squidpy now anndata to plot spatial plots and ligrec
         ch_squidpy = DECONVOLVE.out.ch_deconvolved
@@ -112,16 +112,16 @@ workflow SPATIAL {
                             .map { [it.meta, it.obj] }
 
         SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
-        ch_versions = ch_versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)
+        versions = versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)
 
         SQUIDPY_LIGREC_ANALYSIS( ch_squidpy )
-        ch_versions = ch_versions.mix(SQUIDPY_LIGREC_ANALYSIS.out.versions)
+        versions = versions.mix(SQUIDPY_LIGREC_ANALYSIS.out.versions)
 
         ch_ligrec_output = SQUIDPY_LIGREC_ANALYSIS.out.ligrec_interactions.collect()
     }
 
     //collate versions
-    softwareVersionsToYAML(ch_versions)
+    softwareVersionsToYAML(versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
             name: 'versions.yml',
@@ -147,7 +147,7 @@ workflow SPATIAL {
 
     // emit:
     // multiqc_report = multiqc_report // channel: /path/to/multiqc_report.html
-    //   versions       = ch_versions                 // channel: [ versions.yml ]
+    //   versions       = versions                 // channel: [ versions.yml ]
 
 
 }

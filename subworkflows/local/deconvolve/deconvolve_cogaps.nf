@@ -1,7 +1,7 @@
 
 include { COGAPS_ADATA2DGC;
           COGAPS as COGAPS_MAIN;
-          COGAPS_PREPROCESS } from '../../modules/local/cogaps/main'
+          COGAPS_PREPROCESS } from '../../../modules/local/cogaps/main'
 
 workflow COGAPS {
     take:
@@ -11,7 +11,7 @@ workflow COGAPS {
 
     def patterns = params.npatterns.split(',').collect { it.toInteger() }
     ch_patterns = Channel.from(patterns)
-    ch_versions = Channel.empty()
+    versions = Channel.empty()
 
     //example channel with cparams
     ch_fixed_params = Channel.of([niterations: params.niterations, sparse: params.sparse, distributed: params.distributed, nsets:params.nsets, nthreads:1])
@@ -22,7 +22,7 @@ workflow COGAPS {
 
     // convert adata to dgCMatrix
     COGAPS_ADATA2DGC(ch_adata)
-    ch_versions = ch_versions.mix(COGAPS_ADATA2DGC.out.versions)
+    ch_versions = versions.mix(COGAPS_ADATA2DGC.out.versions)
 
 
     // preprocess dgCMatrix
@@ -43,5 +43,5 @@ workflow COGAPS {
 
     emit:
         ch_deconvolved
-        ch_versions
+        versions
 }
