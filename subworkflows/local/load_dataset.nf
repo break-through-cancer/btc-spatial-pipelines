@@ -30,7 +30,6 @@ workflow LOAD_DATASET {
             ch_scrna = ch_input.map{ it -> tuple(it.meta)}
                 .combine(ATLAS_GET.out.atlas)
             versions = versions.mix(ATLAS_GET.out.versions)
-            ch_scrna.view()
         } else{
         // Use the matched scrna per sample
             expression_profiles = ch_input.map { it -> tuple(it.meta, it.expression_profile) }
