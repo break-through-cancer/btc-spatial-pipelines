@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 - metamap extends with every column from samplesheet except data paths
 - random seed to SpaceMarkers, RCTD, Squidpy modules
+- permutations for Moran's I to estimate p without normality assumption
+- NA as value option for cell_type, used downstream from deconvolution/cell typing
 
 ### `Deprecated`
 - samplesheet params `n_cell_types,n_top_genes,bleeding_correction,run_bayestme,run_cogaps,run_spacemarkers,find_annotations`
