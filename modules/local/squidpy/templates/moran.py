@@ -7,9 +7,10 @@ os.makedirs("${prefix}", exist_ok=True)
 adata = ad.read_h5ad("$adata")
 process = "${task.process}"
 seed = ${params.seed}
+nperms = ${params.sq_gr_spatial_autocorr_nperms}
 
 sq.gr.spatial_neighbors(adata)
-sq.gr.spatial_autocorr(adata, mode="moran", seed=seed)
+sq.gr.spatial_autocorr(adata, mode="moran", seed=seed, n_perms=nperms)
 
 svgs = adata.uns["moranI"]
 svgs = svgs[svgs["pval_norm"] < 0.05]
