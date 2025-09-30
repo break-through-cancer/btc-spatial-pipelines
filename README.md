@@ -9,9 +9,7 @@
 If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
 to set-up Nextflow. 
 
-First, prepare a samplesheet with your input data that looks as follows: [samplesheet.csv](samplesheet.csv):
-
-Each row represents a spatial transcriptomics sample and configuration parameters specific to that sample.
+First, prepare a samplesheet with your input data that looks as follows: [samplesheet.csv](samplesheet.csv), where each row represents a spatial transcriptomics samlple, and columns holding sample id, and associated data directories. Any extra column provided will be treated as metadata and copied into the `meta` map.
 
 `sample`: A unique identifier for the sample.
 
