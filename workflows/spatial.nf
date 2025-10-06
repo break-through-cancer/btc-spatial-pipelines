@@ -25,6 +25,8 @@ include { DECONVOLVE } from '../subworkflows/local/deconvolve'
 include { SPACEMARKERS; 
         } from '../modules/local/spacemarkers/nextflow/main'
 
+include  { QC } from '../modules/local/util/util'
+
 include { SPACEMARKERS_HD;  // temp - spacemarkers hd runs on dev
         } from '../modules/local/spacemarkers/nextflow/main_hd'
 
@@ -54,9 +56,8 @@ include { MULTIQC } from '../modules/nf-core/multiqc'
 
 
 workflow SPATIAL {
-    //gather all QC reports for MultiQC
     ch_multiqc_files = Channel.empty()
-    //multiqc_report   = Channel.empty()
+    multiqc_report   = Channel.empty()
     versions = Channel.empty()
 
     // Load input paths and metadata
@@ -67,16 +68,23 @@ workflow SPATIAL {
     // Grab datasets
     ch_datasets = INPUT_CHECK.out.datasets
     LOAD_DATASET(ch_datasets)
-
     ch_adata = LOAD_DATASET.out.ch_adata
     ch_scrna = LOAD_DATASET.out.ch_scrna
     ch_matched_adata = LOAD_DATASET.out.ch_matched_adata
     versions = versions.mix(LOAD_DATASET.out.versions)
 
+    // Report read data to MultiQC
+    ch_report = ch_scrna.map {it -> [it[0], it[1], 'atlas_input']} 
+    ch_report = ch_report.mix(ch_adata.map {it -> [it[0], it[1], 'adata_input']})
+
+
     // Deconvolve / cell type / use external
     DECONVOLVE (ch_datasets, ch_matched_adata, ch_scrna, ch_adata)
     versions = versions.mix(DECONVOLVE.out.versions)
-  
+
+    // Report deconvolution results to MultiQC
+    ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'data_output']} )
+
     ch_squidpy = Channel.empty()
     //Analyze - spacemarkers
     if (params.analyze.spacemarkers){
@@ -120,34 +128,38 @@ workflow SPATIAL {
         ch_ligrec_output = SQUIDPY_LIGREC_ANALYSIS.out.ligrec_interactions.collect()
     }
 
+    //make reports
+    QC( ch_report )
+    ch_multiqc_files = ch_multiqc_files.mix(QC.out.report)
+    versions = versions.mix(QC.out.versions)
+
     //collate versions
     softwareVersionsToYAML(versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'versions.yml',
+            name: 'all_mqc_versions.yml',
             sort: true,
             newLine: true
-        ).set { version_yaml }
-    ch_multiqc_files = ch_multiqc_files.mix(version_yaml)
+        ).set{ all_versions }
+    ch_multiqc_files = ch_multiqc_files.mix(all_versions)
 
     // MultiQC
     // NOTE - will fail to find spaceranger reports unless the full path is provided
     // multiqc does not find spaceranger report for VisiumHD, address with #24
-    // ch_multiqc_files.view()
-    // MULTIQC (
-    //          ch_multiqc_files.collect().ifEmpty([]),
-    //          ch_multiqc_config,
-    //          [],
-    //          [],
-    //          [],
-    //          []
-    //          )
-    // multiqc_report = MULTIQC.out.report.toList()
+     MULTIQC (
+             ch_multiqc_files.collect().ifEmpty([]),
+             file(params.multiqc_config).exists() ? file(params.multiqc_config) : null,
+             [],
+             [],
+             [],
+             []
+             )
+    multiqc_report = MULTIQC.out.report.toList()
 
 
-    // emit:
-    // multiqc_report = multiqc_report // channel: /path/to/multiqc_report.html
-    //   versions       = versions                 // channel: [ versions.yml ]
+    //emit:
+      multiqc_report = multiqc_report           // channel: /path/to/multiqc_report.html
+      versions       = versions                 // channel: [ versions.yml ]
 
 
 }

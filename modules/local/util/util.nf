@@ -143,6 +143,53 @@ with open("versions.yml", "w") as f:
 """
 }
 
+process QC {
+    //generate a simple report of the atlas adata
+    label "process_low"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+
+    input:
+        tuple val(meta), path(adata), val(report_name)
+    output:
+        path("*report.csv"),                     emit: report
+        path("versions.yml"),                    emit: versions
+
+    script:
+"""
+#!/usr/bin/env python3
+import os
+import anndata as ad
+import pandas as pd
+import scanpy as sc
+
+
+adata_path = "$adata"
+outname = "$report_name"
+adata = ad.read_h5ad(adata_path)
+
+qc = sc.pp.calculate_qc_metrics(adata, inplace=False)
+
+report = pd.DataFrame({
+    "Sample": ["${meta.id}"],
+    "n_genes": qc[0].shape[0],
+    "n_cells": qc[1].shape[0],
+    "mean_genes_by_counts": qc[0]["n_genes_by_counts"].mean(),
+    "mean_cells_by_counts": qc[1]["n_cells_by_counts"].mean(),
+    "mean_total_nnz_counts": adata.X[adata.X.nonzero()].mean(),
+})
+
+report.to_csv(f"{outname}_report.csv", index=False)
+
+adata.file.close()
+
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    anndata: {}\\n".format(ad.__version__))
+    f.write("    pandas: {}\\n".format(pd.__version__))
+"""
+}
+
 process ADATA_FROM_VISIUM_HD {
     //convert vhd file to h5ad
     label "process_medium"
