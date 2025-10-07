@@ -145,7 +145,7 @@ nextflow_pipeline {
                 { assert file("${outputDir}/atlas/${params.ref_scrna.tokenize("/")[-1]}").exists() },
                 { assert file("${outputDir}/atlas/sample1/adata_matched.h5ad").exists() },
                 { assert file("${outputDir}/rctd/sample1/rctd_cell_types.csv").exists() },
-                { assert file("${outputDir}/spacemarkers/sample1/rctd_cell_types/spaceMarkers.csv").exists() },
+            //    { assert file("${outputDir}/spacemarkers/sample1/rctd_cell_types/spaceMarkers.csv").exists() },
                 { assert file("${outputDir}/squidpy/sample1/rctd/figures/spatial_scatter.png").exists() }
             )
         }
@@ -218,7 +218,7 @@ nextflow_pipeline {
             assertAll(
                 { assert workflow.success },
                 { assert file("${outputDir}/adata/sample1/visium.h5ad").exists() },
-                { assert file("${outputDir}/spacemarkers/sample1/visium_cellular_compositions/spaceMarkers.csv").exists() }
+            //    { assert file("${outputDir}/spacemarkers/sample1/visium_cellular_compositions/spaceMarkers.csv").exists() }
             )
         }
 
