@@ -129,7 +129,8 @@ workflow SPATIAL {
     }
 
     //make reports
-    QC( ch_report )
+    QC( ch_report.filter { it -> it[1] != null && it[1] != '' && it[1] != [] }
+            .map { tuple(it[0], it[1], it[2]) } )
     ch_multiqc_files = ch_multiqc_files.mix(QC.out.report)
     versions = versions.mix(QC.out.versions)
 
