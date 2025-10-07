@@ -311,3 +311,20 @@ process ATTACH_CELL_PROBS {
     prefix = task.ext.prefix ?: "${sample}"
     template 'attach_cell_probs.py'
 }
+
+process CELL_TYPES_FROM_COGAPS {
+    //extract cell types from a cogaps object
+    tag "$meta.id"
+    label "process_low"
+    container "ghcr.io/fertiglab/cogaps:master"
+
+    input:
+        tuple val(meta), path(cogaps_obj)
+    output:
+        tuple val(meta), path("${prefix}/cogaps_cell_types.csv"), emit: cogaps_cell_types
+        path("versions.yml"),                                     emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    template 'cell_types_from_cogaps.r'
+}

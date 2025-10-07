@@ -2,6 +2,7 @@
 include { COGAPS_ADATA2DGC;
           COGAPS as COGAPS_MAIN;
           COGAPS_PREPROCESS } from '../../../modules/local/cogaps/main'
+include { CELL_TYPES_FROM_COGAPS as COGAPS_CELL_TYPES } from '../../../modules/local/util/'
 
 workflow COGAPS {
     take:
@@ -38,8 +39,13 @@ workflow COGAPS {
 
     COGAPS_MAIN(ch_input)
     ch_versions = ch_versions.mix(COGAPS_MAIN.out.versions)
-    ch_deconvolved = COGAPS_MAIN.out.cogapsResult.map { tuple(it[0], it[1]) }
+    ch_cogaps = COGAPS_MAIN.out.cogapsResult.map { tuple(it[0], it[1]) }
 
+    COGAPS_CELL_TYPES(ch_cogaps)
+    ch_versions = ch_versions.mix(COGAPS_CELL_TYPES.out.versions)
+
+    ch_deconvolved = COGAPS_CELL_TYPES.out.cogaps_cell_types
+      .map { tuple(it[0], it[1]) }
 
     emit:
         ch_deconvolved

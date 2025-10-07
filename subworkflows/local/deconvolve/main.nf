@@ -4,6 +4,7 @@ include { COGAPS } from './deconvolve_cogaps'
 include { RCTD } from '../../../modules/local/rctd/rctd'
 include { ATTACH_CELL_PROBS as EXTERNAL_PROBS } from '../../../modules/local/util/'
 include { ATTACH_CELL_PROBS as RCTD_PROBS } from '../../../modules/local/util/'
+include { ATTACH_CELL_PROBS as COGAPS_PROBS } from '../../../modules/local/util/'
 
 workflow DECONVOLVE {
     take:
@@ -53,6 +54,7 @@ workflow DECONVOLVE {
         RCTD( ch_rctd_input )
         versions = versions.mix(RCTD.out.versions)
         ch_rctd_output = RCTD.out.rctd_cell_types
+
         // join rctd cell types to adata
         ch_cell_probs_input = ch_rctd_output.join( ch_adata ).map { tuple(it[0], it[1], it[2], "rctd") }
         RCTD_PROBS(ch_cell_probs_input)
@@ -67,8 +69,14 @@ workflow DECONVOLVE {
         COGAPS( ch_adata )
         versions = versions.mix(COGAPS.out.versions)
         ch_cogaps_output = COGAPS.out.ch_deconvolved
-                                .map { [meta:it[0], cell_probs:null, obj:it[1]] }
-        ch_deconvolved = ch_deconvolved.mix(ch_cogaps_output) //need to add csv with cell type probs
+
+        //join cogaps cell types to adata
+        COGAPS_PROBS( ch_cogaps_output
+                        .join( ch_adata ).map { tuple(it[0], it[1], it[2], "cogaps") } ) //meta, cell types, adata, label
+        ch_cogaps_output = ch_cogaps_output.join(COGAPS_PROBS.out.adata)
+            .map { [meta:it[0], cell_probs:it[1], obj:it[2]] }
+        ch_deconvolved = ch_deconvolved.mix(ch_cogaps_output)
+        versions = versions.mix(COGAPS.out.versions)
     }
 
     emit:
