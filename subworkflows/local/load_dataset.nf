@@ -1,7 +1,7 @@
 include { ATLAS_GET;
           ATLAS_MATCH;
           ADATA_FROM_VISIUM;
-          ADATA_FROM_VISIUM_HD; } from '../../modules/local/util/util'
+          ADATA_FROM_VISIUM_HD; } from '../../modules/local/util/'
 
 
 workflow LOAD_DATASET {

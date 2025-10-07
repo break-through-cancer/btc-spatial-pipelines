@@ -118,26 +118,6 @@ message(sprintf('saving results to %s/', outdir))
 dir.create(outdir, showWarnings = FALSE)
 write.csv(as.matrix(cell_types), file=file.path(outdir, 'rctd_cell_types.csv'))
 
-#create lean anndata object for plotting (switch back to full temporarily)
-message('adding most abundant type to adata_st.obs')
-which_cell_max <- apply(cell_types, 1, function(x) colnames(cell_types)[which.max(x)])
-cell_type_vect <- rep(NA, length(adata_st[['obs_names']]))
-names(cell_type_vect) <- adata_st[['obs_names']][['values']]
-cell_type_vect[names(which_cell_max)] <- which_cell_max
-cell_type_vect <- as.factor(cell_type_vect)
-adata_st[['obs']][['cell_type']] <- cell_type_vect
-
-message('adding cell type proportions to adata_st.uns')
-all_cell_types <- merge(as(cell_type_vect,"matrix"),
-                        as(cell_types, "matrix"), by="row.names",all.x=TRUE)
-#remove unneeded cols
-all_cell_types <- all_cell_types[,colnames(cell_types)]
-
-adata_st[['uns']] <- append(adata_st[['uns']],
-                            list('cell_types'=all_cell_types))
-
-adata_st[['write_h5ad']](file.path(outdir, 'rctd.h5ad'), compression = 0)
-
 #versions
 message("reading session info")
 sinfo <- sessionInfo()

@@ -293,3 +293,21 @@ with open("versions.yml", "w") as f:
     f.write("    squidpy: {}\\n".format(sq.__version__))
 """
 }
+
+process ATTACH_CELL_PROBS {
+    //attach cell type probabilities to anndata obsm
+    tag "$meta.id"
+    label "process_low"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+
+    input:
+        tuple val(meta), path(cell_probs), path(adata), val(out_name)
+    output:
+        tuple val(meta), path("${prefix}/${out_name}.h5ad"),       emit: adata
+        path("versions.yml"),                                      emit: versions
+
+    script:
+    sample = "${meta.id}"
+    prefix = task.ext.prefix ?: "${sample}"
+    template 'attach_cell_probs.py'
+}

@@ -7,7 +7,6 @@ process RCTD {
     tuple val(meta), path(adata_sc), path(adata_st)
     output:
     tuple val(meta), path("${prefix}/rctd_cell_types.csv"), emit: rctd_cell_types
-    tuple val(meta), path("${prefix}/rctd.h5ad"),           emit: rctd_adata
     path "versions.yml",                                    emit: versions
 
     script:

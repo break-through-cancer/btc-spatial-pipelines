@@ -25,7 +25,7 @@ include { DECONVOLVE } from '../subworkflows/local/deconvolve'
 include { SPACEMARKERS; 
         } from '../modules/local/spacemarkers/nextflow/main'
 
-include  { QC } from '../modules/local/util/util'
+include  { QC } from '../modules/local/util/'
 
 include { SPACEMARKERS_HD;  // temp - spacemarkers hd runs on dev
         } from '../modules/local/spacemarkers/nextflow/main_hd'

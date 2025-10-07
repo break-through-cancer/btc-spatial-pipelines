@@ -2,13 +2,15 @@
 include { BAYESTME } from './deconvolve_bayestme'
 include { COGAPS } from './deconvolve_cogaps'
 include { RCTD } from '../../../modules/local/rctd/rctd'
+include { ATTACH_CELL_PROBS as EXTERNAL_PROBS } from '../../../modules/local/util/'
+include { ATTACH_CELL_PROBS as RCTD_PROBS } from '../../../modules/local/util/'
 
 workflow DECONVOLVE {
     take:
-        ch_datasets          // from LOAD_DATASET, for BayesTME
-        ch_matched_adata     // from LOAD_DATASET, for RCTD
-        ch_scrna             // from LOAD_DATASET, for RCTD
-        ch_adata             // from LOAD_DATASET, for CoGAPS
+        ch_datasets          // from LOAD_DATASET, for BayesTME, as it has it's own Visium reader
+        ch_matched_adata     // from LOAD_DATASET, for RCTD and any reference based deconvolution
+        ch_scrna             // from LOAD_DATASET, for RCTD and any reference based deconvolution
+        ch_adata             // from LOAD_DATASET, for CoGAPS and any reference free deconvolution
     main:
 
     versions = Channel.empty()
@@ -17,7 +19,7 @@ workflow DECONVOLVE {
     // Grab external deconvolution results
     // CODA annotation channel - or any other external csv annotaion
         if (params.deconvolve.external){
-            ch_deconvolved = ch_datasets.map { tuple(it.meta, it.data_directory) }
+            ch_external = ch_datasets.map { tuple(it.meta, it.data_directory) }
                 .flatMap { item -> 
                     def meta = item[0]
                     def data_path = item[1]
@@ -27,8 +29,13 @@ workflow DECONVOLVE {
                             coda_files.add(file)
                         }
                     }
-                    coda_files.collect { file -> [meta: meta, cell_probs:file, obj: null] }
+                    coda_files.collect { file -> [meta, file] }
                 }
+            //join external cell probs to adata
+            ch_cell_probs_input = ch_external.join( ch_adata ).map { tuple(it[0], it[1], it[2], "external") }
+            EXTERNAL_PROBS(ch_cell_probs_input)
+            ch_deconvolved = ch_deconvolved.mix(ch_external.join(EXTERNAL_PROBS.out.adata)
+                .map { [meta:it[0], cell_probs:it[1], obj:it[2]] })
         }
 
     // BayestME deconvolution and plots, run only if not hd as the tool does not support it
@@ -46,8 +53,11 @@ workflow DECONVOLVE {
         RCTD( ch_rctd_input )
         versions = versions.mix(RCTD.out.versions)
         ch_rctd_output = RCTD.out.rctd_cell_types
-                            .join(RCTD.out.rctd_adata)
-                            .map { [meta:it[0], cell_probs:it[1], obj:it[2]] }
+        // join rctd cell types to adata
+        ch_cell_probs_input = ch_rctd_output.join( ch_adata ).map { tuple(it[0], it[1], it[2], "rctd") }
+        RCTD_PROBS(ch_cell_probs_input)
+        ch_rctd_output = ch_rctd_output.join(RCTD_PROBS.out.adata)
+            .map { [meta:it[0], cell_probs:it[1], obj:it[2]] }
         ch_deconvolved = ch_deconvolved.mix(ch_rctd_output)
         versions = versions.mix(RCTD.out.versions)
     }
