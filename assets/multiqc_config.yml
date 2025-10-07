@@ -12,7 +12,12 @@ custom_data:
   atlas:
     plot_type: 'table'
     section_name: 'Atlas Summary'
-    description: 'Summary of the cells and genes in the atlas. If same atlas is used for multiple samples, this table will be repeated.'
+    description: 'Summary of the cells and genes in the atlas. If same atlas is used for multiple samples, table rows will be repeated.'
+  atlas_ct:
+    parent: 'atlas'
+    plot_type: 'table'
+    section_name: 'Atlas Cell Types'
+    description: 'Summary of the cell types in the atlas.'
   adata:
     plot_type: 'table'
     section_name: 'Input Summary'
@@ -21,6 +26,11 @@ custom_data:
     plot_type: 'table'
     section_name: 'Output Summary'
     description: 'Summary of the AnnData object after deconvolution / cell typing.'
+  deconvolved_ct:
+    parent: 'deconvolved'
+    plot_type: 'table'
+    section_name: 'Output Cell Types'
+    description: 'Cell types as deconvolution / cell typing results.'
 
 
 sp:
@@ -30,6 +40,10 @@ sp:
     fn: 'adata_input_report.csv'
   deconvolved:
     fn: 'adata_output_report.csv'
+  atlas_ct:
+    fn: 'atlas_counts_report.csv'
+  deconvolved_ct:
+    fn: 'adata_counts_report.csv'
 
 ignore_images: false
 export_plots: false

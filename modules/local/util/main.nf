@@ -151,8 +151,8 @@ process QC {
     input:
         tuple val(meta), path(adata), val(report_name)
     output:
-        path("*report.csv"),                     emit: report
-        path("versions.yml"),                    emit: versions
+        path("*report.csv"),                     emit: report,   optional: true
+        path("versions.yml"),                    emit: versions, optional: true
 
     script:
 """
@@ -166,20 +166,34 @@ import scanpy as sc
 adata_path = "$adata"
 outname = "$report_name"
 adata = ad.read_h5ad(adata_path)
+sample = "${meta.id}"
 
-qc = sc.pp.calculate_qc_metrics(adata, inplace=False)
+if outname in ["atlas_input", "adata_input", "adata_output"]:
+    #basic scanpy qc metrics
+    qc = sc.pp.calculate_qc_metrics(adata, inplace=False)
+    report = pd.DataFrame({
+        "Sample": [sample],
+        "n_genes": adata.shape[1],
+        "n_cells": adata.shape[0],
+        "mean_genes_by_counts": qc[0]["n_genes_by_counts"].mean(),
+        "mean_cells_by_counts": qc[1]["n_cells_by_counts"].mean(),
+        "mean_total_nnz_counts": adata.X[adata.X.nonzero()].mean(),
+    })
+    report.to_csv(f"{outname}_report.csv", index=False)
 
-report = pd.DataFrame({
-    "Sample": ["${meta.id}"],
-    "n_genes": qc[0].shape[0],
-    "n_cells": qc[1].shape[0],
-    "mean_genes_by_counts": qc[0]["n_genes_by_counts"].mean(),
-    "mean_cells_by_counts": qc[1]["n_cells_by_counts"].mean(),
-    "mean_total_nnz_counts": adata.X[adata.X.nonzero()].mean(),
-})
+if outname in ["atlas_counts", "adata_counts"]:
+    #cell type statistics
+    cell_type_col = "${params.ref_scrna_type_col}"
+    if cell_type_col in adata.obs.columns:
+        ct_counts = adata.obs[cell_type_col].value_counts()
+        ct_counts.columns = ["cell_type", "n_cells"]
+        ct_counts = pd.DataFrame(ct_counts).transpose()
+        ct_counts.insert(0, "Sample", sample)
+        pd.DataFrame(ct_counts).to_csv(f"{outname}_report.csv", index=False)
+    else:
+        print(f"Cell type column {cell_type_col} not found in adata.obs")
 
-report.to_csv(f"{outname}_report.csv", index=False)
-
+#wrap up
 adata.file.close()
 
 #versions

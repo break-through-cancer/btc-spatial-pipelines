@@ -74,8 +74,10 @@ workflow SPATIAL {
     versions = versions.mix(LOAD_DATASET.out.versions)
 
     // Report read data to MultiQC
-    ch_report = ch_scrna.map {it -> [it[0], it[1], 'atlas_input']} 
-    ch_report = ch_report.mix(ch_adata.map {it -> [it[0], it[1], 'adata_input']})
+    ch_report = ch_scrna.map {it -> [it[0], it[1], 'atlas_input']}                  //basic qc
+    ch_report = ch_report.mix(ch_scrna.map {it -> [it[0], it[1], 'atlas_counts']})  //atlas cell type counts
+    ch_report = ch_report.mix(ch_adata.map {it -> [it[0], it[1], 'adata_input']})   //basic qc
+
 
 
     // Deconvolve / cell type / use external
@@ -83,7 +85,8 @@ workflow SPATIAL {
     versions = versions.mix(DECONVOLVE.out.versions)
 
     // Report deconvolution results to MultiQC
-    ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'data_output']} )
+    ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'adata_output']} ) //basic qc
+    ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'adata_counts']} ) //cell type counts
 
     ch_squidpy = Channel.empty()
     //Analyze - spacemarkers
