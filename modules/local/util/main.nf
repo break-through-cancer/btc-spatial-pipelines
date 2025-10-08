@@ -145,7 +145,7 @@ with open("versions.yml", "w") as f:
 
 process QC {
     //generate a simple report of the atlas adata
-    label "process_low"
+    label "process_medium"
     container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
 
     input:
