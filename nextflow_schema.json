@@ -26,7 +26,8 @@
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-                    "fa_icon": "fas fa-folder-open"
+                    "fa_icon": "fas fa-folder-open",
+                    "default": "out"
                 },
                 "email": {
                     "type": "string",
@@ -166,7 +167,8 @@
                     "format": "file-path",
                     "description": "Custom config file to supply to MultiQC.",
                     "fa_icon": "fas fa-cog",
-                    "hidden": true
+                    "hidden": true,
+                    "default": "/Users/dlvovs/btc/btc-spatial-pipelines/assets/multiqc_config.yml"
                 },
                 "multiqc_logo": {
                     "type": "string",
@@ -225,18 +227,97 @@
         }
     ],
     "properties": {
-        "reference_scrna": {
+        "npatterns": {
             "type": "string",
-            "description": "URL of a reference scRNA-seq dataset file in h5ad format"
+            "default": "5,"
         },
-        "hd": {
-            "type": "string",
-            "description": "If VisiumHD, the binned output to use, for example `square_008um`"
+        "nsets": {
+            "type": "integer",
+            "default": 1
         },
-        "type_col_scrna": {
+        "niterations": {
+            "type": "integer",
+            "default": 100
+        },
+        "sparse": {
+            "type": "integer",
+            "default": 0
+        },
+        "seed": {
+            "type": "integer",
+            "default": 41263
+        },
+        "distributed": {
+            "type": "string"
+        },
+        "nthreads": {
+            "type": "integer",
+            "default": 1
+        },
+        "n_top_genes": {
+            "type": "integer",
+            "default": 5000
+        },
+        "bayestme_spatial_smoothing_parameter": {
+            "type": "number",
+            "default": 1
+        },
+        "reference_scrna_sample_column": {
             "type": "string",
-            "default": "cell_type",
-            "description": "Column in the reference scRNA-seq dataset that contains cell type annotations"
+            "default": "donor_id"
+        },
+        "reference_scrna_celltype_column": {
+            "type": "string",
+            "default": "cell_type"
+        },
+        "reference_scrna_gene_column": {
+            "type": "string",
+            "default": "donor_id"
+        },
+        "should_run_bleeding_correction": {
+            "type": "boolean"
+        },
+        "n_cell_types": {
+            "type": "integer",
+            "default": 5
+        },
+        "ref_scrna": {
+            "type": "string"
+        },
+        "ref_scrna_type_col": {
+            "type": "string",
+            "default": "cell_type"
+        },
+        "visium_hd": {
+            "type": "string"
+        },
+        "sq_gr_ligrec_threshold": {
+            "type": "number",
+            "default": 0.1
+        },
+        "sq_gr_ligrec_alpha": {
+            "type": "number",
+            "default": 0.01
+        },
+        "sq_gr_ligrec_nperms": {
+            "type": "integer",
+            "default": 1000
+        },
+        "sq_pl_ligrec_pvalue": {
+            "type": "number",
+            "default": 0.05
+        },
+        "sq_pl_ligrec_max_interactions": {
+            "type": "integer",
+            "default": 25
+        },
+        "doublet_mode": {
+            "type": "string",
+            "default": "full"
+        },
+        "bayestme_version": {
+            "type": "string",
+            "default": "0a7cde6acac2ffc34e8ad00b7fab75f869d80de2"
         }
     }
 }

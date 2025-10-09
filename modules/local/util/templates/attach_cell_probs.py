@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+import anndata as ad
+import pandas as pd
+import os
+import logging
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger()
+
+adata_path = "${adata}"
+sample = "${sample}"
+probs_path = "${cell_probs}"
+out_name = "${out_name}"
+
+#output directory
+os.makedirs(sample, exist_ok=True)
+
+#read inputs
+adata = ad.read_h5ad(adata_path)
+cell_probs = pd.read_csv(probs_path)
+if('barcode' in cell_probs.columns):
+    log.info("found barcode, setting as index")
+    cell_probs.set_index('barcode', inplace=True)
+else:
+    log.warning("no barcode column found in cell_probs, assuming first column is barcode")
+    cell_probs.set_index(cell_probs.columns[0], inplace=True)
+    cell_probs.index.name = 'barcode'
+
+#put cell types to uns
+adata.uns['cell_type_composition'] = cell_probs
+
+#put most abundant cell type to obs
+most_abundant = cell_probs.idxmax(axis=1)
+adata.obs['cell_type'] = most_abundant
+
+#save
+adata.write_h5ad(f"{sample}/{out_name}.h5ad")
+
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    anndata: {}\\n".format(ad.__version__))
+    f.write("    pandas: {}\\n".format(pd.__version__))
+
+

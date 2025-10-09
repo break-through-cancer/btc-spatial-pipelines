@@ -1,3 +1,2 @@
 sample,data_directory,expression_profile
-"sample1","data_directory",
-
+"sample1","../../../tests/data/visium",
