@@ -9,11 +9,13 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
 
 adata_path = "${adata}"
-sample = "${prefix}"
+sample = "${sample}"
+out = "${prefix}"
 process = "${task.process}"
 cell_type = "cell_type"
+na_as_value = "${params.na_as_value}"
 
-os.makedirs(sample, exist_ok=True)
+os.makedirs(out, exist_ok=True)
 
 log.info("loading {}".format(adata_path))
 adata = ad.read_h5ad(adata_path)
@@ -26,7 +28,8 @@ if cell_type not in adata.obs.columns:
     adata.obs[cell_type] = most_abundant.astype('str')
 
 #squidpy insists on dir naming, not creating outdir as usually
-os.chdir(sample)
+main_dir = os.getcwd()
+os.chdir(out)
 
 # Extract spatial coordinates from the AnnData object
 spatial_coords = adata.obsm['spatial']
@@ -68,6 +71,17 @@ else: #bayestme adata, no image
                         dpi=300
                         )
 
+# NA as value for cell_type
+if 'NA' not in adata.obs[cell_type].cat.categories and adata.obs[cell_type].isna().any():
+    if na_as_value:
+        log.info(f"Adding 'NA' as a category to {cell_type}")
+        adata.obs['cell_type'] = adata.obs[cell_type].cat.add_categories('NA')
+        adata.obs['cell_type'] = adata.obs[cell_type].fillna('NA')
+        adata.uns['cell_type_colors'] = adata.uns['cell_type_colors'] + ['lightgrey']
+    else:   
+        log.info(f"Dropping NA values from {cell_type}")
+        adata = adata[~adata.obs[cell_type].isna(), :].copy()
+
 
 # Plot the interaction matrix
 sq.gr.spatial_neighbors(adata)
@@ -77,14 +91,13 @@ sq.pl.interaction_matrix(adata,
                         save="interaction_matrix.png",
                         title="{} Interaction Matrix".format(sample))
 
-#Plot the co-occurence, needs not NaN clusters to run
-nona_adata = adata[~adata.obs[cell_type].isna()]
-clusters = nona_adata.obs[cell_type].unique()
-sq.gr.spatial_neighbors(nona_adata)
-sq.gr.co_occurrence(nona_adata, cluster_key=cell_type)
+#Plot the co-occurence
+clusters = adata.obs[cell_type].unique()
+sq.gr.spatial_neighbors(adata)
+sq.gr.co_occurrence(adata, cluster_key=cell_type)
 
 for c in clusters:
-    sq.pl.co_occurrence(nona_adata,
+    sq.pl.co_occurrence(adata,
                         cluster_key=cell_type,
                         clusters=c,
                         save="co_occurrence_{}.png".format(c),
@@ -93,8 +106,8 @@ for c in clusters:
 
 
 #Plot nhood enrichment
-sq.gr.nhood_enrichment(nona_adata, cluster_key=cell_type)
-sq.pl.nhood_enrichment(nona_adata,
+sq.gr.nhood_enrichment(adata, cluster_key=cell_type)
+sq.pl.nhood_enrichment(adata,
                         cluster_key=cell_type,
                         save="nhood_enrichment.png",
                         title="{} Nhood Enrichment".format(sample),
@@ -114,7 +127,7 @@ sq.pl.centrality_scores(adata,
 adata.write_h5ad("squidpy.h5ad", compression="gzip")
 
 #versions
-os.chdir('..')
+os.chdir(main_dir)
 with open("versions.yml", "w") as f:
     f.write("{}:\\n".format(process))
     f.write("    squidpy: {}\\n".format(sq.__version__))

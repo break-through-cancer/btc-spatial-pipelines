@@ -143,6 +143,67 @@ with open("versions.yml", "w") as f:
 """
 }
 
+process QC {
+    //generate a simple report of the atlas adata
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+
+    input:
+        tuple val(meta), path(adata), val(report_name)
+    output:
+        path("*report.csv"),                     emit: report,   optional: true
+        path("versions.yml"),                    emit: versions, optional: true
+
+    script:
+"""
+#!/usr/bin/env python3
+import os
+import anndata as ad
+import pandas as pd
+import scanpy as sc
+
+
+adata_path = "$adata"
+outname = "$report_name"
+adata = ad.read_h5ad(adata_path)
+sample = "${meta.id}"
+
+if outname in ["atlas_input", "adata_input", "adata_output"]:
+    #basic scanpy qc metrics
+    qc = sc.pp.calculate_qc_metrics(adata, inplace=False)
+    report = pd.DataFrame({
+        "Sample": [sample],
+        "n_genes": adata.shape[1],
+        "n_cells": adata.shape[0],
+        "mean_genes_by_counts": qc[0]["n_genes_by_counts"].mean(),
+        "mean_cells_by_counts": qc[1]["n_cells_by_counts"].mean(),
+        "mean_total_nnz_counts": adata.X[adata.X.nonzero()].mean(),
+    })
+    report.to_csv(f"{outname}_report.csv", index=False)
+
+if outname in ["atlas_counts", "adata_counts"]:
+    #cell type statistics
+    cell_type_col = "${params.ref_scrna_type_col}"
+    if cell_type_col in adata.obs.columns:
+        ct_counts = adata.obs[cell_type_col].value_counts()
+        ct_counts.columns = ["cell_type", "n_cells"]
+        ct_counts = pd.DataFrame(ct_counts).transpose()
+        ct_counts.insert(0, "Sample", sample)
+        pd.DataFrame(ct_counts).to_csv(f"{outname}_report.csv", index=False)
+    else:
+        print(f"Cell type column {cell_type_col} not found in adata.obs")
+
+#wrap up
+adata.file.close()
+
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    anndata: {}\\n".format(ad.__version__))
+    f.write("    pandas: {}\\n".format(pd.__version__))
+"""
+}
+
 process ADATA_FROM_VISIUM_HD {
     //convert vhd file to h5ad
     label "process_medium"
@@ -151,8 +212,8 @@ process ADATA_FROM_VISIUM_HD {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/${params.hd}.h5ad"),   emit: adata
-        path("versions.yml"),                                   emit: versions
+        tuple val(meta), path("${prefix}/${params.visium_hd}.h5ad"),   emit: adata
+        path("versions.yml"),                                          emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -166,7 +227,7 @@ import squidpy as sq
 
 sample = "${prefix}"
 data = "${data}"
-table = "${params.hd}"
+table = "${params.visium_hd}"
 os.makedirs(sample, exist_ok=True)
 
 #read visium_hd dataset
@@ -245,4 +306,39 @@ with open("versions.yml", "w") as f:
     f.write("    spatialdata_io: {}\\n".format(sd.__version__))
     f.write("    squidpy: {}\\n".format(sq.__version__))
 """
+}
+
+process ATTACH_CELL_PROBS {
+    //attach cell type probabilities to anndata obsm
+    tag "$meta.id"
+    label "process_low"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+
+    input:
+        tuple val(meta), path(cell_probs), path(adata), val(out_name)
+    output:
+        tuple val(meta), path("${prefix}/${out_name}.h5ad"),       emit: adata
+        path("versions.yml"),                                      emit: versions
+
+    script:
+    sample = "${meta.id}"
+    prefix = task.ext.prefix ?: "${sample}"
+    template 'attach_cell_probs.py'
+}
+
+process CELL_TYPES_FROM_COGAPS {
+    //extract cell types from a cogaps object
+    tag "$meta.id"
+    label "process_low"
+    container "ghcr.io/fertiglab/cogaps:master"
+
+    input:
+        tuple val(meta), path(cogaps_obj)
+    output:
+        tuple val(meta), path("${prefix}/cogaps_cell_types.csv"), emit: cogaps_cell_types
+        path("versions.yml"),                                     emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    template 'cell_types_from_cogaps.r'
 }
