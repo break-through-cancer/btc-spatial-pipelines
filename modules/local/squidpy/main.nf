@@ -1,6 +1,6 @@
 process SQUIDPY_MORANS_I {
     tag "$meta.id"
-    label "process_low"
+    label "process_medium"
     container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
 
     input:
