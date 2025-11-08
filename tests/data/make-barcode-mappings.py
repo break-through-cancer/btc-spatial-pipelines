@@ -4,7 +4,7 @@ from spatialdata_io.experimental import to_legacy_anndata
 import squidpy as sq
 
 #load test data
-sdata = visium_hd('./data/hdvisium/', dataset_id='sample')
+sdata = visium_hd('./data/hdvisium/', dataset_id='sample', bin_size=2)
 adata = to_legacy_anndata(sdata, coordinate_system='sample')
 
 #get neighbors info
