@@ -308,6 +308,23 @@ with open("versions.yml", "w") as f:
 """
 }
 
+process ADATA_FROM_SEGMENTED_VISIUM {
+    //convert visium dir to h5ad with cells instead of spots 
+    //and cell centers as coordinates
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+
+    input:
+        tuple val(meta), path(data)
+    output:
+        tuple val(meta), path("${prefix}/${params.visium_hd}.h5ad"),   emit: adata
+        path("versions.yml"),                                          emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    template 'adata_from_segmented_visium.py'
+}
+
 process ATTACH_CELL_PROBS {
     //attach cell type probabilities to anndata obsm
     tag "$meta.id"

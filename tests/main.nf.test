@@ -191,6 +191,45 @@ nextflow_pipeline {
         }
     }
 
+    test("Full pipeline on segmented Visium HD with local ref") {
+
+        tag "segmented"
+
+        when {
+            params {
+                input = "../../../tests/data/samplesheets/hdvisium-test.csv"
+                max_memory = "8.GB"
+                max_cpus = 4
+                deconvolve {
+                    bayestme = false
+                    cogaps = false
+                    rctd = true
+                    external = false
+                    n_top_genes = 1000
+                }
+                analyze {
+                    spacemarkers = false // will not work yet with segmented outputs
+                    squidpy = true
+                }
+                visium_hd = "segmented"
+                outdir = "output"
+                ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file("${outputDir}/adata/sample1/${params.visium_hd}.h5ad").exists() },
+                { assert file("${outputDir}/atlas/${params.ref_scrna.tokenize("/")[-1]}").exists() },
+                { assert file("${outputDir}/atlas/sample1/adata_matched.h5ad").exists() },
+                { assert file("${outputDir}/rctd/sample1/rctd_cell_types.csv").exists() },
+                //{ assert file("${outputDir}/spacemarkers/sample1/rctd_cell_types/LRscores.rds").exists() }, // will not work yet with segmented outputs
+                { assert file("${outputDir}/squidpy/sample1/rctd/figures/spatial_scatter.png").exists() }
+            )
+        }
+    }
+
     test("Visium SD with external deconvolution") {
 
         tag "external"

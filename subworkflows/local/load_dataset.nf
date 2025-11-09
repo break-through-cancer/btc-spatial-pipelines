@@ -1,24 +1,36 @@
 include { ATLAS_GET;
           ATLAS_MATCH;
           ADATA_FROM_VISIUM;
-          ADATA_FROM_VISIUM_HD; } from '../../modules/local/util/'
+          ADATA_FROM_VISIUM_HD;
+          ADATA_FROM_SEGMENTED_VISIUM} from '../../modules/local/util/'
 
 
 workflow LOAD_DATASET {
     take:
-        ch_input // Channel of tuples: (meta, data_directory, expression_profiles, ...)
+        ch_input // channel of tuples: (meta, data_directory, expression_profiles, ...)
 
     main:
-        versions = Channel.empty() // Channel to collect versions of the tools used
+        versions = channel.empty() // channel to collect versions of the tools used
 
         // Load visium HD or standard data
         if(params.visium_hd) {
-            ADATA_FROM_VISIUM_HD( ch_input.map { tuple(it.meta, it.data_directory) } )
-            ch_adata = ADATA_FROM_VISIUM_HD.out.adata
-            data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory + "/binned_outputs/${params.visium_hd}") }
-            versions = versions.mix(ADATA_FROM_VISIUM_HD.out.versions)
+
+            if(params.visium_hd == 'segmented'){
+            //use Spaceranger4.0 segmented outputs
+                ADATA_FROM_SEGMENTED_VISIUM( ch_input.map {it -> tuple(it.meta, it.data_directory) } )
+                ch_adata = ADATA_FROM_SEGMENTED_VISIUM.out.adata
+                data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory) }
+                versions = versions.mix(ADATA_FROM_SEGMENTED_VISIUM.out.versions)
+
+            } else {
+                ADATA_FROM_VISIUM_HD( ch_input.map {it -> tuple(it.meta, it.data_directory) } )
+                ch_adata = ADATA_FROM_VISIUM_HD.out.adata
+                data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory + "/binned_outputs/${params.visium_hd}") }
+                versions = versions.mix(ADATA_FROM_VISIUM_HD.out.versions)
+            }
+
         } else {
-            ADATA_FROM_VISIUM( ch_input.map { tuple(it.meta, it.data_directory) } )
+            ADATA_FROM_VISIUM( ch_input.map {it -> tuple(it.meta, it.data_directory) } )
             ch_adata = ADATA_FROM_VISIUM.out.adata
             data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory) }
             versions = versions.mix(ADATA_FROM_VISIUM.out.versions)
