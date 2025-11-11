@@ -60,7 +60,7 @@ if matching_lengths[which_matching] == 0:
 if which_matching == 0:
     print("Matching by index")
     matching = matching_index
-    adata_st[:, matching].write_h5ad("${prefix}/adata_matched.h5ad")
+    adata_st[:, matching].write_h5ad("${prefix}/adata_matched.h5ad", compression='gzip')
     print(f"Saved adata_st with {len(matching)} matching genes")
 elif which_matching == 1:
     print("Matching by gene_ids")
@@ -68,7 +68,7 @@ elif which_matching == 1:
     adata_st.var.reset_index(drop=False, inplace=True)
     adata_st.var.set_index("gene_ids", inplace=True)
     adata_st.var.index = adata_st.var.index.astype('object')
-    adata_st[:, matching].write_h5ad("${prefix}/adata_matched.h5ad")
+    adata_st[:, matching].write_h5ad("${prefix}/adata_matched.h5ad", compression='gzip')
     print(f"Saved adata_st with {len(matching)} matching genes")
 elif which_matching == 2:
     print("Matching by feature_name")
@@ -79,7 +79,7 @@ elif which_matching == 2:
     adata_st.var.reset_index(drop=False, inplace=True)
     adata_st.var.set_index("name_matched", inplace=True)
     adata_st.var.index = adata_st.var.index.astype('object')
-    adata_st[:, adata_st.var.index].write_h5ad("${prefix}/adata_matched.h5ad")
+    adata_st[:, adata_st.var.index].write_h5ad("${prefix}/adata_matched.h5ad", compression='gzip')
     print(f"Saved adata_st with {len(matching)} matching genes")
 else:
     raise RuntimeError("More cases than expected")
@@ -246,7 +246,7 @@ adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 
 #save
 outname = os.path.join(sample, f"{table}.h5ad")
-adata.write_h5ad(filename=outname)
+adata.write_h5ad(filename=outname, compression='gzip')
 
 #versions
 with open("versions.yml", "w") as f:
@@ -298,7 +298,7 @@ adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 
 #save
 outname = os.path.join(sample, "visium.h5ad")
-adata.write_h5ad(filename=outname)
+adata.write_h5ad(filename=outname, compression='gzip')
 
 #versions
 with open("versions.yml", "w") as f:

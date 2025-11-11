@@ -260,7 +260,7 @@
         },
         "bayestme_spatial_smoothing_parameter": {
             "type": "number",
-            "default": 1
+            "default": 1.0
         },
         "reference_scrna_sample_column": {
             "type": "string",
@@ -318,6 +318,22 @@
         "bayestme_version": {
             "type": "string",
             "default": "0a7cde6acac2ffc34e8ad00b7fab75f869d80de2"
+        },
+        "sq_gr_spatial_autocorr_nperms": {
+            "type": "integer",
+            "default": 100
+        },
+        "na_as_value": {
+            "type": "string",
+            "default": "NA"
+        },
+        "use_ligand_receptor_genes": {
+            "type": "boolean",
+            "default": true
+        },
+        "good_gene_threshold": {
+            "type": "integer",
+            "default": 1000
         }
     }
 }

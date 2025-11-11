@@ -33,7 +33,7 @@ most_abundant = cell_probs.idxmax(axis=1)
 adata.obs['cell_type'] = most_abundant
 
 #save
-adata.write_h5ad(f"{sample}/{out_name}.h5ad")
+adata.write_h5ad(f"{sample}/{out_name}.h5ad", compression='gzip')
 
 #versions
 with open("versions.yml", "w") as f:
