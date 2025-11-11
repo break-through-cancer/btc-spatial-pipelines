@@ -1,6 +1,6 @@
 ## Introduction
 
-**btc/spatial** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data. Being a simple preprocessing-deconvolution-interaction pipeline it features multiple tools, including reference-based deconvolution. In case of reference-based deconvolution, atlas may be specified as an URL on an S3 location (e.g. CellxGene), or matched-scRNAmade made available in the sample folder.
+**STAPLE** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data. Being a simple preprocessing-deconvolution-interaction pipeline it features multiple tools, for reference-based deconvolution and cell-cell interaction analysis. In case of reference-based deconvolution, atlas may be specified as an URL on an S3 location (e.g. CellxGene) or a local file, or matched-scRNA made available.
 ![image info](assets/btc-visium.svg)
 
 ## Usage
