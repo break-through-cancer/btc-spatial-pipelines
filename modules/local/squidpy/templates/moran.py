@@ -9,6 +9,8 @@ process = "${task.process}"
 seed = ${params.seed}
 nperms = ${params.sq_gr_spatial_autocorr_nperms}
 
+if nperms <= 0:
+    nperms = None
 sq.gr.spatial_neighbors(adata)
 sq.gr.spatial_autocorr(adata, mode="moran", seed=seed, n_perms=nperms)
 
