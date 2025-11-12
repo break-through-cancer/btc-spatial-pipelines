@@ -60,13 +60,18 @@
                     }
                 }
             },
-            "spatial":{
-                "title": "Spatial options",
+            "interact":{
+                "title": "cell-cell interaction analysis",
                 "type": "object",
                 "properties": {
                     "run_spacemarkers": {
                         "type": "boolean",
                         "title": "Enable SpaceMarkers"
+                    },
+                    "run_squidpy": {
+                        "type": "boolean",
+                        "title": "Enable Squidpy LigRec",
+                        "default": true
                     }
                 }
             }
