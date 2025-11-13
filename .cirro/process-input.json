@@ -1,16 +1,20 @@
 {
-    "cirro_input": "$.params.inputs",
-    "outdir": "$.params.dataset.s3|/data/",
-    "deconvolve.n_top_genes": "$.params.dataset.paramJson.preprocessing.n_top_genes",
-    "bleeding_correction": "$.params.dataset.paramJson.preprocessing.bleeding_correction",
-    "n_cell_types": "$.params.dataset.paramJson.deconvolution.n_cell_types",
-    "deconvolve.bayestme": "$.params.dataset.paramJson.deconvolution.run_bayestme",
-    "deconvolve.cogaps": "$.params.dataset.paramJson.deconvolution.run_cogaps",
-    "deconvolve.external": "$.params.dataset.paramJson.deconvolution.find_annotations",
-    "deconvolve.rctd": "true",
-    "analyze.spacemarkers": "$.params.dataset.paramJson.interact.run_spacemarkers",
-    "analyze.squidpy": "$.params.dataset.paramJson.interact.run_squidpy",
-    "ref_scrna": "$.params.dataset.paramJson.deconvolution.reference_scrna",
-    "ref_scrna_type_col": "$.params.dataset.paramJson.deconvolution.type_col_scrna",
-    "visium_hd": "$.params.dataset.paramJson.data.hd"
+    "cirro_input": "$.inputs",
+    "outdir": "$.dataset.dataPath|/",
+    "deconvolve": {
+        "n_top_genes": "$.dataset.params.preprocessing.n_top_genes",
+        "cogaps": "$.dataset.params.deconvolution.run_cogaps",
+        "bayestme": "$.dataset.params.deconvolution.run_bayestme",
+        "rctd": "true",
+        "external": "$.dataset.params.deconvolution.find_annotations",
+    },
+    "bleeding_correction": "$.dataset.params.preprocessing.bleeding_correction",
+    "analyze":{
+        "spacemarkers": "$.dataset.params.interact.run_spacemarkers",
+        "squidpy": "$.dataset.params.interact.run_squidpy"
+    },
+    "n_cell_types": "$.dataset.params.deconvolution.n_cell_types",
+    "ref_scrna": "$.dataset.params.deconvolution.reference_scrna",
+    "ref_scrna_type_col": "$.dataset.params.deconvolution.type_col_scrna",
+    "visium_hd": "$.dataset.params.data.hd"
 }
