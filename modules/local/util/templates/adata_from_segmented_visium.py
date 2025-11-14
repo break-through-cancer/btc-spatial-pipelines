@@ -7,6 +7,8 @@ import squidpy as sq
 import pandas as pd
 import numpy as np
 import anndata as ad
+import scanpy as sc
+
 
 sample = "${prefix}"
 data = "${data}"
@@ -28,16 +30,22 @@ adata.uns['layout'] = 'IRREGULAR'
 #read bin to cell mappings
 barcode_mappings = pd.read_parquet(os.path.join(data, "barcode_mappings.parquet"))
 
-#aggregate adata X by summing over cell_id
-adata.obs['cell_id'] = adata.obs_names.map(
-    barcode_mappings.set_index(table)['cell_id']
+#aggregate sparse adata X by summing over cell_id, keep sparse
+adata.obs['cell_id'] = barcode_mappings.set_index(table).loc[adata.obs_names]['cell_id'].values
+adata = adata[~adata.obs['cell_id'].isnull(), :]
+
+cell_adata = sc.get.aggregate(
+    adata,
+    by='cell_id',
+    func='sum',
+    axis='obs',
+    layer=None
 )
-adata_cell = adata.to_df().groupby(adata.obs['cell_id']).sum()
 
 
 #for each cell, compute cell centers from adata.uns['spatial']
 cell_centers_array = []
-for cell_id in barcode_mappings['cell_id'].unique():
+for cell_id in cell_adata.obs_names:
     if pd.isnull(cell_id):
         continue
     cell_barcodes = barcode_mappings[barcode_mappings['cell_id'] == cell_id][table].tolist()
@@ -47,15 +55,15 @@ for cell_id in barcode_mappings['cell_id'].unique():
 
 #compose a new adata with cell-level gene data
 adata = ad.AnnData(
-    X=adata_cell.values,
-    obs=pd.DataFrame(index=adata_cell.index),
+    X=cell_adata.layers['sum'],
+    obs=cell_adata.obs.copy(),
     var=adata.var.copy(),
     uns=adata.uns.copy(),
     obsm={'spatial': np.array(cell_centers_array)}
 )
 
 #save
-outname = os.path.join(sample, f"{visium_hd}.h5ad")
+outname = os.path.join(sample, f"{mod_name}.h5ad")
 adata.write_h5ad(filename=outname)
 
 #versions
