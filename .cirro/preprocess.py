@@ -33,7 +33,7 @@ def prepare_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     #check is pipeline uses Cirro samplesheet, and if not prepare it from params
     if samplesheet.empty:
         ds.logger.warning("No files found in dataset. Preparing samplesheet from params.")
-        samplesheet = samplesheet_from_params(ds.params)
+        samplesheet = samplesheet_from_params(ds)
         if samplesheet.empty:
             raise ValueError("No files found in dataset and unable to prepare samplesheet from params.")
         ds.logger.info("Prepared samplesheet from params.")
@@ -81,16 +81,14 @@ def samplesheet_from_files(params, ds):
 
     return samplesheet
 
-def samplesheet_from_params(params):
+def samplesheet_from_params(ds):
 
     data_params = pd.DataFrame({
-        'sample':[x['name'] for x in params['cirro_input']],
-        'data_directory': [x['s3']+'/data' for x in params['cirro_input']]
-        })
-    
-    samplesheet = data_params
+        'sample':[x['name'] for x in ds.metadata['inputs']],
+        'data_directory': [x['dataPath'] for x in ds.metadata['inputs']]
+    })
 
-    return samplesheet
+    return data_params
 
 def main():
     ds = PreprocessDataset.from_running()
