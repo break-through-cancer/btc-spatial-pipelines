@@ -6,7 +6,7 @@
         "cogaps": "$.dataset.params.deconvolution.run_cogaps",
         "bayestme": "$.dataset.params.deconvolution.run_bayestme",
         "rctd": "true",
-        "external": "$.dataset.params.deconvolution.find_annotations",
+        "external": "$.dataset.params.deconvolution.find_annotations"
     },
     "bleeding_correction": "$.dataset.params.preprocessing.bleeding_correction",
     "analyze":{

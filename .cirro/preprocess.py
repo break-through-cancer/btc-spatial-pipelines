@@ -69,6 +69,8 @@ def samplesheet_from_files(params, ds):
     pipeline_params = { k: [params[k]] for k in pipeline_param_names if k in params.keys()}
 
     files = ds.files
+    
+    ds.logger.info(f'found files in ds.files: {files}')
 
     # Assumes samplesheet associates sample with a file in the sample's root directory
     # Convert s3 link to PosixPath and derive parent; convert back into string
@@ -97,7 +99,6 @@ def main():
 
     # log
     ds.logger.info(ds.params)
-    print(ds.params)
 
 
 if __name__ == "__main__":
