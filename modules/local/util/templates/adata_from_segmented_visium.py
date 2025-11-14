@@ -63,7 +63,7 @@ adata = ad.AnnData(
 )
 
 #save
-outname = os.path.join(sample, f"{mod_name}.h5ad")
+outname = os.path.join(sample, f"{visium_hd}.h5ad")
 adata.write_h5ad(filename=outname)
 
 #versions
