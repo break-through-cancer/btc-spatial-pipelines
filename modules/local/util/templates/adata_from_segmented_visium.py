@@ -8,7 +8,10 @@ import pandas as pd
 import numpy as np
 import anndata as ad
 import scanpy as sc
+import logging
 
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger()
 
 sample = "${prefix}"
 data = "${data}"
@@ -18,19 +21,23 @@ visium_hd = "${params.visium_hd}"
 os.makedirs(sample, exist_ok=True)
 
 #read visium_hd dataset
+log.info(f"loading Visium HD table {table} for sample {sample}")
 ds = sd.visium_hd(data, dataset_id=sample, var_names_make_unique=True)
 
 #convert to anndata
+log.info(f"converting to anndata")
 adata = to_legacy_anndata(ds, coordinate_system=sample, 
                           table_name = table, include_images=True)
 adata.var_names_make_unique()
 adata.uns['layout'] = 'IRREGULAR'
-
+log.info(f"adata is {adata}")
 
 #read bin to cell mappings
+log.info(f"loading segmentation mappings")
 barcode_mappings = pd.read_parquet(os.path.join(data, "barcode_mappings.parquet"))
 
 #aggregate sparse adata X by summing over cell_id, keep sparse
+log.info(f"aggregating binned data to cell level")
 adata.obs['cell_id'] = barcode_mappings.set_index(table).loc[adata.obs_names]['cell_id'].values
 adata = adata[~adata.obs['cell_id'].isnull(), :]
 
@@ -42,16 +49,18 @@ cell_adata = sc.get.aggregate(
     layer=None
 )
 
+log.info(f"cell_adata is {cell_adata}")
 
-#for each cell, compute cell centers from adata.uns['spatial']
-cell_centers_array = []
-for cell_id in cell_adata.obs_names:
-    if pd.isnull(cell_id):
-        continue
-    cell_barcodes = barcode_mappings[barcode_mappings['cell_id'] == cell_id][table].tolist()
-    cell_indexes = np.where(adata.obs_names.isin(cell_barcodes))[0]
-    cell_centers = adata.obsm['spatial'][cell_indexes,:].mean(axis=0).tolist()
-    cell_centers_array.append(cell_centers)
+#compute cell centers
+log.info(f"computing cell center coordinates")
+spatial_df = pd.DataFrame({table: adata.obs_names,
+                           0:adata.obsm['spatial'][:,0],
+                           1:adata.obsm['spatial'][:,1],
+                           'cell_id':adata.obs['cell_id'].values}).set_index(table)
+center_coords = spatial_df.groupby('cell_id').mean()
+
+assert center_coords.shape[0] == cell_adata.n_obs, "number of cells do not match after aggregation"
+assert all(center_coords.index == cell_adata.obs_names), "cell ids do not match after aggregation"
 
 #compose a new adata with cell-level gene data
 adata = ad.AnnData(
@@ -59,7 +68,7 @@ adata = ad.AnnData(
     obs=cell_adata.obs.copy(),
     var=adata.var.copy(),
     uns=adata.uns.copy(),
-    obsm={'spatial': np.array(cell_centers_array)}
+    obsm={'spatial': np.array(center_coords)}
 )
 
 #save
