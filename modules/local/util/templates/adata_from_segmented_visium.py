@@ -58,6 +58,17 @@ spatial_df = pd.DataFrame({table: adata.obs_names,
                            1:adata.obsm['spatial'][:,1],
                            'cell_id':adata.obs['cell_id'].values}).set_index(table)
 center_coords = spatial_df.groupby('cell_id').mean()
+n_bins_per_cell = spatial_df.groupby('cell_id').size()
+cell_adata.obs['bins_per_cell'] = n_bins_per_cell.loc[cell_adata.obs_names].values
+
+#estimate new cell diameter based on average bin count per cell
+spot_diameter = adata.uns['spatial'][f"{sample}_hires_image"]['scalefactors']['spot_diameter_fullres']
+avg_bins_per_cell = n_bins_per_cell.mean()
+new_spot_diameter = spot_diameter * 2 * np.sqrt(avg_bins_per_cell/3.14)
+adata.uns['spatial'][f"{sample}_hires_image"]['scalefactors']['spot_diameter_fullres'] = new_spot_diameter
+adata.uns['spatial'][f"{sample}_hires_image"]['scalefactors']['orig_bin_spot_diameter'] = spot_diameter
+
+log.info(f"writing mean cell diameter {new_spot_diameter:.2f} (ex {spot_diameter:.2f}) to adata.uns")
 
 assert center_coords.shape[0] == cell_adata.n_obs, "number of cells do not match after aggregation"
 assert all(center_coords.index == cell_adata.obs_names), "cell ids do not match after aggregation"
