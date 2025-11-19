@@ -2,7 +2,7 @@ process ATLAS_MATCH {
     //return adata_sc with gene index matching adata_st by gene name or gene id
     tag "$meta.id"
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:e1895b25ee5fed52972c94a3a353cc4083dc19df92e0e1a848f63bd07deea9b9"
 
     //adata_sc adata_sc
     //adata_st adata_st
@@ -97,7 +97,7 @@ with open ("versions.yml", "w") as f:
 process ATLAS_GET {
     //download an atlas anndata file from a url
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:e1895b25ee5fed52972c94a3a353cc4083dc19df92e0e1a848f63bd07deea9b9"
 
     input:
         val(url)
@@ -146,7 +146,7 @@ with open("versions.yml", "w") as f:
 process QC {
     //generate a simple report of the atlas adata
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:e1895b25ee5fed52972c94a3a353cc4083dc19df92e0e1a848f63bd07deea9b9"
 
     input:
         tuple val(meta), path(adata), val(report_name)
@@ -207,7 +207,7 @@ with open("versions.yml", "w") as f:
 process ADATA_FROM_VISIUM_HD {
     //convert vhd file to h5ad
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:e1895b25ee5fed52972c94a3a353cc4083dc19df92e0e1a848f63bd07deea9b9"
 
     input:
         tuple val(meta), path(data)
@@ -259,7 +259,7 @@ with open("versions.yml", "w") as f:
 process ADATA_FROM_VISIUM {
     //convert visium dir to h5ad
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:e1895b25ee5fed52972c94a3a353cc4083dc19df92e0e1a848f63bd07deea9b9"
 
     input:
         tuple val(meta), path(data)
@@ -312,7 +312,7 @@ process ADATA_FROM_SEGMENTED_VISIUM {
     //convert visium dir to h5ad with cells instead of spots 
     //and cell centers as coordinates
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:e1895b25ee5fed52972c94a3a353cc4083dc19df92e0e1a848f63bd07deea9b9"
 
     input:
         tuple val(meta), path(data)
@@ -329,7 +329,7 @@ process ATTACH_CELL_PROBS {
     //attach cell type probabilities to anndata obsm
     tag "$meta.id"
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:e1895b25ee5fed52972c94a3a353cc4083dc19df92e0e1a848f63bd07deea9b9"
 
     input:
         tuple val(meta), path(cell_probs), path(adata), val(out_name)
@@ -347,7 +347,7 @@ process CELL_TYPES_FROM_COGAPS {
     //extract cell types from a cogaps object
     tag "$meta.id"
     label "process_low"
-    container "ghcr.io/fertiglab/cogaps:master"
+    container "ghcr.io/fertiglab/cogaps@sha256:15dc4d443d927a7876b0b0f18291055fe0b3be63f1f040c71db8b6002b73e5de"
 
     input:
         tuple val(meta), path(cogaps_obj)
