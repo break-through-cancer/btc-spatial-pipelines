@@ -183,7 +183,10 @@ if outname in ["atlas_input", "adata_input", "adata_output"]:
 
 if outname in ["atlas_counts", "adata_counts"]:
     #cell type statistics
-    cell_type_col = "${params.ref_scrna_type_col}"
+    if "cell_type" in adata.obs.columns:
+        cell_type_col = "cell_type"
+    else:
+        cell_type_col = "${params.ref_scrna_type_col}"
     if cell_type_col in adata.obs.columns:
         ct_counts = adata.obs[cell_type_col].value_counts()
         ct_counts.columns = ["cell_type", "n_cells"]

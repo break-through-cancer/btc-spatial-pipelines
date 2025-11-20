@@ -74,10 +74,7 @@ workflow SPATIAL {
     versions = versions.mix(LOAD_DATASET.out.versions)
 
     // Report read data to MultiQC
-    ch_report = ch_scrna.map {it -> [it[0], it[1], 'atlas_input']}                  //basic qc
-    ch_report = ch_report.mix(ch_scrna.map {it -> [it[0], it[1], 'atlas_counts']})  //atlas cell type counts
-    ch_report = ch_report.mix(ch_adata.map {it -> [it[0], it[1], 'adata_input']})   //basic qc
-
+    ch_report = LOAD_DATASET.out.ch_report
 
 
     // Deconvolve / cell type / use external
