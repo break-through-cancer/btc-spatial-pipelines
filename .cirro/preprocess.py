@@ -28,7 +28,7 @@ def prepare_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     if 'reference_scrna' in ds.params and not is_url(ds.params['reference_scrna']):
         ds.params['expression_profile'] = ds.params['reference_scrna']
     
-    samplesheet = samplesheet_from_files(ds.params, ds)
+    samplesheet = samplesheet_from_files(ds)
     
     #check is pipeline uses Cirro samplesheet, and if not prepare it from params
     if samplesheet.empty:
