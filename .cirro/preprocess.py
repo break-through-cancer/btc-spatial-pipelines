@@ -64,13 +64,13 @@ def prepare_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.logger.info(samplesheet.to_dict())
 
 
-def samplesheet_from_files(params, ds):
+def samplesheet_from_files(ds):
     pipeline_param_names = [c for c in SAMPLESHEET_REQUIRED_COLUMNS]
-    pipeline_params = { k: [params[k]] for k in pipeline_param_names if k in params.keys()}
+    pipeline_params = { k: [ds.params[k]] for k in pipeline_param_names if k in ds.params.keys()}
 
     files = ds.files
     
-    ds.logger.info(f'found files in ds.files: {files}')
+    ds.logger.info(f'found files in ds.files: {files.to_dict()}')
 
     # Assumes samplesheet associates sample with a file in the sample's root directory
     # Convert s3 link to PosixPath and derive parent; convert back into string
@@ -78,8 +78,8 @@ def samplesheet_from_files(params, ds):
     files['data_directory'] = files['file'].apply(lambda x: str(Path(x).parent).replace('s3:/', 's3://'))
     files = files[['sample','data_directory']]
 
-    data_params = pd.merge(ds.samplesheet,files,on='sample', how='left')
-    samplesheet = data_params.join(pd.DataFrame(pipeline_params), how='cross')
+    samplesheet = pd.merge(ds.samplesheet, files, on='sample', how='left')
+    
 
     return samplesheet
 
