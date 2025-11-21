@@ -62,7 +62,9 @@ workflow SPATIAL {
     INPUT_CHECK (
         file(params.input)
     )
-    ch_multiqc_files = INPUT_CHECK.out.samplesheet_valid
+
+    // Init MultiQC reporting
+    ch_multiqc_files = channel.from(file(params.input))
 
     // Grab datasets
     ch_datasets = INPUT_CHECK.out.datasets
