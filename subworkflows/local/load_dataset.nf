@@ -11,8 +11,8 @@ workflow LOAD_DATASET {
         ch_input // channel of tuples: (meta, data_directory, expression_profiles, ...)
 
     main:
-        versions = channel.empty() // channel to collect versions of the tools used
-        ch_report = channel.empty()
+        versions = Channel.empty() // channel to collect versions of the tools used
+        ch_report = Channel.empty()
 
         // Load visium HD or standard data
         if(params.visium_hd) {

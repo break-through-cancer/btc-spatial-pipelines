@@ -64,7 +64,13 @@ cell_adata.obs['bins_per_cell'] = n_bins_per_cell.loc[cell_adata.obs_names].valu
 #estimate new cell diameter based on average bin count per cell
 spot_diameter = adata.uns['spatial'][f"{sample}_hires_image"]['scalefactors']['spot_diameter_fullres']
 avg_bins_per_cell = n_bins_per_cell.mean()
-new_spot_diameter = spot_diameter * 2 * np.sqrt(avg_bins_per_cell/3.14)
+# Estimate the new cell diameter based on the average number of bins per cell.
+# Assumes each cell is roughly circular, and each bin covers the same area as the original spot.
+# The area of a cell is estimated as (avg_bins_per_cell * area_per_bin).
+# Since area_per_bin is proportional to (spot_diameter/2)^2 * pi, we can solve for the new diameter:
+#   area = pi * r^2  =>  r = sqrt(area/pi)  =>  diameter = 2 * sqrt(area/pi)
+# Here, we use avg_bins_per_cell as a proxy for area (in units of bins), and 3.14 as an approximation for pi.
+new_spot_diameter = spot_diameter * 2 * np.sqrt(avg_bins_per_cell/np.pi)
 adata.uns['spatial'][f"{sample}_hires_image"]['scalefactors']['spot_diameter_fullres'] = new_spot_diameter
 adata.uns['spatial'][f"{sample}_hires_image"]['scalefactors']['orig_bin_spot_diameter'] = spot_diameter
 

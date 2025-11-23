@@ -1,5 +1,4 @@
-from spatialdata_io import visium, visium_hd
-import pandas as pd
+from spatialdata_io import visium_hd
 from spatialdata_io.experimental import to_legacy_anndata
 import squidpy as sq
 
@@ -13,7 +12,7 @@ print(f'mean counts per spot: {adata.X.mean():.5f}')
 sq.gr.spatial_neighbors(adata, n_rings=1)
 neighbors = adata.obsp['spatial_connectivities'].toarray()
 
-#compute synthetic cells from neighbors and therir neighbors
+#compute synthetic cells from neighbors and their neighbors
 adata.obs['cell_id'] = None
 for i in range(neighbors.shape[0]):
     neighbor_idxs = neighbors[i,:].nonzero()[0].tolist()

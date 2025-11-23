@@ -56,7 +56,7 @@ include { MULTIQC } from '../modules/nf-core/multiqc'
 
 
 workflow SPATIAL {
-    versions = channel.empty()
+    versions = Channel.empty()
 
     // Load input paths and metadata
     INPUT_CHECK (
@@ -85,7 +85,7 @@ workflow SPATIAL {
     ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'adata_output']} ) //basic qc
     ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'adata_counts']} ) //cell type counts
 
-    ch_squidpy = channel.empty()
+    ch_squidpy = Channel.empty()
     //Analyze - spacemarkers
     if (params.analyze.spacemarkers){
 

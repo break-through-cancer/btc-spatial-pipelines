@@ -66,8 +66,6 @@ def prepare_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
 
 def samplesheet_from_files(ds):
     pipeline_param_names = [c for c in SAMPLESHEET_REQUIRED_COLUMNS]
-    pipeline_params = { k: [ds.params[k]] for k in pipeline_param_names if k in ds.params.keys()}
-
     files = ds.files
     
     ds.logger.info(f'found files in ds.files: {files.to_dict()}')
