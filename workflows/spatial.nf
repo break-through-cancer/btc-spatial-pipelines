@@ -56,14 +56,13 @@ include { MULTIQC } from '../modules/nf-core/multiqc'
 
 
 workflow SPATIAL {
-    ch_multiqc_files = Channel.empty()
-    multiqc_report   = Channel.empty()
     versions = Channel.empty()
 
     // Load input paths and metadata
     INPUT_CHECK (
         file(params.input)
     )
+    ch_multiqc_files = INPUT_CHECK.out.samplesheet_valid
 
     // Grab datasets
     ch_datasets = INPUT_CHECK.out.datasets
@@ -73,11 +72,9 @@ workflow SPATIAL {
     ch_matched_adata = LOAD_DATASET.out.ch_matched_adata
     versions = versions.mix(LOAD_DATASET.out.versions)
 
-    // Report read data to MultiQC
-    ch_report = ch_scrna.map {it -> [it[0], it[1], 'atlas_input']}                  //basic qc
-    ch_report = ch_report.mix(ch_scrna.map {it -> [it[0], it[1], 'atlas_counts']})  //atlas cell type counts
-    ch_report = ch_report.mix(ch_adata.map {it -> [it[0], it[1], 'adata_input']})   //basic qc
 
+    // Report read data to MultiQC
+    ch_report = LOAD_DATASET.out.ch_report
 
 
     // Deconvolve / cell type / use external
@@ -94,12 +91,12 @@ workflow SPATIAL {
 
         //csv if available, otherwise deconvolution object - SpaceMarkers knows how to handle both
         ch_sm_inputs = DECONVOLVE.out.ch_deconvolved
-                        .map { [it.meta, it.cell_probs?:it.obj] }
-                        .combine( ch_datasets.map { [it.meta, it.data_directory] }, by:0 )
+                        .map { it -> [it.meta, it.cell_probs?:it.obj] }
+                        .combine( ch_datasets.map { it -> [it.meta, it.data_directory] }, by:0 )
 
         if(params.visium_hd) {
         
-            SPACEMARKERS_HD( ch_sm_inputs.map {[it[0], it[1], it[2]+"/binned_outputs/${params.visium_hd}" ]} )   //temp - allow spacemarkers to run on dev
+            SPACEMARKERS_HD( ch_sm_inputs.map {it -> [it[0], it[1], it[2]+"/binned_outputs/${params.visium_hd}" ]} )   //temp - allow spacemarkers to run on dev
 
         } else {
 
@@ -120,7 +117,7 @@ workflow SPATIAL {
         ch_squidpy = DECONVOLVE.out.ch_deconvolved
                             .filter { it -> it.obj != null }
                             .filter { it -> it.obj.name.endsWith('.h5ad') }
-                            .map { [it.meta, it.obj] }
+                            .map { it-> [it.meta, it.obj] }
 
         SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
         versions = versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)
@@ -133,7 +130,7 @@ workflow SPATIAL {
 
     //make reports
     QC( ch_report.filter { it -> it[1] != null && it[1] != '' && it[1] != [] }
-            .map { tuple(it[0], it[1], it[2]) } )
+            .map { it -> tuple(it[0], it[1], it[2]) } )
     ch_multiqc_files = ch_multiqc_files.mix(QC.out.report)
     versions = versions.mix(QC.out.versions)
 

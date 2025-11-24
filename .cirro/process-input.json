@@ -8,7 +8,6 @@
         "rctd": "true",
         "external": "$.dataset.params.deconvolution.find_annotations"
     },
-    "bleeding_correction": "$.dataset.params.preprocessing.bleeding_correction",
     "analyze":{
         "spacemarkers": "$.dataset.params.interact.run_spacemarkers",
         "squidpy": "$.dataset.params.interact.run_squidpy"

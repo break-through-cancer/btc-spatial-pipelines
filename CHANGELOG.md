@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.0.0 - unreleased
+## v2.1.0 - 2025-11-23
 
 ### `Fixed`
 - moved all tool-related params samplesheet to params
@@ -12,15 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - harmonized all deconvolution method io
 
 ### `Added`
+- segmentation support for Visium HD
+- samplesheet with all metadata fields to MultiQC
 - metamap extends with every column from samplesheet except data paths
 - random seed to SpaceMarkers, RCTD, Squidpy modules
-- permutations for Moran's I to estimate p without normality assumption
 - NA as value option for cell_type, used downstream from deconvolution/cell typing
 - basic QC for Anndata objects
 
 ### `Deprecated`
-- samplesheet params `n_cell_types,n_top_genes,bleeding_correction,run_bayestme,run_cogaps,run_spacemarkers,find_annotations`
-- SpaceMarkers SD plots
+- removed samplesheet params `n_cell_types,n_top_genes,bleeding_correction,run_bayestme,run_cogaps,run_spacemarkers,find_annotations`
+- disabled SpaceMarkers SD plots
+- removed bleeding_correction Cirro param for simplicity
 
 
 ## v1.3.1 - 2025-09-06

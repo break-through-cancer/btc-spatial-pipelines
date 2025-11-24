@@ -2,7 +2,7 @@ process ATLAS_MATCH {
     //return adata_sc with gene index matching adata_st by gene name or gene id
     tag "$meta.id"
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
 
     //adata_sc adata_sc
     //adata_st adata_st
@@ -97,7 +97,7 @@ with open ("versions.yml", "w") as f:
 process ATLAS_GET {
     //download an atlas anndata file from a url
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
 
     input:
         val(url)
@@ -146,7 +146,7 @@ with open("versions.yml", "w") as f:
 process QC {
     //generate a simple report of the atlas adata
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
 
     input:
         tuple val(meta), path(adata), val(report_name)
@@ -183,7 +183,10 @@ if outname in ["atlas_input", "adata_input", "adata_output"]:
 
 if outname in ["atlas_counts", "adata_counts"]:
     #cell type statistics
-    cell_type_col = "${params.ref_scrna_type_col}"
+    if "cell_type" in adata.obs.columns:
+        cell_type_col = "cell_type"
+    else:
+        cell_type_col = "${params.ref_scrna_type_col}"
     if cell_type_col in adata.obs.columns:
         ct_counts = adata.obs[cell_type_col].value_counts()
         ct_counts.columns = ["cell_type", "n_cells"]
@@ -207,7 +210,7 @@ with open("versions.yml", "w") as f:
 process ADATA_FROM_VISIUM_HD {
     //convert vhd file to h5ad
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
 
     input:
         tuple val(meta), path(data)
@@ -259,7 +262,7 @@ with open("versions.yml", "w") as f:
 process ADATA_FROM_VISIUM {
     //convert visium dir to h5ad
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
 
     input:
         tuple val(meta), path(data)
@@ -308,11 +311,28 @@ with open("versions.yml", "w") as f:
 """
 }
 
+process ADATA_FROM_SEGMENTED_VISIUM {
+    //convert visium dir to h5ad with cells instead of spots 
+    //and cell centers as coordinates
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+
+    input:
+        tuple val(meta), path(data)
+    output:
+        tuple val(meta), path("${prefix}/${params.visium_hd}.h5ad"),   emit: adata
+        path("versions.yml"),                                          emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    template 'adata_from_segmented_visium.py'
+}
+
 process ATTACH_CELL_PROBS {
     //attach cell type probabilities to anndata obsm
     tag "$meta.id"
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
 
     input:
         tuple val(meta), path(cell_probs), path(adata), val(out_name)
@@ -330,7 +350,7 @@ process CELL_TYPES_FROM_COGAPS {
     //extract cell types from a cogaps object
     tag "$meta.id"
     label "process_low"
-    container "ghcr.io/fertiglab/cogaps:master"
+    container "ghcr.io/fertiglab/cogaps@sha256:15dc4d443d927a7876b0b0f18291055fe0b3be63f1f040c71db8b6002b73e5de"
 
     input:
         tuple val(meta), path(cogaps_obj)

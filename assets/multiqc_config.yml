@@ -9,6 +9,10 @@ report_section_order:
   "btc-spatial-summary":
     order: -1002
 custom_data:
+  samplesheet:
+    plot_type: 'table'
+    section_name: 'Sample Sheet'
+    description: 'The sample sheet provided as input to the pipeline.'
   atlas:
     plot_type: 'table'
     section_name: 'Atlas Summary'
@@ -34,6 +38,8 @@ custom_data:
 
 
 sp:
+  samplesheet:
+    fn: 'samplesheet.valid.csv'
   atlas:
     fn: 'atlas_input_report.csv'
   adata:
