@@ -15,8 +15,7 @@ log = logging.getLogger()
 
 sample = "${prefix}"
 data = "${data}"
-table = "square_002um"
-visium_hd = "${params.visium_hd}"
+table = "${params.visium_hd}"
 
 os.makedirs(sample, exist_ok=True)
 
@@ -29,67 +28,17 @@ log.info(f"converting to anndata")
 adata = to_legacy_anndata(ds, coordinate_system=sample, 
                           table_name = table, include_images=True)
 adata.var_names_make_unique()
-adata.uns['layout'] = 'IRREGULAR'
+
+#grab cell areas from the geopandas series
+areas = ds.shapes[f"{sample}_cell_segmentations"].area
+if len(areas) == len(adata.obs_names):
+    adata.obs['cell_area'] = areas.values
+    log.info(f"added cell_area to adata.obs")
+
 log.info(f"adata is {adata}")
 
-#read bin to cell mappings
-log.info(f"loading segmentation mappings")
-barcode_mappings = pd.read_parquet(os.path.join(data, "barcode_mappings.parquet"))
-
-#aggregate sparse adata X by summing over cell_id, keep sparse
-log.info(f"aggregating binned data to cell level")
-adata.obs['cell_id'] = barcode_mappings.set_index(table).loc[adata.obs_names]['cell_id'].values
-adata = adata[~adata.obs['cell_id'].isnull(), :]
-
-cell_adata = sc.get.aggregate(
-    adata,
-    by='cell_id',
-    func='sum',
-    axis='obs',
-    layer=None
-)
-
-log.info(f"cell_adata is {cell_adata}")
-
-#compute cell centers
-log.info(f"computing cell center coordinates")
-spatial_df = pd.DataFrame({table: adata.obs_names,
-                           0:adata.obsm['spatial'][:,0],
-                           1:adata.obsm['spatial'][:,1],
-                           'cell_id':adata.obs['cell_id'].values}).set_index(table)
-center_coords = spatial_df.groupby('cell_id').mean()
-n_bins_per_cell = spatial_df.groupby('cell_id').size()
-cell_adata.obs['bins_per_cell'] = n_bins_per_cell.loc[cell_adata.obs_names].values
-
-#estimate new cell diameter based on average bin count per cell
-spot_diameter = adata.uns['spatial'][f"{sample}_hires_image"]['scalefactors']['spot_diameter_fullres']
-avg_bins_per_cell = n_bins_per_cell.mean()
-# Estimate the new cell diameter based on the average number of bins per cell.
-# Assumes each cell is roughly circular, and each bin covers the same area as the original spot.
-# The area of a cell is estimated as (avg_bins_per_cell * area_per_bin).
-# Since area_per_bin is proportional to (spot_diameter/2)^2 * pi, we can solve for the new diameter:
-#   area = pi * r^2  =>  r = sqrt(area/pi)  =>  diameter = 2 * sqrt(area/pi)
-# Here, we use avg_bins_per_cell as a proxy for area (in units of bins), and 3.14 as an approximation for pi.
-new_spot_diameter = spot_diameter * 2 * np.sqrt(avg_bins_per_cell/np.pi)
-adata.uns['spatial'][f"{sample}_hires_image"]['scalefactors']['spot_diameter_fullres'] = new_spot_diameter
-adata.uns['spatial'][f"{sample}_hires_image"]['scalefactors']['orig_bin_spot_diameter'] = spot_diameter
-
-log.info(f"writing mean cell diameter {new_spot_diameter:.2f} (ex {spot_diameter:.2f}) to adata.uns")
-
-assert center_coords.shape[0] == cell_adata.n_obs, "number of cells do not match after aggregation"
-assert all(center_coords.index == cell_adata.obs_names), "cell ids do not match after aggregation"
-
-#compose a new adata with cell-level gene data
-adata = ad.AnnData(
-    X=cell_adata.layers['sum'],
-    obs=cell_adata.obs.copy(),
-    var=adata.var.copy(),
-    uns=adata.uns.copy(),
-    obsm={'spatial': np.array(center_coords)}
-)
-
 #save
-outname = os.path.join(sample, f"{visium_hd}.h5ad")
+outname = os.path.join(sample, f"{table}.h5ad")
 adata.write_h5ad(filename=outname)
 
 #versions
