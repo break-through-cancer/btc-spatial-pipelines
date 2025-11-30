@@ -114,7 +114,7 @@ nextflow_pipeline {
         }
     }
 
-    test("Full pipeline on Visium SD with remote ref") {
+    test("RCTD full pipeline on Visium SD with remote ref") {
 
         tag "visiumsd"
 
@@ -153,7 +153,7 @@ nextflow_pipeline {
     }
 
 
-    test("Full pipeline on Visium HD with remote ref") {
+    test("RCTD full pipeline on Visium HD with remote ref") {
 
         tag "visiumhd"
 
@@ -191,7 +191,7 @@ nextflow_pipeline {
         }
     }
 
-    test("Full pipeline on segmented Visium HD with local ref") {
+    test("RCTD full pipeline on segmented Visium HD with local ref") {
 
         tag "segmented"
 
@@ -211,7 +211,7 @@ nextflow_pipeline {
                     spacemarkers = false // will not work yet with segmented outputs
                     squidpy = true
                 }
-                visium_hd = "segmented"
+                visium_hd = "cell_segmentations"
                 outdir = "output"
                 ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
             }
