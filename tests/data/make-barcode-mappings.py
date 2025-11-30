@@ -24,7 +24,7 @@ def _extract_geometries_from_geojson(
 
     Parameters
     ----------
-    cell_adata
+    adata
         AnnData object containing cell data.
     geojson_path
         Path to the GeoJSON file containing cell segmentation geometries.
@@ -75,21 +75,20 @@ def write_10X_h5(adata, file):
         None
     """
 
-    w = h5py.File(file, 'w')
-    grp = w.create_group("matrix")
-    grp.create_dataset("barcodes", data=np.array(adata.obs_names))
-    grp.create_dataset("data", data=np.array(adata.X.data), compression="gzip", compression_opts=9)
-    ftrs = grp.create_group("features")
-    # this group will lack the following keys:
-    # '_all_tag_keys', 'feature_type', 'genome', 'id', 'name', 'pattern', 'read', 'sequence'
-    ftrs.create_dataset("feature_type", data=np.array(adata.var.feature_types))
-    ftrs.create_dataset("genome", data=np.array(adata.var.genome))
-    ftrs.create_dataset("id", data=np.array(adata.var.gene_ids))
-    ftrs.create_dataset("name", data=np.array(adata.var.index))
-    grp.create_dataset("indices", data=np.array(adata.X.indices))
-    grp.create_dataset("indptr", data=np.array(adata.X.indptr))
-    grp.create_dataset("shape", data=np.array(list(adata.X.shape)[::-1]))
-    w.close()
+    with h5py.File(file, 'w') as w:
+        grp = w.create_group("matrix")
+        grp.create_dataset("barcodes", data=np.array(adata.obs_names))
+        grp.create_dataset("data", data=np.array(adata.X.data), compression="gzip", compression_opts=9)
+        ftrs = grp.create_group("features")
+        # this group will lack the following keys:
+        # '_all_tag_keys', 'feature_type', 'genome', 'id', 'name', 'pattern', 'read', 'sequence'
+        ftrs.create_dataset("feature_type", data=np.array(adata.var.feature_types))
+        ftrs.create_dataset("genome", data=np.array(adata.var.genome))
+        ftrs.create_dataset("id", data=np.array(adata.var.gene_ids))
+        ftrs.create_dataset("name", data=np.array(adata.var.index))
+        grp.create_dataset("indices", data=np.array(adata.X.indices))
+        grp.create_dataset("indptr", data=np.array(adata.X.indptr))
+        grp.create_dataset("shape", data=np.array(list(adata.X.shape)[::-1]))
 
 
 #load test data
@@ -150,7 +149,7 @@ geo_types = cell_gdf.geometry.type
 cell_gdf = cell_gdf[geo_types.isin(['Polygon', 'MultiPolygon', 'Circles'])]
 
 
-#save the aggregated counts matrix to filtered_feature_bc_matrix.h5, adjust names to 'cellid_00000000x-1' format
+# save the aggregated counts matrix to filtered_feature_cell_matrix.h5, adjust names to 'cellid_NNNNNNNNN-1' format where N is a digit
 adata = adata[~adata.obs['cell_id'].isnull(), :]
 agg_adata = sc.get.aggregate(adata, by='cell_id', func='sum', axis='obs', layer=None).copy()
 agg_adata.obs_names = [f'cellid_{int(cid):09d}-1' for cid in agg_adata.obs_names]

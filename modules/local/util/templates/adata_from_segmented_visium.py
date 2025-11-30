@@ -34,6 +34,8 @@ areas = ds.shapes[f"{sample}_cell_segmentations"].area
 if len(areas) == len(adata.obs_names):
     adata.obs['cell_area'] = areas.values
     log.info(f"added cell_area to adata.obs")
+else:
+    log.warning(f"Length mismatch: {len(areas)} areas vs {len(adata.obs_names)} observations. cell_area not added.")
 
 log.info(f"adata is {adata}")
 
