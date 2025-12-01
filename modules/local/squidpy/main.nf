@@ -1,7 +1,7 @@
 process SQUIDPY_MORANS_I {
     tag "$meta.id"
-    label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse:main"
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
 
     input:
     tuple val(meta), path(adata)
@@ -18,7 +18,7 @@ process SQUIDPY_MORANS_I {
 process SQUIDPY_SPATIAL_PLOTS {
     tag "$meta.id"
     label 'process_medium'
-    container 'ghcr.io/break-through-cancer/btc-containers/scverse:main'
+    container 'ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216'
 
     input:
     tuple val(meta), path(adata)
@@ -43,7 +43,7 @@ process SQUIDPY_SPATIAL_PLOTS {
 process SQUIDPY_LIGREC_ANALYSIS { //WIP
     tag "$meta.id"
     label 'process_medium'
-    container 'ghcr.io/break-through-cancer/btc-containers/scverse:main'
+    container 'ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216'
 
     input:
     tuple val(meta), path(adata)
