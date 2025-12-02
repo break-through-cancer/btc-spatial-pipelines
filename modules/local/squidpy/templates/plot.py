@@ -85,7 +85,7 @@ if 'NA' not in adata.obs[cell_type].cat.categories and adata.obs[cell_type].isna
 
 # Plot the interaction matrix
 sq.gr.spatial_neighbors(adata)
-sq.gr.interaction_matrix(adata, cluster_key="cell_type", normalize=True)
+sq.gr.interaction_matrix(adata, cluster_key="cell_type", normalized=True)
 sq.pl.interaction_matrix(adata,
                         cluster_key="cell_type",
                         save="interaction_matrix.png",
