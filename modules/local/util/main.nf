@@ -165,10 +165,10 @@ import scanpy as sc
 
 adata_path = "$adata"
 outname = "$report_name"
-adata = ad.read_h5ad(adata_path)
 sample = "${meta.id}"
 
 if outname in ["atlas_input", "adata_input", "adata_output"]:
+    adata = ad.read_h5ad(adata_path)
     #basic scanpy qc metrics
     qc = sc.pp.calculate_qc_metrics(adata, inplace=False)
     report = pd.DataFrame({
@@ -183,6 +183,7 @@ if outname in ["atlas_input", "adata_input", "adata_output"]:
 
 if outname in ["atlas_counts", "adata_counts"]:
     #cell type statistics
+    adata = ad.read_h5ad(adata_path, backed='r')
     if "cell_type" in adata.obs.columns:
         cell_type_col = "cell_type"
     else:
@@ -196,6 +197,15 @@ if outname in ["atlas_counts", "adata_counts"]:
     else:
         print(f"Cell type column {cell_type_col} not found in adata.obs")
 
+if outname in ["cell_probs"]:
+    #cell type qc metrics
+    adata = ad.read_h5ad(adata_path, backed='r')
+    if "cell_type_prob" in adata.obs.columns:
+        mean_probs = adata.obs.groupby('cell_type').agg({'cell_type_prob':'mean'}).transpose()
+        mean_probs.insert(0, "Sample", sample)
+        mean_probs.to_csv(f"{outname}_report.csv", index=False)
+    else:
+        print("cell_type_probs not found in adata.obsm")
 #wrap up
 adata.file.close()
 

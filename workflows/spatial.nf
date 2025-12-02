@@ -82,8 +82,8 @@ workflow SPATIAL {
     versions = versions.mix(DECONVOLVE.out.versions)
 
     // Report deconvolution results to MultiQC
-    ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'adata_output']} ) //basic qc
     ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'adata_counts']} ) //cell type counts
+    ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'cell_probs']} )   //cel probs report
 
     ch_squidpy = Channel.empty()
     //Analyze - spacemarkers
