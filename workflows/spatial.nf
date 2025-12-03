@@ -28,8 +28,6 @@ include  { QC } from '../modules/local/util/'
 
 include { LOAD_DATASET } from '../subworkflows/local/load_dataset'
 
-include { XSAMPLE_LIGREC } from '../modules/local/xsample/xsample'
-
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -88,6 +86,7 @@ workflow SPATIAL {
 
     // Analyze
     ANALYZE ( ch_sm_inputs, ch_squidpy )
+    versions = versions.mix(ANALYZE.out.versions)
 
     //make reports
     QC( ch_report.filter { it -> it[1] != null && it[1] != '' && it[1] != [] }
