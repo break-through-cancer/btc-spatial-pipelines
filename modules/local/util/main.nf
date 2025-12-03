@@ -225,8 +225,8 @@ process ADATA_FROM_VISIUM_HD {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/${params.visium_hd}.h5ad"),   emit: adata
-        path("versions.yml"),                                          emit: versions
+        tuple val(meta), path("${prefix}/adata.h5ad"),   emit: adata
+        path("versions.yml"),                            emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -258,7 +258,7 @@ sq.gr.spatial_neighbors(adata)
 adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 
 #save
-outname = os.path.join(sample, f"{table}.h5ad")
+outname = os.path.join(sample, "adata.h5ad")
 adata.write_h5ad(filename=outname, compression='gzip')
 
 #versions
@@ -277,7 +277,7 @@ process ADATA_FROM_VISIUM {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/visium.h5ad"),         emit: adata
+        tuple val(meta), path("${prefix}/adata.h5ad"),          emit: adata
         path("versions.yml"),                                   emit: versions
 
     script:
@@ -310,7 +310,7 @@ sq.gr.spatial_neighbors(adata)
 adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 
 #save
-outname = os.path.join(sample, "visium.h5ad")
+outname = os.path.join(sample, "adata.h5ad")
 adata.write_h5ad(filename=outname, compression='gzip')
 
 #versions
@@ -330,8 +330,8 @@ process ADATA_FROM_SEGMENTED_VISIUM {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/${params.visium_hd}.h5ad"),   emit: adata
-        path("versions.yml"),                                          emit: versions
+        tuple val(meta), path("${prefix}/adata.h5ad"),   emit: adata
+        path("versions.yml"),                            emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -371,4 +371,23 @@ process CELL_TYPES_FROM_COGAPS {
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
     template 'cell_types_from_cogaps.r'
+}
+
+ process ADATA_ADD_METADATA {
+    //add metadata columns to anndata obs from samplesheet
+    //this overwrites previously created andata.h5ad files
+    tag "$meta.id"
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+
+    input:
+        tuple val(meta), path(adata)
+
+    output:
+        tuple val(meta), path("${prefix}/adata.h5ad"), emit: adata
+        path("versions.yml"),                          emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    template 'attach_metadata.py'
 }
