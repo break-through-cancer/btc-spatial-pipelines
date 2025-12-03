@@ -22,21 +22,13 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
 include { DECONVOLVE } from '../subworkflows/local/deconvolve'
 
-include { SPACEMARKERS; 
-        } from '../modules/local/spacemarkers/nextflow/main'
+include { ANALYZE } from '../subworkflows/local/analyze'
 
 include  { QC } from '../modules/local/util/'
 
-include { SPACEMARKERS_HD;  // temp - spacemarkers hd runs on dev
-        } from '../modules/local/spacemarkers/nextflow/main_hd'
-
-include { SQUIDPY_MORANS_I;
-          SQUIDPY_SPATIAL_PLOTS;
-          SQUIDPY_LIGREC_ANALYSIS } from '../modules/local/squidpy/main'
-
-include { RCTD } from '../modules/local/rctd/rctd'
-
 include { LOAD_DATASET } from '../subworkflows/local/load_dataset'
+
+include { XSAMPLE_LIGREC } from '../modules/local/xsample/xsample'
 
 
 /*
@@ -56,7 +48,7 @@ include { MULTIQC } from '../modules/nf-core/multiqc'
 
 
 workflow SPATIAL {
-    versions = Channel.empty()
+    versions = channel.empty()
 
     // Load input paths and metadata
     INPUT_CHECK (
@@ -85,48 +77,17 @@ workflow SPATIAL {
     ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'adata_counts']} ) //cell type counts
     ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'cell_probs']} )   //cel probs report
 
-    ch_squidpy = Channel.empty()
-    //Analyze - spacemarkers
-    if (params.analyze.spacemarkers){
+    ch_sm_inputs = DECONVOLVE.out.ch_deconvolved
+                .map { it -> [it.meta, it.cell_probs?:it.obj] }
+                .combine( ch_datasets.map { it -> [it.meta, it.data_directory] }, by:0 )
+            // squidpy now anndata to plot spatial plots and ligrec
+    ch_squidpy = DECONVOLVE.out.ch_deconvolved
+                        .filter { it -> it.obj != null }
+                        .filter { it -> it.obj.name.endsWith('.h5ad') }
+                        .map { it-> [it.meta, it.obj] }
 
-        //csv if available, otherwise deconvolution object - SpaceMarkers knows how to handle both
-        ch_sm_inputs = DECONVOLVE.out.ch_deconvolved
-                        .map { it -> [it.meta, it.cell_probs?:it.obj] }
-                        .combine( ch_datasets.map { it -> [it.meta, it.data_directory] }, by:0 )
-
-        if(params.visium_hd) {
-        
-            SPACEMARKERS_HD( ch_sm_inputs.map {it -> [it[0], it[1], it[2]+"/binned_outputs/${params.visium_hd}" ]} )   //temp - allow spacemarkers to run on dev
-
-        } else {
-
-            SPACEMARKERS( ch_sm_inputs )
-            versions = versions.mix(SPACEMARKERS.out.versions)
-
-        }
-    }
-
-
-    // squidpy analysis
-    if (params.analyze.squidpy){
-        // spatially variable genes do not depend on deconvolution
-        SQUIDPY_MORANS_I( ch_adata )
-        versions = versions.mix(SQUIDPY_MORANS_I.out.versions)
-
-        // squidpy now anndata to plot spatial plots and ligrec
-        ch_squidpy = DECONVOLVE.out.ch_deconvolved
-                            .filter { it -> it.obj != null }
-                            .filter { it -> it.obj.name.endsWith('.h5ad') }
-                            .map { it-> [it.meta, it.obj] }
-
-        SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
-        versions = versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)
-
-        SQUIDPY_LIGREC_ANALYSIS( ch_squidpy )
-        versions = versions.mix(SQUIDPY_LIGREC_ANALYSIS.out.versions)
-
-        ch_ligrec_output = SQUIDPY_LIGREC_ANALYSIS.out.ligrec_interactions.collect()
-    }
+    // Analyze
+    ANALYZE ( ch_sm_inputs, ch_squidpy )
 
     //make reports
     QC( ch_report.filter { it -> it[1] != null && it[1] != '' && it[1] != [] }
