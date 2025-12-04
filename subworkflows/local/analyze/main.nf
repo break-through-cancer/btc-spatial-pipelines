@@ -13,13 +13,13 @@ workflow ANALYZE {
 
     versions = channel.empty()
     squidpy_ligrec = channel.empty()
-    spacemarkers_ligrec = channel.empty()
+
 
     // ligrec - spacemarkers if requested
     if (params.analyze.spacemarkers){
         SPACEMARKERS(ch_sm_inputs)
         versions = versions.mix(SPACEMARKERS.out.versions)
-        spacemarkers_ligrec = spacemarkers_ligrec.mix(SPACEMARKERS.out.spacemarkers)
+        // spacemarkers_ligrec was unused and has been removed
     }
 
     // ligrec - squidpy if requested

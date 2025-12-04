@@ -205,7 +205,7 @@ if outname in ["cell_probs"]:
         mean_probs.insert(0, "Sample", sample)
         mean_probs.to_csv(f"{outname}_report.csv", index=False)
     else:
-        print("cell_type_probs not found in adata.obsm")
+        print("cell_type_prob not found in adata.obs")
 #wrap up
 adata.file.close()
 

@@ -73,12 +73,13 @@ workflow SPATIAL {
 
     // Report deconvolution results to MultiQC
     ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'adata_counts']} ) //cell type counts
-    ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'cell_probs']} )   //cel probs report
+    ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'cell_probs']} )   //cell probs report
 
     ch_sm_inputs = DECONVOLVE.out.ch_deconvolved
                 .map { it -> [it.meta, it.cell_probs?:it.obj] }
                 .combine( ch_datasets.map { it -> [it.meta, it.data_directory] }, by:0 )
-            // squidpy now anndata to plot spatial plots and ligrec
+
+    // Filter deconvolved results to get anndata objects for squidpy spatial plots and ligand-receptor analysis
     ch_squidpy = DECONVOLVE.out.ch_deconvolved
                         .filter { it -> it.obj != null }
                         .filter { it -> it.obj.name.endsWith('.h5ad') }
