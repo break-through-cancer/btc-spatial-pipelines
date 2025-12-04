@@ -8,7 +8,7 @@ workflow SQUIDPY {
         SQUIDPY_LIGREC_ANALYSIS( ch_squidpy )
         versions = versions.mix(SQUIDPY_LIGREC_ANALYSIS.out.versions)
 
-        ligrec = SQUIDPY_LIGREC_ANALYSIS.out.ligrec_interactions.collect()
+        ligrec = SQUIDPY_LIGREC_ANALYSIS.out.ligrec_interactions
 
     emit:
         versions
