@@ -1,19 +1,3 @@
-process SQUIDPY_MORANS_I {
-    tag "$meta.id"
-    label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
-
-    input:
-    tuple val(meta), path(adata)
-    output:
-    tuple val(meta), path("${prefix}/spatially_variable_genes.csv"), emit: svgs
-    path "versions.yml",                                             emit: versions
-
-    script:
-    prefix = task.ext.prefix ?: "${meta.id}"
-    template 'moran.py'
-}
-
 
 process SQUIDPY_SPATIAL_PLOTS {
     tag "$meta.id"
@@ -37,10 +21,10 @@ process SQUIDPY_SPATIAL_PLOTS {
     source = adata.simpleName
     sample = "${meta.id}"
     prefix = task.ext.prefix ?: "${sample}/${source}"
-    template 'plot.py'
+    template 'spatial.py'
 }
 
-process SQUIDPY_LIGREC_ANALYSIS { //WIP
+process SQUIDPY_LIGREC_ANALYSIS {
     tag "$meta.id"
     label 'process_medium'
     container 'ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216'
