@@ -391,3 +391,19 @@ process CELL_TYPES_FROM_COGAPS {
     prefix = task.ext.prefix ?: "${meta.id}"
     template 'attach_metadata.py'
 }
+
+process STAPLE_ATTACH_LIGREC {
+    tag "$meta.id"
+    label 'process_medium'
+    container 'ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216'
+
+    input:
+        tuple val(meta), path(adata), path(ligrec)
+    output:
+        tuple val(meta), path("${prefix}/staple.h5ad"), emit: adata
+        path "versions.yml",                  emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    template 'attach_ligrec.py'
+}

@@ -1,6 +1,7 @@
 include { SPACEMARKERS } from './analyze_spacemarkers.nf'
 include { SQUIDPY } from './analyze_squidpy_ligrec.nf'
 include { SQUIDPY_SPATIAL_PLOTS } from '../../../modules/local/squidpy/main'
+include { STAPLE_ATTACH_LIGREC } from '../../../modules/local/util/main'
 
 
 workflow ANALYZE {
@@ -31,10 +32,12 @@ workflow ANALYZE {
     // do basic analysis anyway
     SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
     versions = versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)
-    adata = SQUIDPY_SPATIAL_PLOTS.out.adata
+    attach_ligrec_input = SQUIDPY_SPATIAL_PLOTS.out.adata.join(squidpy_ligrec)
 
     // wrap up - collect results from tools and save
-
+    // TODO: make every subworkflow write ./staple/staple.h5ad
+    STAPLE_ATTACH_LIGREC(attach_ligrec_input)
+    adata = STAPLE_ATTACH_LIGREC.out.adata 
 
     emit:
         versions
