@@ -102,6 +102,7 @@ nextflow_pipeline {
                 analyze {
                     spacemarkers = false
                     squidpy = true
+                    xsample = true
                 }
             }
         }
@@ -132,6 +133,8 @@ nextflow_pipeline {
                 analyze {
                     spacemarkers = true
                     squidpy = true
+                    xsample = true
+
                 }
                 outdir = "output"
                 ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
