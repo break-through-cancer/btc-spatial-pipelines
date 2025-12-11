@@ -96,10 +96,13 @@
                     "run_xsample": {
                         "type": "boolean",
                         "title": "Enable Cross-sample analysis"
+                    },
+                    "spotlight": {
+                        "type": "string",
+                        "title": "Feature only these cell types in analysis (comma-separated)"
                     }
                 }
             }
         }
     }
 }
-
