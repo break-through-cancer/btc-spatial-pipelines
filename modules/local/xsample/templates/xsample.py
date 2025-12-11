@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+# Cross-sample analysis template script
+# Input is a space-delimirted string with adatas
+import os
+import pickle
+import logging
+import pandas as pd
+import scipy as sp
+import anndata as ad
+import numpy as np
+import json
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger()
+
+def ligrec_from_adatas(adatas, type='ligrec_means', axis=1,
+                            samples=None, spotlight=None):
+
+    # extract stat from each adata
+    ligrecs = [x.uns[type] for x in adatas if type in x.uns]
+
+    # combine sample level
+    combined = pd.concat(ligrecs, keys=samples, axis=axis)
+
+    # move cell types to columns and perform the t-test
+    res = combined.stack(future_stack=True)
+
+    # if a cell type or pair has been specified, filter to that only
+    if spotlight is not None and spotlight != 'false':
+        sp_index = [np.all([y in x for y in spotlight ]) for x in res.index.get_level_values(-1)]
+        res = res[sp_index]
+
+    return res
+
+def ligrec_report(adatas, spotlight=None, groups=None, show=100):
+    samples = [a.uns['spatialdata_attrs']['region'][0] for a in adatas]
+    ligrecs = ligrec_from_adatas(adatas, spotlight=spotlight, samples=samples)
+    if groups is not None:
+        ligrecs_ttest = xsample_ttest(ligrecs, groups[0], groups[1])
+
+        # if no t-test results found, fall back to mean across samples
+        if(len(ligrecs_ttest) == 0):
+            log.warning("No differential interactions found.")
+            ligrecs['mean'] = ligrecs.mean(axis=1)
+            res = ligrecs.sort_values('mean', ascending=False)[samples]
+            memo = f"Mean interaction across samples shown as no differential interactions were found between {groups[0]} and {groups[1]}."
+        else:
+            res = ligrecs_ttest.sort_values('pval')[samples]
+            memo = f"Differential ligand-receptor interactions between groups: {groups}."
+    else:
+        ligrecs['mean'] = ligrecs.mean(axis=1)
+        res = ligrecs.sort_values('mean', ascending=False)[samples]
+        memo = "Mean interaction across samples shown as no groups were specified."
+    
+    #join multiindex into single index
+    if(isinstance(res.index, pd.MultiIndex)):
+        res.index = [' '.join(map(str, idx)) for idx in res.index]
+    
+    res = res[:show]
+    res_dict = res.to_dict()
+    
+    mqc_report = {
+        "id": "ligand_receptor_interactions",
+        "description": memo,
+        "plot_type": "heatmap",
+        "pconfig": {
+            "ylab": "Sample",
+            "ycats_samples": True,
+            "xcats_samples": False,
+            "xlab": "Interaction",
+            "zlab": "Score",
+            "title": "Interaction scores",
+            "square": False
+        },
+        "data": res_dict
+    }
+    return mqc_report, res
+
+def neighbors_report(adatas, spotlight=None):
+    if spotlight is not None and spotlight != 'false':
+        cell_types = spotlight    
+    else:
+        cell_types = {}
+        for adata in adatas:
+            if "cell_type" in adata.obs:
+                ct_counts = adata.obs['cell_type'].value_counts()
+                for ct, count in ct_counts.items():
+                    if ct in cell_types:
+                        cell_types[ct] += count
+                    else:
+                        cell_types[ct] = count
+        cell_types = cell_types.keys()
+    
+    reports = []
+    for cell_type in cell_types:
+        sample_dict = {}
+        for adata in adatas:
+            if "cell_type_interactions" in adata.uns:
+                adata_cell_type_index = adata.obs['cell_type'].cat.categories.get_loc(cell_type)
+                interactions = adata.uns["cell_type_interactions"][adata_cell_type_index]
+                #construct dict of other cell types and interaction values
+                other_cell_types = adata.obs['cell_type'].cat.categories.tolist()
+                interaction_dict = {}
+                for i, other_cell_type in enumerate(other_cell_types):
+                    interaction_dict[other_cell_type] = interactions[i]
+                sample_dict[adata.uns['spatialdata_attrs']['region'][0]] = interaction_dict
+        reports.append(sample_dict)
+        
+        mqc_report = {
+            "id": "spatial_neighbors",
+            "plot_type": "bar",
+            "description": "Cell type immediate neighborhood across samples",
+            "pconfig": {
+                "title": "Cell type neighborhood across samples",
+                "ylab": "Neighboring cell type share",
+                "xlab": "Sample",
+                "data_labels": list(cell_types)
+            },
+            "data": reports
+        }
+    return mqc_report
+
+
+
+def plot_hist(df_pair, title=None, save=True):
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    x = 8
+    y = df_pair.shape[0] / 4
+
+    plt.figure(figsize=(x, y))
+    sns.heatmap(df_pair, cmap='coolwarm', fmt=".2f", linewidths=.5)
+    plt.title(title)
+    if save:
+        plt.savefig(title.replace(" ", "_")+".png", dpi=300, bbox_inches='tight')
+
+def xsample_ttest(df, group1, group2):
+    res = df.copy()
+    test = sp.stats.ttest_ind(res[group1], res[group2], axis=1)
+    res['statistic'] = test.statistic
+    res['pval'] = test.pvalue
+    res.dropna(inplace=True)
+    res['pval_adj'] = sp.stats.false_discovery_control(res['pval'], method='bh')
+    res.sort_values('pval_adj', inplace=True)
+
+    return res
+
+def versions():
+    with open ("versions.yml", "w") as f:
+        f.write(f"{process}:\\n")
+        f.write(f"    scipy: {sp.__version__}\\n")
+        f.write(f"    numpy: {np.__version__}\\n")
+        f.write(f"    anndata: {ad.__version__}\\n")
+        f.write(f"    pandas: {pd.__version__}\\n")
+        f.write(f"    json: {json.__version__}\\n")
+
+
+def get_cat_vars(adatas):
+    # find vars added by the staple pipeline
+    vars = [x.uns['added_metadata_fields'].tolist() for x in adatas if 'added_metadata_fields' in x.uns]
+    if (len(vars) == 0):
+        log.warning("No added metadata fields found in any of the provided anndatas, quitting.")
+        exit(0)
+
+    # drop id var from analysis vars
+    for v in vars:
+        if 'id' in v:
+            v.remove('id')
+
+    # find vars present in all samples
+    common_vars = set(vars[0]).intersection(*vars[1:])
+    log.info(f"Common added metadata fields across all samples: {common_vars}")
+    if len(common_vars) == 0:
+        log.warning("No common added metadata fields found across all provided anndatas, quitting.")
+        exit(0)
+    
+    # check that vars are categorical, same inside sample and differ across samples
+    cats = {}
+    for var in common_vars:
+        is_categorical = all([isinstance(x.obs[var].dtype, pd.CategoricalDtype) for x in adatas])
+        if not is_categorical:
+            log.warning(f"Variable {var} is not categorical in all samples, skipping.")
+            continue
+        n_categories = [x.obs[var].nunique() for x in adatas]
+        if len(set(n_categories)) != 1:
+            log.warning(f"Variable {var} differs across individual samples .obs, skipping.")
+            continue
+        combined_categories = pd.concat([x.obs[[var,'id']] for x in adatas])
+        levels = combined_categories.groupby(var)['id'].unique()
+        if (len(levels) != 2):
+            log.warning(f"Can only do vars with 2 levels ({var} has {len(levels)}), skipping.")
+            continue
+        cats[var] = levels.to_dict()
+
+    return cats
+
+if __name__ == '__main__':
+    process = "${task.process}"
+    collected = "${collected_items}"          # these are whitespace separated paths to anndatas
+    show = int("${params.analyze.show_top}")  # how many top results to show
+
+    adata_paths = collected.split(" ")
+    adatas = [ad.read_h5ad(path, backed="r") for path in adata_paths]
+    spotlight = "${params.analyze.spotlight}" # this is a comma-separated string of cell type pairs to spotlight
+    if ',' in spotlight:
+        spotlight = spotlight.split(',')
+
+    # generate neighbors report
+    os.makedirs("reports", exist_ok=True)
+    neighbors = neighbors_report(adatas, spotlight=spotlight)
+    json.dump(neighbors, open("reports/neighbors_mqc.json","w"), indent=4)
+
+    # print versions now because later may be too late
+    versions()
+
+    # generate reports using added meta vars
+    cats = get_cat_vars(adatas)
+    log.info(f"Variables and number of groups suitable for cross-sample analysis: {cats}")
+    
+    # if not cats found, just produce overall ligrec report
+    if len(cats) == 0:
+        res_mqc, res = ligrec_report(adatas, spotlight=spotlight, show=show)
+        json.dump(res_mqc, open(f"reports/ligrec_overall_mqc.json","w"), indent=4)
+    else:
+        # for variables with 2 groups, perform ligrec t-test
+        for var in cats.keys():
+            groups = [x for x in cats[var]]
+            group1 = cats[var][groups[0]].tolist()
+            group2 = cats[var][groups[1]].tolist()
+            res_mqc, res = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show)
+            json.dump(res_mqc, open(f"reports/ligrec_{var}_mqc.json","w"), indent=4)

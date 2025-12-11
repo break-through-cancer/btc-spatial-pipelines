@@ -28,6 +28,8 @@ include  { QC } from '../modules/local/util/'
 
 include { LOAD_DATASET } from '../subworkflows/local/load_dataset'
 
+include { STAPLE_XSAMPLE } from '../modules/local/xsample/'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,7 +47,7 @@ include { MULTIQC } from '../modules/nf-core/multiqc'
 */
 
 
-workflow SPATIAL {
+workflow STAPLE {
     versions = channel.empty()
 
     // Load input paths and metadata
@@ -62,10 +64,8 @@ workflow SPATIAL {
     ch_matched_adata = LOAD_DATASET.out.ch_matched_adata
     versions = versions.mix(LOAD_DATASET.out.versions)
 
-
     // Report read data to MultiQC
     ch_report = LOAD_DATASET.out.ch_report
-
 
     // Deconvolve / cell type / use external
     DECONVOLVE (ch_datasets, ch_matched_adata, ch_scrna, ch_adata)
@@ -89,7 +89,15 @@ workflow SPATIAL {
     ANALYZE ( ch_sm_inputs, ch_squidpy )
     versions = versions.mix(ANALYZE.out.versions)
 
-    //make reports
+    // Cross-sample analysis
+    //if ( params.analyze.xsample ) {
+        xsample_inputs = ANALYZE.out.adata.map{ it -> it[1] }.collect()
+        STAPLE_XSAMPLE (xsample_inputs)
+        versions = versions.mix(STAPLE_XSAMPLE.out.versions)
+        ch_multiqc_files = ch_multiqc_files.mix(STAPLE_XSAMPLE.out.multiqc_files)
+    //}
+
+    // make reports
     QC( ch_report.filter { it -> it[1] != null && it[1] != '' && it[1] != [] }
             .map { it -> tuple(it[0], it[1], it[2]) } )
     ch_multiqc_files = ch_multiqc_files.mix(QC.out.report)
