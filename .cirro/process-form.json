@@ -1,7 +1,7 @@
 {
     "ui": {},
     "form": {
-        "title": "BTC 10X Visium Pipeline",
+        "title": "STAPLE: BTC 10X Visium Pipeline",
         "type": "object",
         "properties": {
             "data": {
@@ -10,7 +10,8 @@
                 "properties": {
                     "hd": {
                         "type": "string",
-                        "title": "Table name if Visium HD format"
+                        "title": "Table name if Visium HD format",
+                        "default": "square_008um"
                     }
                 }
             },
@@ -20,15 +21,20 @@
                 "properties":{
                     "n_top_genes": {
                         "type": "integer",
-                        "title": "Number of Top Genes (by var) to keep",
-                        "default": 1000
+                        "title": "Number of Top Genes (by var) to keep - use lower number for faster runtime",
+                        "default": 99999
                     }
                 }
             },
-            "deconvolution": {
-                "title": "Deconvolution options",
+            "ref_deconvolution":{
+                "title": "Reference-based deconvolution options",
                 "type": "object",
                 "properties": {
+                    "run_rctd": {
+                        "type": "boolean",
+                        "title": "Run RCTD Deconvolution",
+                        "default": true
+                    },
                     "reference_scrna": {
                         "type": "string",
                         "title": "Reference scRNA-seq h5ad dataset for RCTD deconvolution (URL or S3 URI)"
@@ -37,11 +43,23 @@
                         "type": "string",
                         "title": "Column name in the reference scRNA-seq dataset that contains the cell type labels",
                         "default": "cell_type"
-                    },
+                    }
+                }
+            },
+            "ext_deconvolution":{
+                "title": "External reference-based deconvolution options",
+                "type": "object",
+                "properties": {
                     "find_annotations": {
                         "type": "boolean",
-                        "title": "Look for External Spot Annotations (e.g. CODA)"
-                    },
+                        "title": "Look for External Spot Annotations (e.g. CODA) in the dataset files."
+                    }
+                }
+            },
+            "deconvolution": {
+                "title": "Reference-free deconvolution options",
+                "type": "object",
+                "properties": {
                     "n_cell_types": {
                         "type": "integer",
                         "title": "Number of Cell Types"
@@ -68,6 +86,16 @@
                         "type": "boolean",
                         "title": "Enable Squidpy LigRec",
                         "default": true
+                    }
+                }
+            },
+            "xsample":{
+                "title": "Cross-sample analysis options",
+                "type": "object",
+                "properties": {
+                    "run_xsample": {
+                        "type": "boolean",
+                        "title": "Enable Cross-sample analysis"
                     }
                 }
             }
