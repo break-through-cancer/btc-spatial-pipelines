@@ -1,3 +1,5 @@
+[![test](https://github.com/break-through-cancer/btc-spatial-pipelines/actions/workflows/test.yml/badge.svg)](https://github.com/break-through-cancer/btc-spatial-pipelines/actions/workflows/test.yml)
+
 ## Introduction
 
 **STAPLE** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data. Being a simple preprocessing-deconvolution-interaction pipeline it features multiple tools, for reference-based deconvolution and cell-cell interaction analysis. In case of reference-based deconvolution, atlas may be specified as an URL on an S3 location (e.g. CellxGene) or a local file, or matched-scRNA made available.
