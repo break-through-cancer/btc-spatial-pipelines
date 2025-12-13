@@ -32,9 +32,16 @@ def ligrec_from_adatas(adatas, type='ligrec_means', axis=1,
 
     return res
 
-def ligrec_report(adatas, spotlight=None, groups=None, show=100):
+def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05):
     samples = [a.obs['id'].unique()[0] for a in adatas]
-    ligrecs = ligrec_from_adatas(adatas, spotlight=spotlight, samples=samples)
+    ligrecs = ligrec_from_adatas(adatas, type='ligrec_means', spotlight=spotlight, samples=samples)
+    pvalues = ligrec_from_adatas(adatas, type='ligrec_pvalues', spotlight=spotlight, samples=samples)
+
+    if pvalues is not None:
+        # filter sample ligrec pairs by p-value
+        sig_mask = (pvalues <= filter).any(axis=1)
+        ligrecs = ligrecs[sig_mask]
+
     if groups is not None:
         ligrecs_ttest = xsample_ttest(ligrecs, groups[0], groups[1])
 
