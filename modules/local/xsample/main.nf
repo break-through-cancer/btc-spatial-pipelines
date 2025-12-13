@@ -7,9 +7,9 @@ process STAPLE_XSAMPLE {
     path collected_items, stageAs: "?/*" // stage numbers the files as 0,1,2...
 
     output:
-    path "*.csv",           emit: reports,          optional: true
-    path "reports/*mqc*",           emit: multiqc_files,    optional: true
-    path "versions.yml",    emit: versions
+    path "reports/*.csv",               emit: reports,          optional: true //full csv reports
+    path "reports/mqc/*mqc*",           emit: multiqc_files,    optional: true //multiqc reports for viewing and ai
+    path "versions.yml",                emit: versions
 
     // collect multiple ligrec results into a single file
 

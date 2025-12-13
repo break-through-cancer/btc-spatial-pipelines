@@ -208,7 +208,7 @@ if __name__ == '__main__':
         spotlight = spotlight.split(',')
 
     #place all reports here
-    os.makedirs("reports", exist_ok=True)
+    os.makedirs("reports/mqc", exist_ok=True)
 
     # generate neighbors report
     try:
@@ -237,7 +237,7 @@ if __name__ == '__main__':
                 group1 = cats[var][groups[0]].tolist()
                 group2 = cats[var][groups[1]].tolist()
                 res_mqc, res = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show)
-                json.dump(res_mqc, open(f"reports/ligrec_diff_{var}_mqc.json","w"), indent=4)
+                json.dump(res_mqc, open(f"reports/mqc/ligrec_diff_{var}_mqc.json","w"), indent=4)
                 res.to_csv(f"reports/ligrec_diff_{var}_results.csv")
     except Exception as e:
         log.warning(f"Could not generate ligand-receptor report: {e}")
