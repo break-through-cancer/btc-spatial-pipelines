@@ -45,20 +45,22 @@ def ligrec_report(adatas, spotlight=None, groups=None, show=100):
             res = ligrecs.sort_values('mean', ascending=False)[samples]
             memo = f"Mean interaction across samples shown as no differential interactions were found between {groups[0]} and {groups[1]}."
         else:
-            res = ligrecs_ttest.sort_values('pval')[samples]
-            memo = f"Differential ligand-receptor interactions between groups: {groups}."
+            res = ligrecs_ttest.sort_values('pval')
+            memo = f"Differential ligand-receptor interactions between {groups[0]} and {groups[1]}. "
+            pval_annot = ligrecs_ttest['pval_adj'][:show]
+            memo += f"Top {show} shown sorted by adjusted p-value between {min(pval_annot):.2e} and {max(pval_annot):.2e}."
     else:
         ligrecs['mean'] = ligrecs.mean(axis=1)
         res = ligrecs.sort_values('mean', ascending=False)[samples]
         memo = "Mean interaction across samples shown as no groups were specified."
     
-    #join multiindex into single index
+    #join multiindex of squidpy ligrec into single index
     if(isinstance(res.index, pd.MultiIndex)):
-        res.index = [' '.join(map(str, idx)) for idx in res.index]
+        res.index = ['-'.join(map(str, idx)) for idx in res.index]
     
-    res = res[:show]
-    res_dict = res.to_dict()
-    
+    res_show = res[samples][:show]
+    res_dict = res_show.to_dict()
+
     mqc_report = {
         "id": "ligand_receptor_interactions",
         "description": memo,
@@ -235,6 +237,7 @@ if __name__ == '__main__':
                 group1 = cats[var][groups[0]].tolist()
                 group2 = cats[var][groups[1]].tolist()
                 res_mqc, res = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show)
-                json.dump(res_mqc, open(f"reports/ligrec_{var}_mqc.json","w"), indent=4)
+                json.dump(res_mqc, open(f"reports/ligrec_diff_{var}_mqc.json","w"), indent=4)
+                res.to_csv(f"reports/ligrec_diff_{var}_results.csv")
     except Exception as e:
         log.warning(f"Could not generate ligand-receptor report: {e}")
