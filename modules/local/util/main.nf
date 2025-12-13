@@ -165,10 +165,10 @@ import scanpy as sc
 
 adata_path = "$adata"
 outname = "$report_name"
-adata = ad.read_h5ad(adata_path)
 sample = "${meta.id}"
 
 if outname in ["atlas_input", "adata_input", "adata_output"]:
+    adata = ad.read_h5ad(adata_path)
     #basic scanpy qc metrics
     qc = sc.pp.calculate_qc_metrics(adata, inplace=False)
     report = pd.DataFrame({
@@ -183,6 +183,7 @@ if outname in ["atlas_input", "adata_input", "adata_output"]:
 
 if outname in ["atlas_counts", "adata_counts"]:
     #cell type statistics
+    adata = ad.read_h5ad(adata_path, backed='r')
     if "cell_type" in adata.obs.columns:
         cell_type_col = "cell_type"
     else:
@@ -196,6 +197,15 @@ if outname in ["atlas_counts", "adata_counts"]:
     else:
         print(f"Cell type column {cell_type_col} not found in adata.obs")
 
+if outname in ["cell_probs"]:
+    #cell type qc metrics
+    adata = ad.read_h5ad(adata_path, backed='r')
+    if "cell_type_prob" in adata.obs.columns:
+        mean_probs = adata.obs.groupby('cell_type').agg({'cell_type_prob':'mean'}).transpose()
+        mean_probs.insert(0, "Sample", sample)
+        mean_probs.to_csv(f"{outname}_report.csv", index=False)
+    else:
+        print("cell_type_prob not found in adata.obs")
 #wrap up
 adata.file.close()
 
@@ -215,8 +225,8 @@ process ADATA_FROM_VISIUM_HD {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/${params.visium_hd}.h5ad"),   emit: adata
-        path("versions.yml"),                                          emit: versions
+        tuple val(meta), path("${prefix}/adata.h5ad"),   emit: adata
+        path("versions.yml"),                            emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -248,7 +258,7 @@ sq.gr.spatial_neighbors(adata)
 adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 
 #save
-outname = os.path.join(sample, f"{table}.h5ad")
+outname = os.path.join(sample, "adata.h5ad")
 adata.write_h5ad(filename=outname, compression='gzip')
 
 #versions
@@ -267,7 +277,7 @@ process ADATA_FROM_VISIUM {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/visium.h5ad"),         emit: adata
+        tuple val(meta), path("${prefix}/adata.h5ad"),          emit: adata
         path("versions.yml"),                                   emit: versions
 
     script:
@@ -300,7 +310,7 @@ sq.gr.spatial_neighbors(adata)
 adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 
 #save
-outname = os.path.join(sample, "visium.h5ad")
+outname = os.path.join(sample, "adata.h5ad")
 adata.write_h5ad(filename=outname, compression='gzip')
 
 #versions
@@ -320,8 +330,8 @@ process ADATA_FROM_SEGMENTED_VISIUM {
     input:
         tuple val(meta), path(data)
     output:
-        tuple val(meta), path("${prefix}/${params.visium_hd}.h5ad"),   emit: adata
-        path("versions.yml"),                                          emit: versions
+        tuple val(meta), path("${prefix}/adata.h5ad"),   emit: adata
+        path("versions.yml"),                            emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -361,4 +371,39 @@ process CELL_TYPES_FROM_COGAPS {
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
     template 'cell_types_from_cogaps.r'
+}
+
+ process ADATA_ADD_METADATA {
+    //add metadata columns to anndata obs from samplesheet
+    //this overwrites previously created andata.h5ad files
+    tag "$meta.id"
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+
+    input:
+        tuple val(meta), path(adata)
+
+    output:
+        tuple val(meta), path("${prefix}/adata.h5ad"), emit: adata
+        path("versions.yml"),                          emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    template 'attach_metadata.py'
+}
+
+process STAPLE_ATTACH_LIGREC {
+    tag "$meta.id"
+    label 'process_medium'
+    container 'ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216'
+
+    input:
+        tuple val(meta), path(adata), path(ligrec)
+    output:
+        tuple val(meta), path("${prefix}/staple.h5ad"), emit: adata
+        path "versions.yml",                  emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    template 'attach_ligrec.py'
 }

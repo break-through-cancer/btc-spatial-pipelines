@@ -14,12 +14,23 @@ out = "${prefix}"
 process = "${task.process}"
 cell_type = "cell_type"
 na_as_value = "${params.na_as_value}"
+seed = ${params.seed}
+nperms = ${params.sq_gr_spatial_autocorr_nperms}
+n_jobs = ${task.cpus}
+
 
 os.makedirs(out, exist_ok=True)
 
 log.info("loading {}".format(adata_path))
 adata = ad.read_h5ad(adata_path)
 log.info("adata is {}".format(adata))
+
+
+log.info("calculating Moran's I for spatially variable genes")
+if nperms <= 0:
+    nperms = None
+sq.gr.spatial_neighbors(adata)
+sq.gr.spatial_autocorr(adata, mode="moran", seed=seed, n_perms=nperms, n_jobs=n_jobs)
 
 #get most abundant cell type from bayestme
 if cell_type not in adata.obs.columns:

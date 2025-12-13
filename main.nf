@@ -39,13 +39,13 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { SPATIAL } from './workflows/spatial'
+include { STAPLE } from './workflows/spatial'
 
 //
 // WORKFLOW: Run main btc/spatial analysis pipeline
 //
-workflow BTC_SPATIAL {
-    SPATIAL ()
+workflow BTC {
+    STAPLE ()
 }
 
 /*
@@ -59,7 +59,7 @@ workflow BTC_SPATIAL {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    BTC_SPATIAL ()
+    BTC ()
 }
 
 /*
