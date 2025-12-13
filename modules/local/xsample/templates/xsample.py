@@ -220,7 +220,7 @@ if __name__ == '__main__':
     # generate neighbors report
     try:
         neighbors = neighbors_report(adatas, spotlight=spotlight)
-        json.dump(neighbors, open("reports/neighbors_mqc.json","w"), indent=4)
+        json.dump(neighbors, open("reports/mqc/neighbors_mqc.json","w"), indent=4)
     except Exception as e:
         log.warning(f"Could not generate neighbors report: {e}")
 
