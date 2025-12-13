@@ -33,7 +33,7 @@ def ligrec_from_adatas(adatas, type='ligrec_means', axis=1,
     return res
 
 def ligrec_report(adatas, spotlight=None, groups=None, show=100):
-    samples = [a.uns['spatialdata_attrs']['region'][0] for a in adatas]
+    samples = [a.obs['id'].unique()[0] for a in adatas]
     ligrecs = ligrec_from_adatas(adatas, spotlight=spotlight, samples=samples)
     if groups is not None:
         ligrecs_ttest = xsample_ttest(ligrecs, groups[0], groups[1])
@@ -205,10 +205,15 @@ if __name__ == '__main__':
     if ',' in spotlight:
         spotlight = spotlight.split(',')
 
-    # generate neighbors report
+    #place all reports here
     os.makedirs("reports", exist_ok=True)
-    neighbors = neighbors_report(adatas, spotlight=spotlight)
-    json.dump(neighbors, open("reports/neighbors_mqc.json","w"), indent=4)
+
+    # generate neighbors report
+    try:
+        neighbors = neighbors_report(adatas, spotlight=spotlight)
+        json.dump(neighbors, open("reports/neighbors_mqc.json","w"), indent=4)
+    except Exception as e:
+        log.warning(f"Could not generate neighbors report: {e}")
 
     # print versions now because later may be too late
     versions()
@@ -217,15 +222,19 @@ if __name__ == '__main__':
     cats = get_cat_vars(adatas)
     log.info(f"Variables and number of groups suitable for cross-sample analysis: {cats}")
     
-    # if not cats found, just produce overall ligrec report
-    if len(cats) == 0:
-        res_mqc, res = ligrec_report(adatas, spotlight=spotlight, show=show)
-        json.dump(res_mqc, open(f"reports/ligrec_overall_mqc.json","w"), indent=4)
-    else:
-        # for variables with 2 groups, perform ligrec t-test
-        for var in cats.keys():
-            groups = [x for x in cats[var]]
-            group1 = cats[var][groups[0]].tolist()
-            group2 = cats[var][groups[1]].tolist()
-            res_mqc, res = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show)
-            json.dump(res_mqc, open(f"reports/ligrec_{var}_mqc.json","w"), indent=4)
+    # make ligand-receptor reports
+    try:
+        # if not cats found, just produce overall ligrec report
+        if len(cats) == 0:
+            res_mqc, res = ligrec_report(adatas, spotlight=spotlight, show=show)
+            json.dump(res_mqc, open(f"reports/ligrec_overall_mqc.json","w"), indent=4)
+        else:
+            # for variables with 2 groups, perform ligrec t-test
+            for var in cats.keys():
+                groups = [x for x in cats[var]]
+                group1 = cats[var][groups[0]].tolist()
+                group2 = cats[var][groups[1]].tolist()
+                res_mqc, res = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show)
+                json.dump(res_mqc, open(f"reports/ligrec_{var}_mqc.json","w"), indent=4)
+    except Exception as e:
+        log.warning(f"Could not generate ligand-receptor report: {e}")
