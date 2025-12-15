@@ -2,8 +2,34 @@
 
 **STAPLE** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data. Being a simple preprocessing-deconvolution-interaction pipeline it features multiple tools for reference-free and reference-based deconvolution (cell typing) and cell-cell interaction analysis. In case of reference-based deconvolution, atlas may be fetched from a URL on an S3 location (e.g. CellxGene) or a local file, or matched-scRNA made available.
 
+```mermaid
+flowchart TB
+  subgraph STAPLE
+    v1([INPUT_CHECK])
+    v4([LOAD_DATASET])
+    v10([DECONVOLVE])
+    v16([ANALYZE])
+    v19([STAPLE_XSAMPLE])
+    v22([QC])
+    v28([MULTIQC])
+    v1 --> v4
+    v1 --> v10
+    v4 --> v10
+    v1 --> v16
+    v10 --> v16
+    v16 --> v19
+    v4 --> v22
+    v10 --> v22
+    v16 --> v28
+    v1 --> v28
+    v19 --> v28
+    v4 --> v28
+    v22 --> v28
+    v10 --> v28
+  end
 
-![image info](assets/dag-STAPLE.svg)
+```
+
 
 ## Usage
 
