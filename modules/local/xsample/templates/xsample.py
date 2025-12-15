@@ -2,7 +2,6 @@
 # Cross-sample analysis template script
 # Input is a space-delimirted string with adatas
 import os
-import pickle
 import logging
 import pandas as pd
 import scipy as sp
@@ -112,21 +111,21 @@ def neighbors_report(adatas, spotlight=None):
                 interaction_dict = {}
                 for i, other_cell_type in enumerate(other_cell_types):
                     interaction_dict[other_cell_type] = interactions[i]
-                sample_dict[adata.uns['spatialdata_attrs']['region'][0]] = interaction_dict
+                sample_dict[adata.obs['id'].unique()[0]] = interaction_dict
         reports.append(sample_dict)
-        
-        mqc_report = {
-            "id": "spatial_neighbors",
-            "plot_type": "bar",
-            "description": "Cell type immediate neighborhood across samples",
-            "pconfig": {
-                "title": "Cell type neighborhood across samples",
-                "ylab": "Neighboring cell type share",
-                "xlab": "Sample",
-                "data_labels": list(cell_types)
-            },
-            "data": reports
-        }
+
+    mqc_report = {
+        "id": "spatial_neighbors",
+        "plot_type": "bar",
+        "description": "Cell type immediate neighborhood across samples",
+        "pconfig": {
+            "title": "Cell type neighborhood across samples",
+            "ylab": "Neighboring cell type share",
+            "xlab": "Sample",
+            "data_labels": list(cell_types)
+        },
+        "data": reports
+    }
     return mqc_report
 
 
@@ -220,7 +219,8 @@ if __name__ == '__main__':
     # generate neighbors report
     try:
         neighbors = neighbors_report(adatas, spotlight=spotlight)
-        json.dump(neighbors, open("reports/mqc/neighbors_mqc.json","w"), indent=4)
+        with open("reports/mqc/neighbors_mqc.json","w") as f:
+            json.dump(neighbors, f, indent=4)
     except Exception as e:
         log.warning(f"Could not generate neighbors report: {e}")
 
@@ -236,7 +236,8 @@ if __name__ == '__main__':
         # if not cats found, just produce overall ligrec report
         if len(cats) == 0:
             res_mqc, res = ligrec_report(adatas, spotlight=spotlight, show=show)
-            json.dump(res_mqc, open(f"reports/ligrec_overall_mqc.json","w"), indent=4)
+            with open(f"reports/ligrec_overall_mqc.json","w") as f:
+                json.dump(res_mqc, f, indent=4)
         else:
             # for variables with 2 groups, perform ligrec t-test
             for var in cats.keys():
@@ -244,7 +245,13 @@ if __name__ == '__main__':
                 group1 = cats[var][groups[0]].tolist()
                 group2 = cats[var][groups[1]].tolist()
                 res_mqc, res = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show)
-                json.dump(res_mqc, open(f"reports/mqc/ligrec_diff_{var}_mqc.json","w"), indent=4)
+                # mqc report is for showing, but csv should have full data
+                with open(f"reports/mqc/ligrec_diff_{var}_mqc.json","w") as f:
+                    json.dump(res_mqc, f, indent=4)
                 res.to_csv(f"reports/ligrec_diff_{var}_results.csv")
     except Exception as e:
         log.warning(f"Could not generate ligand-receptor report: {e}")
+
+    #wrapup
+    for adata in adatas:
+        adata.file_close()

@@ -180,6 +180,7 @@ if outname in ["atlas_input", "adata_input", "adata_output"]:
         "mean_total_nnz_counts": adata.X[adata.X.nonzero()].mean(),
     })
     report.to_csv(f"{outname}_report.csv", index=False)
+    adata.file.close()
 
 if outname in ["atlas_counts", "adata_counts"]:
     #cell type statistics
@@ -196,6 +197,7 @@ if outname in ["atlas_counts", "adata_counts"]:
         pd.DataFrame(ct_counts).to_csv(f"{outname}_report.csv", index=False)
     else:
         print(f"Cell type column {cell_type_col} not found in adata.obs")
+    adata.file.close()
 
 if outname in ["cell_probs"]:
     #cell type qc metrics
@@ -206,8 +208,7 @@ if outname in ["cell_probs"]:
         mean_probs.to_csv(f"{outname}_report.csv", index=False)
     else:
         print("cell_type_prob not found in adata.obs")
-#wrap up
-adata.file.close()
+    adata.file.close()
 
 #versions
 with open("versions.yml", "w") as f:

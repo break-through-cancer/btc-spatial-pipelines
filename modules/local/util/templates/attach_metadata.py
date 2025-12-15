@@ -18,7 +18,7 @@ adata = ad.read_h5ad(adata_path)
 
 #parse groovy meta map to dict, example map: metadata="[response:, id:sample1]"
 flist = metadata.replace("[","").replace("]","").strip()
-fdict = {x.split(":")[0].strip():x.split(":")[1].strip() for x in flist.split(",")}
+fdict = {x.split(":",1)[0].strip():x.split(":",1)[1].strip() for x in flist.split(",")}
 
 #attach metadata to obs if not blank
 for key in fdict:
