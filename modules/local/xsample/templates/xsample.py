@@ -254,4 +254,4 @@ if __name__ == '__main__':
 
     #wrapup
     for adata in adatas:
-        adata.file_close()
+        adata.file.close()
