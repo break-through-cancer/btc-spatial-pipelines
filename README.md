@@ -58,6 +58,22 @@ nextflow run break-through-cancer/btc-spatial-pipelines \
    --deconvolve.bayestme \
 ```
 
+## Limitations
+
+Not all the tools support all the formats! Use these guidelines to pick parameters in case the fully functioning defaults (RCTD + Squidpy) are not desired.
+
+| tool/format | Visium SD | Visium HD | HD segmented |
+| ----------- | --------- | --------- | ------------ |
+| RCTD | OK | OK | OK | OK |
+| Squidpy | OK | OK | OK | OK |
+| CoGAPS | OK | reduce genes | reduce genes |
+| BayesTME | OK | | |
+| SpaceMarkers | OK | directred only** |
+
+** Spacemarkers has two modes - directed and undirected, where the directed version will only consider known ligand-receptor itnteractions from a  database, the undirected version will assess differential expression for each gene in the neighboring regions of interest.
+
+Furthermore, not all the tools are fully featured in the cross-sample analysis. So, Spacemakers are not yet integrated into the MultuQC module, as well as since BayesTME and CoGAPS are reference-free, the synthetic cell type outputs they produce does not match across samples.
+
 
 ## Contributions and Support
 
