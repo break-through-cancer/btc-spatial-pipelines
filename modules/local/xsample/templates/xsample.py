@@ -31,10 +31,20 @@ def ligrec_from_adatas(adatas, type='ligrec_means', axis=1,
 
     return res
 
-def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05):
+def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, tool='squidpy'):
     samples = [a.obs['id'].unique()[0] for a in adatas]
-    ligrecs = ligrec_from_adatas(adatas, type='ligrec_means', spotlight=spotlight, samples=samples)
-    pvalues = ligrec_from_adatas(adatas, type='ligrec_pvalues', spotlight=spotlight, samples=samples)
+    pvalues = None
+    if tool =='squidpy_ligrec':
+        ligrecs = ligrec_from_adatas(adatas, type='ligrec_means', spotlight=spotlight, samples=samples)
+        pvalues = ligrec_from_adatas(adatas, type='ligrec_pvalues', spotlight=spotlight, samples=samples)
+    elif tool =='spacemarkers_LRscores':
+        ligrecs = ligrec_from_adatas(adatas, type='LRscores', spotlight=spotlight, samples=samples)
+    elif tool =='spacemarkers_IMscores':
+        ligrecs = ligrec_from_adatas(adatas, type='IMscores', spotlight=spotlight, samples=samples)
+    elif tool =='Moran_I':
+        ligrecs = ligrec_from_adatas(adatas, type='moranI', spotlight=spotlight, samples=samples)
+        #pick only the Moran's I value index
+        ligrecs = ligrecs[ligrecs.index.get_level_values(-1) == 'I']
 
     if pvalues is not None:
         # filter sample ligrec pairs by p-value
@@ -52,7 +62,7 @@ def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05):
             memo = f"Mean interaction across samples shown as no differential interactions were found between {groups[0]} and {groups[1]}."
         else:
             res = ligrecs_ttest.sort_values('pval')
-            memo = f"Differential ligand-receptor interactions between {groups[0]} and {groups[1]}. "
+            memo = f"Differential interactions between {groups[0]} and {groups[1]}. "
             pval_annot = ligrecs_ttest['pval_adj'][:show]
             memo += f"Top {show} shown sorted by adjusted p-value between {min(pval_annot):.2e} and {max(pval_annot):.2e}."
     else:
@@ -68,7 +78,7 @@ def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05):
     res_dict = res_show.to_dict()
 
     mqc_report = {
-        "id": "ligand_receptor_interactions",
+        "id": f"{tool}_interactions",
         "description": memo,
         "plot_type": "heatmap",
         "pconfig": {
@@ -213,13 +223,16 @@ if __name__ == '__main__':
     if ',' in spotlight:
         spotlight = spotlight.split(',')
 
-    #place all reports here
-    os.makedirs("reports/mqc", exist_ok=True)
+    #place all mqc reports here
+    reports_dir = "reports"
+    os.makedirs(reports_dir, exist_ok=True)
+    mqc_reports_dir = "reports/mqc"
+    os.makedirs(mqc_reports_dir, exist_ok=True)
 
     # generate neighbors report
     try:
         neighbors = neighbors_report(adatas, spotlight=spotlight)
-        with open("reports/mqc/neighbors_mqc.json","w") as f:
+        with open(f"{mqc_reports_dir}/neighbors_mqc.json","w") as f:
             json.dump(neighbors, f, indent=4)
     except Exception as e:
         log.warning(f"Could not generate neighbors report: {e}")
@@ -232,25 +245,76 @@ if __name__ == '__main__':
     log.info(f"Variables and number of groups suitable for cross-sample analysis: {cats}")
     
     # make ligand-receptor reports
-    try:
-        # if not cats found, just produce overall ligrec report
-        if len(cats) == 0:
-            res_mqc, res = ligrec_report(adatas, spotlight=spotlight, show=show)
-            with open(f"reports/ligrec_overall_mqc.json","w") as f:
-                json.dump(res_mqc, f, indent=4)
-        else:
-            # for variables with 2 groups, perform ligrec t-test
-            for var in cats.keys():
-                groups = [x for x in cats[var]]
-                group1 = cats[var][groups[0]].tolist()
-                group2 = cats[var][groups[1]].tolist()
+    # mqc report is for showing, but csv should have full data
+    def save_reports(mqc, res, name):
+        with open(f"{mqc_reports_dir}/{name}.json","w") as f:
+            json.dump(mqc, f, indent=4)
+        res.to_csv(f"{name}.csv")
+
+    # if not cats found, just produce overall ligrec report
+    if len(cats) == 0:
+        try:
+            res_mqc, res = ligrec_report(adatas, spotlight=spotlight, show=show, tool='squidpy_ligrec')
+            save_reports(res_mqc, res, "ligrec_overall_mqc")
+        except Exception as e:
+            log.warning(f"Could not generate overall ligand-receptor report: {e}")
+            pass
+        try:
+            lrs_mqc, lrs = ligrec_report(adatas, spotlight=spotlight, show=show, tool='spacemarkers_LRscores')
+            save_reports(lrs_mqc, lrs, "lrscores_overall_mqc.json")
+        except Exception as e:
+            log.warning(f"Could not generate overall LR scores report: {e}")
+            pass
+        try:
+            ims_mqc, ims = ligrec_report(adatas, spotlight=spotlight, show=show, tool='spacemarkers_IMscores')
+            save_reports(ims_mqc, ims, "imscores_overall_mqc.json")
+        except Exception as e:
+            log.warning(f"Could not generate overall IM scores report: {e}")
+            pass
+        try:
+            moran_mqc, moran = ligrec_report(adatas, spotlight=spotlight, show=show, tool='Moran_I')
+            save_reports(moran_mqc, moran, "moranI_overall_mqc.json")
+        except Exception as e:
+            log.warning(f"Could not generate overall Moran's I report: {e}")
+            pass
+    else:
+        # for variables with 2 groups, perform ligrec t-test
+        for var in cats.keys():
+            groups = [x for x in cats[var]]
+            group1 = cats[var][groups[0]].tolist()
+            group2 = cats[var][groups[1]].tolist()
+            
+            #squidpy ligrec
+            try:
                 res_mqc, res = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show)
-                # mqc report is for showing, but csv should have full data
-                with open(f"reports/mqc/ligrec_diff_{var}_mqc.json","w") as f:
-                    json.dump(res_mqc, f, indent=4)
-                res.to_csv(f"reports/ligrec_diff_{var}_results.csv")
-    except Exception as e:
-        log.warning(f"Could not generate ligand-receptor report: {e}")
+                save_reports(res_mqc, res, f"ligrec_diff_{var}_results")
+            except Exception as e:
+                log.warning(f"Could not generate ligand-receptor report for variable {var}: {e}")
+                pass
+            
+            # SpaceMarkers LR scores
+            try:
+                lrs_mqc, lrs = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, type='LRscores')
+                save_reports(lrs_mqc, lrs, f"lrscores_diff_{var}_results")
+            except Exception as e:
+                log.warning(f"Could not generate LR scores report for variable {var}: {e}")
+                pass
+            
+            # SpaceMarkers IM scores
+            try:
+                ims_mqc, ims = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, type='IMscores')
+                save_reports(ims_mqc, ims, f"imscores_diff_{var}_results")
+            except Exception as e:
+                log.warning(f"Could not generate IM scores report for variable {var}: {e}")
+                pass
+
+            # Moran's I
+            try:
+                moran_mqc, moran = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, type='moranI')
+                save_reports(moran_mqc, moran, f"Moran_I_diff_{var}_results")
+            except Exception as e:
+                log.warning(f"Could not generate Moran's I report for variable {var}: {e}")
+                pass
 
     #wrapup
     for adata in adatas:

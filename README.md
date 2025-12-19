@@ -27,7 +27,7 @@ Any extra columns will be treated as metadata and copied into the `meta` map and
 >[!IMPORTANT]
 `export NXF_SINGULARITY_HOME_MOUNT=true` in order to allow matplotlib to write its logs (and avoid related error) if using singularity.
 
-Run on segmetned Visium HD with RCTD for cell typing and squipy ligand-receptor analysis (default) using remote atlas annotation. In case of CellXGene atlas, the cell type column is always `cell_type`, so it does not need to be explicitly specified.
+Run on segmented Visium HD with RCTD for cell typing and squipy ligand-receptor analysis (default) using remote atlas annotation. In case of CellXGene atlas, the cell type column is always `cell_type`, so it does not need to be explicitly specified.
 ```bash
 nextflow run break-through-cancer/btc-spatial-pipelines \
    -profile <docker/singularity/.../institute> \
@@ -62,15 +62,18 @@ nextflow run break-through-cancer/btc-spatial-pipelines \
 
 Not all the tools support all the formats! Use these guidelines to pick parameters in case the fully functioning defaults (RCTD + Squidpy) are not desired.
 
-| tool/format | Visium SD | Visium HD | HD segmented |
-| ----------- | --------- | --------- | ------------ |
+| tool/format | Visium SD | Visium HD | HD segmented | MultiQC |
+| ----------- | --------- | --------- | ------------ | ---------- |
 | RCTD | OK | OK | OK | OK |
 | Squidpy | OK | OK | OK | OK |
-| CoGAPS | OK | reduce genes | reduce genes |
-| BayesTME | OK | | |
-| SpaceMarkers | OK | directred only** |
+| CoGAPS | OK | reduce gene N | reduce gene N | OK |
+| BayesTME | OK | | | |
+| SpaceMarkers SD | OK | | | OK |
+| SpaceMarkers HD | | OK | | OK |
 
-** Spacemarkers has two modes - directed and undirected, where the directed version will only consider known ligand-receptor itnteractions from a  database, the undirected version will assess differential expression for each gene in the neighboring regions of interest.
+Spacemarkers for SD reports IMscores for gene names and undirected cell type interactions (cell_type1 near cell_type2 is no different to cell_type2 near cell_type1)
+
+SpaceMarkers for HD reports IMscores for gene names in a directed fashion (cell_type1 near cell_type2 is different to cell_type2 near cell_type1) but also reports LRscores, which are the interaction scores between genes listed in a database that SpaceMarkers uses (CellChat) by default.
 
 Furthermore, not all the tools are fully featured in the cross-sample analysis. So, Spacemakers are not yet integrated into the MultuQC module, as well as since BayesTME and CoGAPS are reference-free, the synthetic cell type outputs they produce does not match across samples.
 

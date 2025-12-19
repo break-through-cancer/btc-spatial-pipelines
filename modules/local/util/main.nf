@@ -402,9 +402,27 @@ process STAPLE_ATTACH_LIGREC {
         tuple val(meta), path(adata), path(ligrec)
     output:
         tuple val(meta), path("${prefix}/staple.h5ad"), emit: adata
-        path "versions.yml",                  emit: versions
+        path "versions.yml",                            emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
     template 'attach_ligrec.py'
+}
+
+
+process SPACEMARKERS_HARMONIZE {
+    tag "$meta.id"
+    label 'process_medium'
+    container 'ghcr.io/deshpandelab/spacemarkers@sha256:9c06f8f9340bb5c51300dbf3bc4e803613a15e1bd349eae43d5a129462a13f4e'
+
+
+    input:
+        tuple val(meta), path(scores), val(source)
+
+    output:
+        tuple val(meta), path("${prefix}/${source}/${scores}.gz") , emit: spacemarkers 
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    template 'harmonize_spacemarkers.r'
 }
