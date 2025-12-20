@@ -258,25 +258,21 @@ if __name__ == '__main__':
             save_reports(res_mqc, res, "ligrec_overall_mqc")
         except Exception as e:
             log.warning(f"Could not generate overall ligand-receptor report: {e}")
-            pass
         try:
             lrs_mqc, lrs = ligrec_report(adatas, spotlight=spotlight, show=show, tool='spacemarkers_LRscores')
-            save_reports(lrs_mqc, lrs, "lrscores_overall_mqc.json")
+            save_reports(lrs_mqc, lrs, "lrscores_overall_mqc")
         except Exception as e:
             log.warning(f"Could not generate overall LR scores report: {e}")
-            pass
         try:
             ims_mqc, ims = ligrec_report(adatas, spotlight=spotlight, show=show, tool='spacemarkers_IMscores')
-            save_reports(ims_mqc, ims, "imscores_overall_mqc.json")
+            save_reports(ims_mqc, ims, "imscores_overall_mqc")
         except Exception as e:
             log.warning(f"Could not generate overall IM scores report: {e}")
-            pass
         try:
             moran_mqc, moran = ligrec_report(adatas, spotlight=spotlight, show=show, tool='Moran_I')
-            save_reports(moran_mqc, moran, "moranI_overall_mqc.json")
+            save_reports(moran_mqc, moran, "moranI_overall_mqc")
         except Exception as e:
             log.warning(f"Could not generate overall Moran's I report: {e}")
-            pass
     else:
         # for variables with 2 groups, perform ligrec t-test
         for var in cats.keys():
@@ -290,31 +286,26 @@ if __name__ == '__main__':
                 save_reports(res_mqc, res, f"ligrec_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate ligand-receptor report for variable {var}: {e}")
-                pass
-            
             # SpaceMarkers LR scores
             try:
-                lrs_mqc, lrs = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, type='LRscores')
+                lrs_mqc, lrs = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='LRscores')
                 save_reports(lrs_mqc, lrs, f"lrscores_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate LR scores report for variable {var}: {e}")
-                pass
             
             # SpaceMarkers IM scores
             try:
-                ims_mqc, ims = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, type='IMscores')
+                ims_mqc, ims = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='IMscores')
                 save_reports(ims_mqc, ims, f"imscores_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate IM scores report for variable {var}: {e}")
-                pass
 
             # Moran's I
             try:
-                moran_mqc, moran = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, type='moranI')
+                moran_mqc, moran = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='moranI')
                 save_reports(moran_mqc, moran, f"Moran_I_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate Moran's I report for variable {var}: {e}")
-                pass
 
     #wrapup
     for adata in adatas:

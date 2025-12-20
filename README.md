@@ -19,7 +19,7 @@ The default named columns are following:
 
   * `data_directory` required, path to the 10x spaceranger `outs` directory
 
-  * `expression_profile`: optional, (leave blank if not using), reference expression profiles from matched scRNA (different local path to each scRNA atlas) or a local scRNA atals (same path for each sample). If using a remotely stored atlas (such as CellXGene), rather pass `params.ref_scrna` and the atlas will be downloaded from the web.
+  * `expression_profile`: optional, (leave blank if not using), reference expression profiles from matched scRNA (different local path to each scRNA atlas) or a local scRNA atlas (same path for each sample). If using a remotely stored atlas (such as CellXGene), rather pass `params.ref_scrna` and the atlas will be downloaded from the web.
 
 Any extra columns will be treated as metadata and copied into the `meta` map and the resulting `.h5ad` object.
 
@@ -34,7 +34,7 @@ nextflow run break-through-cancer/btc-spatial-pipelines \
    --input samplesheet.csv \ 
    --outdir <OUTDIR> \
    --visium_hd 'cell_segmentations' \
-   --reference_scrna https://datasets.cellxgene.cziscience.com/d1d90d18-2109-412f-8dc0-e014e8abb338.h5ad
+   --refe_scrna https://datasets.cellxgene.cziscience.com/d1d90d18-2109-412f-8dc0-e014e8abb338.h5ad
 ```
 In order to specify a different Visium HD resolution, change `visium_hd` param to an existing table name such as `square_008um` or `square_016um`. 
 
@@ -71,11 +71,11 @@ Not all the tools support all the formats! Use these guidelines to pick paramete
 | SpaceMarkers SD | OK | | | OK |
 | SpaceMarkers HD | | OK | | OK |
 
-Spacemarkers for SD reports IMscores for gene names and undirected cell type interactions (cell_type1 near cell_type2 is no different to cell_type2 near cell_type1)
+SpaceMarkers for SD reports IMscores for gene names and undirected cell type interactions (cell_type1 near cell_type2 is no different to cell_type2 near cell_type1)
 
 SpaceMarkers for HD reports IMscores for gene names in a directed fashion (cell_type1 near cell_type2 is different to cell_type2 near cell_type1) but also reports LRscores, which are the interaction scores between genes listed in a database that SpaceMarkers uses (CellChat) by default.
 
-Furthermore, not all the tools are fully featured in the cross-sample analysis. So, Spacemakers are not yet integrated into the MultuQC module, as well as since BayesTME and CoGAPS are reference-free, the synthetic cell type outputs they produce does not match across samples.
+Furthermore, not all the tools are fully featured in the cross-sample analysis. So, BayesTME is not yet integrated into the MultiQC module, as well as since BayesTME and CoGAPS are reference-free, the synthetic cell type outputs they produce does not match across samples.
 
 
 ## Contributions and Support

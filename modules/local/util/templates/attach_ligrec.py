@@ -31,7 +31,13 @@ def attach_spacemarkers_ligrec(adata, ligrec_path):
 
     ligrec = pd.read_csv(ligrec_path, index_col=0)
 
-    adata.uns[ligrec_name] = ligrec
+    #drop all na rows
+    ligrec.dropna(how='all', inplace=True)
+
+    if ligrec.empty:
+        log.warning(f"ligrec dataframe is empty after dropping all-NA rows, skipping attachment")
+    else:
+        adata.uns[ligrec_name] = ligrec
 
     return adata
 
