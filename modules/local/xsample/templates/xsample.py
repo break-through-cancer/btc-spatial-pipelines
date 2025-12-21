@@ -151,13 +151,14 @@ def plot_hist(df_pair, title=None, save=True):
     if save:
         plt.savefig(title.replace(" ", "_")+".png", dpi=300, bbox_inches='tight')
 
-def xsample_ttest(df, group1, group2):
+def xsample_ttest(df, group1, group2, filter=0.05):
     res = df.copy()
     test = sp.stats.ttest_ind(res[group1], res[group2], axis=1)
     res['statistic'] = test.statistic
     res['pval'] = test.pvalue
     res.dropna(inplace=True)
     res['pval_adj'] = sp.stats.false_discovery_control(res['pval'], method='bh')
+    res = res[res['pval_adj'] <= filter]
     res.sort_values('pval_adj', inplace=True)
 
     return res
