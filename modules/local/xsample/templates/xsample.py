@@ -31,7 +31,7 @@ def ligrec_from_adatas(adatas, type='ligrec_means', axis=1,
 
     return res
 
-def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, tool='squidpy'):
+def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, tool=None):
     samples = [a.obs['id'].unique()[0] for a in adatas]
     pvalues = None
     if tool =='squidpy_ligrec':
@@ -40,6 +40,7 @@ def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, to
     elif tool =='spacemarkers_LRscores':
         ligrecs = ligrec_from_adatas(adatas, type='LRscores', spotlight=spotlight, samples=samples)
     elif tool =='spacemarkers_IMscores':
+        # TODO: harmonize IMscores to wide format, add p-values separately
         ligrecs = ligrec_from_adatas(adatas, type='IMscores', spotlight=spotlight, samples=samples)
     elif tool =='Moran_I':
         ligrecs = ligrec_from_adatas(adatas, type='moranI', spotlight=spotlight, samples=samples)
@@ -204,7 +205,7 @@ def get_cat_vars(adatas):
             log.warning(f"Variable {var} differs across individual samples .obs, skipping.")
             continue
         combined_categories = pd.concat([x.obs[[var,'id']] for x in adatas])
-        levels = combined_categories.groupby(var)['id'].unique()
+        levels = combined_categories.groupby(var, observed=True)['id'].unique()
         if (len(levels) != 2):
             log.warning(f"Can only do vars with 2 levels ({var} has {len(levels)}), skipping.")
             continue
@@ -282,27 +283,27 @@ if __name__ == '__main__':
             
             #squidpy ligrec
             try:
-                res_mqc, res = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show)
+                res_mqc, res = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool="squidpy_ligrec")
                 save_reports(res_mqc, res, f"ligrec_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate ligand-receptor report for variable {var}: {e}")
             # SpaceMarkers LR scores
             try:
-                lrs_mqc, lrs = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='LRscores')
+                lrs_mqc, lrs = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='spacemarkers_LRscores')
                 save_reports(lrs_mqc, lrs, f"lrscores_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate LR scores report for variable {var}: {e}")
             
             # SpaceMarkers IM scores
             try:
-                ims_mqc, ims = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='IMscores')
+                ims_mqc, ims = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='spacemarkers_IMscores')
                 save_reports(ims_mqc, ims, f"imscores_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate IM scores report for variable {var}: {e}")
 
             # Moran's I
             try:
-                moran_mqc, moran = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='moranI')
+                moran_mqc, moran = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='Moran_I')
                 save_reports(moran_mqc, moran, f"Moran_I_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate Moran's I report for variable {var}: {e}")
