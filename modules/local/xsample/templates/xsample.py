@@ -39,11 +39,9 @@ def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, to
         pvalues = ligrec_from_adatas(adatas, type='ligrec_pvalues', spotlight=spotlight, samples=samples)
     elif tool =='spacemarkers_LRscores':
         ligrecs = ligrec_from_adatas(adatas, type='LRscores', spotlight=spotlight, samples=samples)
-    elif tool =='spacemarkers_IMscores':
-        # TODO: harmonize IMscores to wide format, add p-values separately
-        ligrecs = ligrec_from_adatas(adatas, type='IMscores', spotlight=spotlight, samples=samples)
     elif tool =='Moran_I':
-        ligrecs = ligrec_from_adatas(adatas, type='moranI', spotlight=spotlight, samples=samples)
+        #Moran's I is not per cell type pair, so no spotlighting (yet)
+        ligrecs = ligrec_from_adatas(adatas, type='moranI', spotlight=None, samples=samples)
         #pick only the Moran's I value index
         ligrecs = ligrecs[ligrecs.index.get_level_values(-1) == 'I']
 
@@ -57,7 +55,7 @@ def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, to
 
         # if no t-test results found, fall back to mean across samples
         if(len(ligrecs_ttest) == 0):
-            log.warning("No differential interactions found for {tool}.")
+            log.warning(f"No differential interactions found for {tool}.")
             ligrecs['mean'] = ligrecs.mean(axis=1)
             res = ligrecs.sort_values('mean', ascending=False)[samples]
             memo = f"Mean interaction across samples shown as no differential interactions were found between {groups[0]} and {groups[1]}."
@@ -207,7 +205,7 @@ def get_cat_vars(adatas):
         combined_categories = pd.concat([x.obs[[var,'id']] for x in adatas])
         levels = combined_categories.groupby(var, observed=True)['id'].unique()
         if (len(levels) != 2):
-            log.warning(f"Can only do vars with 2 levels ({var} has {len(levels)}), skipping.")
+            log.warning(f"Can only contrast vars with 2 levels ({var} has {len(levels)}), skipping.")
             continue
         cats[var] = levels.to_dict()
 
@@ -265,11 +263,6 @@ if __name__ == '__main__':
         except Exception as e:
             log.warning(f"Could not generate overall LR scores report: {e}")
         try:
-            ims_mqc, ims = ligrec_report(adatas, spotlight=spotlight, show=show, tool='spacemarkers_IMscores')
-            save_reports(ims_mqc, ims, "imscores_overall_mqc")
-        except Exception as e:
-            log.warning(f"Could not generate overall IM scores report: {e}")
-        try:
             moran_mqc, moran = ligrec_report(adatas, spotlight=spotlight, show=show, tool='Moran_I')
             save_reports(moran_mqc, moran, "moranI_overall_mqc")
         except Exception as e:
@@ -293,13 +286,6 @@ if __name__ == '__main__':
                 save_reports(lrs_mqc, lrs, f"lrscores_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate LR scores report for variable {var}: {e}")
-            
-            # SpaceMarkers IM scores
-            try:
-                ims_mqc, ims = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='spacemarkers_IMscores')
-                save_reports(ims_mqc, ims, f"imscores_diff_{var}_results")
-            except Exception as e:
-                log.warning(f"Could not generate IM scores report for variable {var}: {e}")
 
             # Moran's I
             try:
