@@ -57,7 +57,7 @@ def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, to
 
         # if no t-test results found, fall back to mean across samples
         if(len(ligrecs_ttest) == 0):
-            log.warning("No differential interactions found.")
+            log.warning("No differential interactions found for {tool}.")
             ligrecs['mean'] = ligrecs.mean(axis=1)
             res = ligrecs.sort_values('mean', ascending=False)[samples]
             memo = f"Mean interaction across samples shown as no differential interactions were found between {groups[0]} and {groups[1]}."
@@ -247,12 +247,12 @@ if __name__ == '__main__':
     
     # make ligand-receptor reports
     # mqc report is for showing, but csv should have full data
-    def save_reports(mqc, res, name):
-        with open(f"{mqc_reports_dir}/{name}.json","w") as f:
+    def save_reports(mqc, res, name, mqc_reports=mqc_reports_dir, reports=reports_dir):
+        with open(f"{mqc_reports}/{name}_mqc.json","w") as f:
             json.dump(mqc, f, indent=4)
-        res.to_csv(f"{name}.csv")
+        res.to_csv(f"{reports}/{name}.csv")
 
-    # if not cats found, just produce overall ligrec report
+    # if no cats found, just produce overall ligrec report
     if len(cats) == 0:
         try:
             res_mqc, res = ligrec_report(adatas, spotlight=spotlight, show=show, tool='squidpy_ligrec')
