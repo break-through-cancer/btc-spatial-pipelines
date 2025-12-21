@@ -40,10 +40,18 @@ workflow ANALYZE {
     versions = versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)
 
     // wrap up - collect results from tools and save
-    // TODO: make every subworkflow write ./staple/staple.h5ad
-    STAPLE_ATTACH_LIGREC(SQUIDPY_SPATIAL_PLOTS.out.adata.join(ligrec))
-    STAPLE_ATTACH_IMSCORES(STAPLE_ATTACH_LIGREC.out.adata.join(imscores))
-    STAPLE_ATTACH_LRSCORES(STAPLE_ATTACH_IMSCORES.out.adata.join(lrscores))
+    // TODO: rewrite to collect ligrecs and join once
+    if (params.analyze.squidpy){
+        // if squidpy not run, just pass input adata along
+        STAPLE_ATTACH_LIGREC(SQUIDPY_SPATIAL_PLOTS.out.adata.join(ligrec))
+        attach_imscores_to = STAPLE_ATTACH_LIGREC.out.adata
+    } else {
+        attach_imscores_to = SQUIDPY_SPATIAL_PLOTS.out.adata
+    }
+    
+    STAPLE_ATTACH_IMSCORES(attach_imscores_to.join(imscores))
+    attach_lrscores_to = STAPLE_ATTACH_IMSCORES.out.adata
+    STAPLE_ATTACH_LRSCORES(attach_lrscores_to.join(lrscores))
 
     adata = STAPLE_ATTACH_LRSCORES.out.adata
 
