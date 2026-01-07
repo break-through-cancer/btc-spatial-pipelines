@@ -29,7 +29,10 @@ def attach_spacemarkers_ligrec(adata, ligrec_path):
     log.info(f"reading spacemarkers ligrec from {ligrec_path}")
     ligrec_name = os.path.basename(ligrec_path).split(".")[0]
 
-    ligrec = pd.read_csv(ligrec_path, index_col=0)
+    if( ligrec_path != "null"):
+        ligrec = pd.read_csv(ligrec_path, index_col=0)
+    else:
+        ligrec = pd.DataFrame() #empty dataframe to pass through adata
 
     #drop all na rows
     ligrec.dropna(how='all', inplace=True)
