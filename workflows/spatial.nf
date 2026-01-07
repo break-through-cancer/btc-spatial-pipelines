@@ -90,12 +90,12 @@ workflow STAPLE {
     versions = versions.mix(ANALYZE.out.versions)
 
     // Cross-sample analysis
-    //if ( params.analyze.xsample ) {
+    if ( params.analyze.xsample ) {
         xsample_inputs = ANALYZE.out.adata.map{ it -> it[1] }.collect()
         STAPLE_XSAMPLE (xsample_inputs)
         versions = versions.mix(STAPLE_XSAMPLE.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(STAPLE_XSAMPLE.out.multiqc_files)
-    //}
+    }
 
     // make reports
     QC( ch_report.filter { it -> it[1] != null && it[1] != '' && it[1] != [] }
