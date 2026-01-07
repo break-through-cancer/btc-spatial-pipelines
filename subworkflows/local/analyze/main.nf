@@ -48,12 +48,20 @@ workflow ANALYZE {
     } else {
         attach_imscores_to = SQUIDPY_SPATIAL_PLOTS.out.adata
     }
-    
-    STAPLE_ATTACH_IMSCORES(attach_imscores_to.join(imscores))
-    attach_lrscores_to = STAPLE_ATTACH_IMSCORES.out.adata
-    STAPLE_ATTACH_LRSCORES(attach_lrscores_to.join(lrscores))
 
-    adata = STAPLE_ATTACH_LRSCORES.out.adata
+    if (!params.analyze.spacemarkers){
+        // if spacemarkers not run, just pass input adata along
+        adata = attach_imscores_to
+    }   else {
+        // else attache imscores and lrscores
+        STAPLE_ATTACH_IMSCORES(attach_imscores_to.join(imscores))
+        attach_lrscores_to = STAPLE_ATTACH_IMSCORES.out.adata
+        STAPLE_ATTACH_LRSCORES(attach_lrscores_to.join(lrscores))
+
+        adata = STAPLE_ATTACH_LRSCORES.out.adata
+    }
+    
+
 
     emit:
         versions
