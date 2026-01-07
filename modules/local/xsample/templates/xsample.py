@@ -177,8 +177,7 @@ def get_cat_vars(adatas):
     # find vars added by the staple pipeline
     vars = [x.uns['added_metadata_fields'].tolist() for x in adatas if 'added_metadata_fields' in x.uns]
     if (len(vars) == 0):
-        log.warning("No added metadata fields found in any of the provided anndatas, quitting.")
-        exit(0)
+        log.warning("No added metadata fields found in any of the provided anndatas.")
 
     # drop id var from analysis vars
     for v in vars:
@@ -189,8 +188,8 @@ def get_cat_vars(adatas):
     common_vars = set(vars[0]).intersection(*vars[1:])
     log.info(f"Common added metadata fields across all samples: {common_vars}")
     if len(common_vars) == 0:
-        log.warning("No common added metadata fields found across all provided anndatas, quitting.")
-        exit(0)
+        log.warning("No common added metadata fields found across all provided anndatas.")
+
     
     # check that vars are categorical, same inside sample and differ across samples
     cats = {}
