@@ -3,7 +3,33 @@
 **STAPLE** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data. Being a simple preprocessing-deconvolution-interaction pipeline it features multiple tools for reference-free and reference-based deconvolution (cell typing) and cell-cell interaction analysis. In case of reference-based deconvolution, atlas may be fetched from a URL on an S3 location (e.g. CellxGene) or a local file, or matched-scRNA made available.
 
 
-![image info](assets/btc-visium.svg)
+```mermaid
+flowchart LR
+    v1([INPUT_CHECK])
+    v4([LOAD_DATASET])
+    v10([DECONVOLVE])
+    v16([ANALYZE])
+    v25([QC])
+    v31([MULTIQC])
+    v20([STAPLE_XSAMPLE])
+    v1 --> v4
+    v1 --> v10
+    v4 --> v10
+    v1 --> v16
+    v10 --> v16
+    v16 --> v20
+    v4 --> v25
+    v10 --> v25
+    v16 --> v31
+    v1 --> v31
+    v20 --> v31
+    v4 --> v31
+    v25 --> v31
+    v10 --> v31
+
+
+```
+
 
 ## Usage
 
@@ -34,7 +60,7 @@ nextflow run break-through-cancer/btc-spatial-pipelines \
    --input samplesheet.csv \ 
    --outdir <OUTDIR> \
    --visium_hd 'cell_segmentations' \
-   --refe_scrna https://datasets.cellxgene.cziscience.com/d1d90d18-2109-412f-8dc0-e014e8abb338.h5ad
+   --ref_scrna https://datasets.cellxgene.cziscience.com/d1d90d18-2109-412f-8dc0-e014e8abb338.h5ad
 ```
 In order to specify a different Visium HD resolution, change `visium_hd` param to an existing table name such as `square_008um` or `square_016um`. 
 
