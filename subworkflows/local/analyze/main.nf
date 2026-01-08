@@ -45,14 +45,22 @@ workflow ANALYZE {
         // if squidpy not run, just pass input adata along
         STAPLE_ATTACH_LIGREC(SQUIDPY_SPATIAL_PLOTS.out.adata.join(ligrec))
         attach_imscores_to = STAPLE_ATTACH_LIGREC.out.adata
+        adata = attach_imscores_to
     } else {
         attach_imscores_to = SQUIDPY_SPATIAL_PLOTS.out.adata
+        adata = attach_imscores_to
     }
 
-    STAPLE_ATTACH_IMSCORES(attach_imscores_to.join(imscores))
-    attach_lrscores_to = STAPLE_ATTACH_IMSCORES.out.adata
-    STAPLE_ATTACH_LRSCORES(attach_lrscores_to.join(lrscores, remainder: true))
-    adata = STAPLE_ATTACH_LRSCORES.out.adata
+    if (params.analyze.spacemarkers){
+        STAPLE_ATTACH_IMSCORES(attach_imscores_to.join(imscores))
+        attach_lrscores_to = STAPLE_ATTACH_IMSCORES.out.adata
+        adata = attach_lrscores_to
+        if (params.visium_hd && params.analyze.spacemarkers){
+            // in Visium HD, some spots have no reads, so make sure to keep all spots
+            STAPLE_ATTACH_LRSCORES(attach_lrscores_to.join(lrscores))
+            adata = STAPLE_ATTACH_LRSCORES.out.adata
+        }
+    }
 
     emit:
         versions
