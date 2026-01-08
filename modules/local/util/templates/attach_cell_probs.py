@@ -3,6 +3,7 @@ import anndata as ad
 import pandas as pd
 import os
 import logging
+
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
 
@@ -28,9 +29,12 @@ else:
 #put cell types to uns
 adata.uns['cell_type_composition'] = cell_probs
 
-#put most abundant cell type to obs
+#save most abundant cell type to obs
 most_abundant = cell_probs.idxmax(axis=1)
 adata.obs['cell_type'] = most_abundant
+adata.obs['cell_type_prob'] = cell_probs.max(axis=1)
+adata.obs['cell_type_zscore'] = adata.uns['cell_type_composition']\
+    .apply(lambda x: (x-x.mean())/x.std(), axis=1).max(axis=1)
 
 #save
 adata.write_h5ad(f"{sample}/{out_name}.h5ad", compression='gzip')

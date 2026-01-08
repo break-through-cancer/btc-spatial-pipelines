@@ -3,7 +3,7 @@ include { ATLAS_GET;
           ADATA_FROM_VISIUM;
           ADATA_FROM_VISIUM_HD;
           ADATA_FROM_SEGMENTED_VISIUM;
-          QC } from '../../modules/local/util/'
+          ADATA_ADD_METADATA } from '../../modules/local/util/'
 
 
 workflow LOAD_DATASET {
@@ -11,22 +11,22 @@ workflow LOAD_DATASET {
         ch_input // channel of tuples: (meta, data_directory, expression_profiles, ...)
 
     main:
-        versions = Channel.empty() // channel to collect versions of the tools used
-        ch_report = Channel.empty()
+        versions = channel.empty() // channel to collect versions of the tools used
+        ch_report = channel.empty()
 
         // Load visium HD or standard data
         if(params.visium_hd) {
 
-            if(params.visium_hd == 'segmented'){
+            if(params.visium_hd == 'cell_segmentations'){
             //use Spaceranger4.0 segmented outputs
                 ADATA_FROM_SEGMENTED_VISIUM( ch_input.map {it -> tuple(it.meta, it.data_directory) } )
-                ch_adata = ADATA_FROM_SEGMENTED_VISIUM.out.adata
+                ch_raw_adata = ADATA_FROM_SEGMENTED_VISIUM.out.adata
                 data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory) }
                 versions = versions.mix(ADATA_FROM_SEGMENTED_VISIUM.out.versions)
 
             } else {
                 ADATA_FROM_VISIUM_HD( ch_input.map {it -> tuple(it.meta, it.data_directory) } )
-                ch_adata = ADATA_FROM_VISIUM_HD.out.adata
+                ch_raw_adata = ADATA_FROM_VISIUM_HD.out.adata
                 // update data dir for spacemarkers
                 data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory + "/binned_outputs/${params.visium_hd}") }
                 versions = versions.mix(ADATA_FROM_VISIUM_HD.out.versions)
@@ -34,13 +34,13 @@ workflow LOAD_DATASET {
 
         } else {
             ADATA_FROM_VISIUM( ch_input.map {it -> tuple(it.meta, it.data_directory) } )
-            ch_adata = ADATA_FROM_VISIUM.out.adata
+            ch_raw_adata = ADATA_FROM_VISIUM.out.adata
             data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory) }
             versions = versions.mix(ADATA_FROM_VISIUM.out.versions)
         }
 
         //report stats after reading
-        ch_report = ch_report.mix( ch_adata.map {it -> tuple(it[0], it[1], 'adata_input')} )
+        ch_report = ch_report.mix( ch_raw_adata.map {it -> tuple(it[0], it[1], 'adata_input')} )
 
         // If an atlas has been provided download and prepare it
         if (params.ref_scrna) {
@@ -61,6 +61,11 @@ workflow LOAD_DATASET {
             ch_report = ch_report.mix(ch_scrna.map {it -> tuple(it[0], it[1], 'atlas_counts')} )
 
         }
+
+        // attach metadata fields for downstream analysis
+        ADATA_ADD_METADATA( ch_raw_adata )
+        versions = versions.mix(ADATA_ADD_METADATA.out.versions)
+        ch_adata = ADATA_ADD_METADATA.out.adata
 
         // match scRNA atlas to spatial data
         ATLAS_MATCH(ch_scrna.join( ch_adata ))

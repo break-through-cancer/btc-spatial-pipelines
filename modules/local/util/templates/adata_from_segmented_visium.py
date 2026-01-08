@@ -40,7 +40,7 @@ else:
 log.info(f"adata is {adata}")
 
 #save
-outname = os.path.join(sample, f"{table}.h5ad")
+outname = os.path.join(sample, "adata.h5ad")
 adata.write_h5ad(filename=outname)
 
 #versions

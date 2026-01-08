@@ -22,21 +22,13 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
 include { DECONVOLVE } from '../subworkflows/local/deconvolve'
 
-include { SPACEMARKERS; 
-        } from '../modules/local/spacemarkers/nextflow/main'
+include { ANALYZE } from '../subworkflows/local/analyze'
 
 include  { QC } from '../modules/local/util/'
 
-include { SPACEMARKERS_HD;  // temp - spacemarkers hd runs on dev
-        } from '../modules/local/spacemarkers/nextflow/main_hd'
-
-include { SQUIDPY_MORANS_I;
-          SQUIDPY_SPATIAL_PLOTS;
-          SQUIDPY_LIGREC_ANALYSIS } from '../modules/local/squidpy/main'
-
-include { RCTD } from '../modules/local/rctd/rctd'
-
 include { LOAD_DATASET } from '../subworkflows/local/load_dataset'
+
+include { STAPLE_XSAMPLE } from '../modules/local/xsample/'
 
 
 /*
@@ -55,8 +47,8 @@ include { MULTIQC } from '../modules/nf-core/multiqc'
 */
 
 
-workflow SPATIAL {
-    versions = Channel.empty()
+workflow STAPLE {
+    versions = channel.empty()
 
     // Load input paths and metadata
     INPUT_CHECK (
@@ -72,63 +64,40 @@ workflow SPATIAL {
     ch_matched_adata = LOAD_DATASET.out.ch_matched_adata
     versions = versions.mix(LOAD_DATASET.out.versions)
 
-
     // Report read data to MultiQC
     ch_report = LOAD_DATASET.out.ch_report
-
 
     // Deconvolve / cell type / use external
     DECONVOLVE (ch_datasets, ch_matched_adata, ch_scrna, ch_adata)
     versions = versions.mix(DECONVOLVE.out.versions)
 
     // Report deconvolution results to MultiQC
-    ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'adata_output']} ) //basic qc
     ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'adata_counts']} ) //cell type counts
+    ch_report = ch_report.mix( DECONVOLVE.out.ch_deconvolved.map {it -> [it.meta, it.obj, 'cell_probs']} )   //cell probs report
 
-    ch_squidpy = Channel.empty()
-    //Analyze - spacemarkers
-    if (params.analyze.spacemarkers){
+    ch_sm_inputs = DECONVOLVE.out.ch_deconvolved
+                .map { it -> [it.meta, it.cell_probs?:it.obj] }
+                .combine( ch_datasets.map { it -> [it.meta, it.data_directory] }, by:0 )
 
-        //csv if available, otherwise deconvolution object - SpaceMarkers knows how to handle both
-        ch_sm_inputs = DECONVOLVE.out.ch_deconvolved
-                        .map { it -> [it.meta, it.cell_probs?:it.obj] }
-                        .combine( ch_datasets.map { it -> [it.meta, it.data_directory] }, by:0 )
+    // Filter deconvolved results to get anndata objects for squidpy spatial plots and ligand-receptor analysis
+    ch_squidpy = DECONVOLVE.out.ch_deconvolved
+                        .filter { it -> it.obj != null }
+                        .filter { it -> it.obj.name.endsWith('.h5ad') }
+                        .map { it-> [it.meta, it.obj] }
 
-        if(params.visium_hd) {
-        
-            SPACEMARKERS_HD( ch_sm_inputs.map {it -> [it[0], it[1], it[2]+"/binned_outputs/${params.visium_hd}" ]} )   //temp - allow spacemarkers to run on dev
+    // Analyze
+    ANALYZE ( ch_sm_inputs, ch_squidpy )
+    versions = versions.mix(ANALYZE.out.versions)
 
-        } else {
-
-            SPACEMARKERS( ch_sm_inputs )
-            versions = versions.mix(SPACEMARKERS.out.versions)
-
-        }
+    // Cross-sample analysis
+    if ( params.analyze.xsample ) {
+        xsample_inputs = ANALYZE.out.adata.map{ it -> it[1] }.collect()
+        STAPLE_XSAMPLE (xsample_inputs)
+        versions = versions.mix(STAPLE_XSAMPLE.out.versions)
+        ch_multiqc_files = ch_multiqc_files.mix(STAPLE_XSAMPLE.out.multiqc_files)
     }
 
-
-    // squidpy analysis
-    if (params.analyze.squidpy){
-        // spatially variable genes do not depend on deconvolution
-        SQUIDPY_MORANS_I( ch_adata )
-        versions = versions.mix(SQUIDPY_MORANS_I.out.versions)
-
-        // squidpy now anndata to plot spatial plots and ligrec
-        ch_squidpy = DECONVOLVE.out.ch_deconvolved
-                            .filter { it -> it.obj != null }
-                            .filter { it -> it.obj.name.endsWith('.h5ad') }
-                            .map { it-> [it.meta, it.obj] }
-
-        SQUIDPY_SPATIAL_PLOTS( ch_squidpy )
-        versions = versions.mix(SQUIDPY_SPATIAL_PLOTS.out.versions)
-
-        SQUIDPY_LIGREC_ANALYSIS( ch_squidpy )
-        versions = versions.mix(SQUIDPY_LIGREC_ANALYSIS.out.versions)
-
-        ch_ligrec_output = SQUIDPY_LIGREC_ANALYSIS.out.ligrec_interactions.collect()
-    }
-
-    //make reports
+    // make reports
     QC( ch_report.filter { it -> it[1] != null && it[1] != '' && it[1] != [] }
             .map { it -> tuple(it[0], it[1], it[2]) } )
     ch_multiqc_files = ch_multiqc_files.mix(QC.out.report)
