@@ -96,8 +96,8 @@ Not all the tools support all the formats! Use these guidelines to pick paramete
 | Squidpy | OK | OK | OK | OK |
 | CoGAPS | OK | reduce gene N | reduce gene N | OK |
 | BayesTME | OK | | | |
-| SpaceMarkers SD | OK | | | OK |
-| SpaceMarkers HD | | OK | | OK |
+| SpaceMarkers | OK | OK | | OK |
+
 
 SpaceMarkers for SD reports IMscores for gene names and undirected cell type interactions (cell_type1 near cell_type2 is no different to cell_type2 near cell_type1)
 
