@@ -321,7 +321,7 @@
         },
         "sq_gr_spatial_autocorr_nperms": {
             "type": "integer",
-            "default": 100
+            "default": 0
         },
         "na_as_value": {
             "type": "string",

@@ -1,0 +1,40 @@
+nextflow_process {
+    name    "Test SAMPLESHEET_CHECK"
+    script  "modules/local/samplesheet_check.nf"
+    process "SAMPLESHEET_CHECK"
+
+    test("Should process valid samplesheet") {
+
+        tag "process"
+
+        when {
+            process {
+                """
+                input[0] = file("${projectDir}/tests/data/samplesheets/hdvisium-test.csv")
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.csv
+        }
+    }
+
+    test("Should fail on empty samplesheet") {
+
+        tag "process"
+
+        when {
+            process {
+                """
+                input[0] = file("${projectDir}/tests/data/samplesheets/samplesheet-empty-test.csv")
+                """
+            }
+        }
+
+        then {
+            assert process.success == false
+        }
+    }
+}

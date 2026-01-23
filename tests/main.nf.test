@@ -102,6 +102,7 @@ nextflow_pipeline {
                 analyze {
                     spacemarkers = false
                     squidpy = true
+                    xsample = true
                 }
             }
         }
@@ -132,6 +133,8 @@ nextflow_pipeline {
                 analyze {
                     spacemarkers = true
                     squidpy = true
+                    xsample = true
+
                 }
                 outdir = "output"
                 ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
@@ -141,11 +144,11 @@ nextflow_pipeline {
         then {
             assertAll(
                 { assert workflow.success },
-                { assert file("${outputDir}/adata/sample1/visium.h5ad").exists() },
+                { assert file("${outputDir}/adata/sample1/adata.h5ad").exists() },
                 { assert file("${outputDir}/atlas/${params.ref_scrna.tokenize("/")[-1]}").exists() },
                 { assert file("${outputDir}/atlas/sample1/adata_matched.h5ad").exists() },
                 { assert file("${outputDir}/rctd/sample1/rctd_cell_types.csv").exists() },
-                { assert file("${outputDir}/spacemarkers/sample1/rctd_cell_types/spaceMarkers.csv").exists() },
+                { assert file("${outputDir}/spacemarkers/sample1/rctd_cell_types/IMScores.rds").exists() },
                 { assert file("${outputDir}/squidpy/sample1/rctd/figures/spatial_scatter.png").exists() }
             )
         }
@@ -181,7 +184,7 @@ nextflow_pipeline {
         then {
             assertAll(
                 { assert workflow.success },
-                { assert file("${outputDir}/adata/sample1/${params.visium_hd}.h5ad").exists() },
+                { assert file("${outputDir}/adata/sample1/adata.h5ad").exists() },
                 { assert file("${outputDir}/atlas/${params.ref_scrna.tokenize("/")[-1]}").exists() },
                 { assert file("${outputDir}/atlas/sample1/adata_matched.h5ad").exists() },
                 { assert file("${outputDir}/rctd/sample1/rctd_cell_types.csv").exists() },
@@ -220,7 +223,7 @@ nextflow_pipeline {
         then {
             assertAll(
                 { assert workflow.success },
-                { assert file("${outputDir}/adata/sample1/${params.visium_hd}.h5ad").exists() },
+                { assert file("${outputDir}/adata/sample1/adata.h5ad").exists() },
                 { assert file("${outputDir}/atlas/${params.ref_scrna.tokenize("/")[-1]}").exists() },
                 { assert file("${outputDir}/atlas/sample1/adata_matched.h5ad").exists() },
                 { assert file("${outputDir}/rctd/sample1/rctd_cell_types.csv").exists() },
@@ -256,8 +259,8 @@ nextflow_pipeline {
         then {
             assertAll(
                 { assert workflow.success },
-                { assert file("${outputDir}/adata/sample1/visium.h5ad").exists() },
-                { assert file("${outputDir}/spacemarkers/sample1/visium_cellular_compositions/spaceMarkers.csv").exists() }
+                { assert file("${outputDir}/adata/sample1/adata.h5ad").exists() },
+                { assert file("${outputDir}/spacemarkers/sample1/visium_cellular_compositions/IMScores.rds").exists() }
             )
         }
 

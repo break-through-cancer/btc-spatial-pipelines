@@ -5,15 +5,17 @@
         "n_top_genes": "$.dataset.params.preprocessing.n_top_genes",
         "cogaps": "$.dataset.params.deconvolution.run_cogaps",
         "bayestme": "$.dataset.params.deconvolution.run_bayestme",
-        "rctd": "true",
-        "external": "$.dataset.params.deconvolution.find_annotations"
+        "rctd": "$.dataset.params.ref_deconvolution.run_rctd",
+        "external": "$.dataset.params.ext_deconvolution.find_annotations"
     },
     "analyze":{
         "spacemarkers": "$.dataset.params.interact.run_spacemarkers",
-        "squidpy": "$.dataset.params.interact.run_squidpy"
+        "squidpy": "$.dataset.params.interact.run_squidpy",
+        "xsample": "$.dataset.params.xsample.run_xsample",
+        "spotlight": "$.dataset.params.xsample.spotlight"
     },
-    "n_cell_types": "$.dataset.params.deconvolution.n_cell_types",
-    "ref_scrna": "$.dataset.params.deconvolution.reference_scrna",
-    "ref_scrna_type_col": "$.dataset.params.deconvolution.type_col_scrna",
+    "n_cell_types": "$.dataset.params.ref_deconvolution.n_cell_types",
+    "ref_scrna": "$.dataset.params.ref_deconvolution.reference_scrna",
+    "ref_scrna_type_col": "$.dataset.params.ref_deconvolution.type_col_scrna",
     "visium_hd": "$.dataset.params.data.hd"
 }

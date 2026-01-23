@@ -1,0 +1,30 @@
+nextflow_process {
+    name    "Test SPACEMARKERS"
+    script  "modules/local/spacemarkers/nextflow/main.nf"
+    process "SPACEMARKERS"
+
+    test("Should generate spacemarkers for valid input") {
+
+        tag "process"
+        tag "spacemarkers"
+
+        when {
+            params {
+                max_memory = '8.GB'
+                max_cpus   = 2
+            }
+            process {
+                """
+                input[0] = [[id:"sample"],
+                            file("${projectDir}/tests/data/visium/visium_cellular_compositions.csv"),
+                            file("${projectDir}/tests/data/visium")]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.spaceMarkersScores
+        }
+    }
+}
