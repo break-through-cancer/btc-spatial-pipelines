@@ -127,13 +127,19 @@ if myurl.startswith("s3://"):
     bucket_name = parsed_url.netloc
     s3 = boto3.client('s3')
     s3.download_file(bucket_name, file_key, os.path.basename(file_key))
-else:
+elif myurl.startswith("http://") or myurl.startswith("https://"):
     print("Downloading from http")
     r = requests.get(myurl)
     r.raise_for_status()
     with open(os.path.basename(file_key), "wb") as f:
         f.write(r.content)
-print(f"Downloaded atlas from {myurl}")
+else:
+    print("Local file path specified")
+    if not os.path.isfile(file_key):
+        raise FileNotFoundError(f"File {file_key} not found")
+    os.symlink(file_key, os.path.basename(file_key))
+
+print(f"Got atlas from {myurl}")
 
 #versions
 with open("versions.yml", "w") as f:
