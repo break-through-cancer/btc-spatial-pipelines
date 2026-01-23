@@ -135,9 +135,9 @@ elif myurl.startswith("http://") or myurl.startswith("https://"):
         f.write(r.content)
 else:
     print("Local file path specified")
-    if not os.path.isfile(file_key):
-        raise FileNotFoundError(f"File {file_key} not found")
-    os.symlink(file_key, os.path.basename(file_key))
+    if not os.path.isfile(myurl):
+        raise FileNotFoundError(f"File {myurl} not found")
+    os.symlink(myurl, os.path.basename(myurl))
 
 print(f"Got atlas from {myurl}")
 
