@@ -85,13 +85,45 @@ nextflow_pipeline {
         }
     }
 
-    test("RCTD on Multisample Visium SD with local ref") {
+    test("RCTD on Multisample Visium SD with local matched ref scRNA") {
 
         tag "multisample"
 
         when {
             params {
                 input = "../../../tests/data/samplesheets/multisample-test.csv"
+                max_memory = "8.GB"
+                max_cpus = 4
+                deconvolve {
+                    bayestme = false
+                    cogaps = false
+                    rctd = true
+                }
+                analyze {
+                    spacemarkers = false
+                    squidpy = true
+                    xsample = true
+                }
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success }
+            )
+
+        }
+    }
+
+    test("RCTD on Multisample Visium SD with local file as param") {
+
+        tag "multisample"
+        tag "localfile"
+
+        when {
+            params {
+                input = "../../../tests/data/samplesheets/multisample-test.csv"
+                ref_scrna = "${projectDir}/tests/data/atlas_small.h5ad"
                 max_memory = "8.GB"
                 max_cpus = 4
                 deconvolve {
@@ -194,7 +226,7 @@ nextflow_pipeline {
         }
     }
 
-    test("RCTD full pipeline on segmented Visium HD with local ref") {
+    test("RCTD full pipeline on segmented Visium HD with remote ref") {
 
         tag "segmented"
 
@@ -232,6 +264,8 @@ nextflow_pipeline {
             )
         }
     }
+
+    
 
     test("Visium SD with external deconvolution") {
 
