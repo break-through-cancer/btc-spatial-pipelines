@@ -113,6 +113,8 @@ def neighbors_report(adatas, spotlight=None):
         sample_dict = {}
         for adata in adatas:
             if "cell_type_interactions" in adata.uns:
+                if cell_type not in adata.obs['cell_type'].cat.categories:
+                    continue
                 adata_cell_type_index = adata.obs['cell_type'].cat.categories.get_loc(cell_type)
                 interactions = adata.uns["cell_type_interactions"][adata_cell_type_index]
                 #construct dict of other cell types and interaction values
