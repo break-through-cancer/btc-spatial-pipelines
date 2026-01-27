@@ -113,14 +113,17 @@ def neighbors_report(adatas, spotlight=None):
         sample_dict = {}
         for adata in adatas:
             if "cell_type_interactions" in adata.uns:
-                adata_cell_type_index = adata.obs['cell_type'].cat.categories.get_loc(cell_type)
-                interactions = adata.uns["cell_type_interactions"][adata_cell_type_index]
-                #construct dict of other cell types and interaction values
-                other_cell_types = adata.obs['cell_type'].cat.categories.tolist()
-                interaction_dict = {}
-                for i, other_cell_type in enumerate(other_cell_types):
-                    interaction_dict[other_cell_type] = interactions[i]
-                sample_dict[adata.obs['id'].unique()[0]] = interaction_dict
+                if cell_type not in adata.obs['cell_type'].cat.categories:
+                    continue
+                else:
+                    adata_cell_type_index = adata.obs['cell_type'].cat.categories.get_loc(cell_type)
+                    interactions = adata.uns["cell_type_interactions"][adata_cell_type_index]
+                    #construct dict of other cell types and interaction values
+                    other_cell_types = adata.obs['cell_type'].cat.categories.tolist()
+                    interaction_dict = {}
+                    for i, other_cell_type in enumerate(other_cell_types):
+                        interaction_dict[other_cell_type] = interactions[i]
+                    sample_dict[adata.obs['id'].unique()[0]] = interaction_dict
         reports.append(sample_dict)
 
     mqc_report = {
