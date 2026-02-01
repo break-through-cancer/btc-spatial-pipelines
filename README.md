@@ -79,7 +79,7 @@ Duration    : 6m 54s
 CPU hours   : 0.9
 Succeeded   : 28
 ```
-Examinine the outputs in the `outs/` folder:
+Examine the outputs in the `outs/` folder:
 ```
 drwxr-xr-x@ 4 user  staff  128 Feb  1 12:25 adata
 drwxr-xr-x@ 4 user  staff  128 Feb  1 12:26 atlas
