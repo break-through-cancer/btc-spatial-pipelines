@@ -127,13 +127,21 @@ if myurl.startswith("s3://"):
     bucket_name = parsed_url.netloc
     s3 = boto3.client('s3')
     s3.download_file(bucket_name, file_key, os.path.basename(file_key))
-else:
-    print("Downloading from http")
+elif myurl.startswith("https://"):
+    print("Downloading from https")
     r = requests.get(myurl)
     r.raise_for_status()
     with open(os.path.basename(file_key), "wb") as f:
         f.write(r.content)
-print(f"Downloaded atlas from {myurl}")
+elif myurl.startswith("http://"):
+    raise ValueError("Insecure HTTP URLs are not allowed. Please use HTTPS for remote atlas files.")
+else:
+    print("Local file path specified")
+    if not os.path.isfile(myurl):
+        raise FileNotFoundError(f"File {myurl} not found")
+    os.symlink(myurl, os.path.basename(myurl))
+
+print(f"Got atlas from {myurl}")
 
 #versions
 with open("versions.yml", "w") as f:
