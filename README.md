@@ -52,7 +52,7 @@ tar -xzvf ~/Downloads/break-through-cancer\ btc-spatial-pipelines\ main\ tests.z
 # navigate to tests/data
 cd tests/data
 
-# check that --max_memory and --max_cpu match your resources, run
+# check that --max_memory and --max_cpus match your resources, run
 nextflow run https://github.com/break-through-cancer/btc-spatial-pipelines --input samplesheets/multisample-test.csv  -profile docker --max_memory 8GB --max_cpus 4
 ```
 
