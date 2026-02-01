@@ -39,6 +39,58 @@ flowchart LR
 If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
 to set-up Nextflow. 
 
+### Just trying
+ Run with our test data in under 10 minutes on your laptop (needs docker installed)! Click [this link](download-directory.github.io?url=https://github.com/break-through-cancer/btc-spatial-pipelines/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. 
+
+```
+# make a clean directory called tests
+mkdir tests
+
+# extract the downloaded archive
+tar -xzvf ~/Downloads/break-through-cancer\ btc-spatial-pipelines\ main\ tests.zip -C tests
+
+# navigate to tests/data
+cd tests/data
+
+# check that --max_memory and --max_cpu match your resources, run
+nextflow run https://github.com/break-through-cancer/btc-spatial-pipelines --input samplesheets/multisample-test.csv  -profile docker --max_memory 8GB --max_cpus 4
+```
+
+Example terminal output confirming everything is OK:
+```
+ N E X T F L O W   ~  version 25.10.2
+
+Launching `https://github.com/break-through-cancer/btc-spatial-pipelines` [silly_rosalind] DSL2 - revision: fbf88bd923 [main]
+
+executor >  local (28)
+[7e/6aa75d] BTC:STAPLE:INPUT_CHECK:SAMPLESHEET_CHECK (multisample-test.csv) [100%] 1 of 1 ✔
+[fb/4e7ece] BTC:STAPLE:LOAD_DATASET:ADATA_FROM_VISIUM (1)                   [100%] 2 of 2 ✔
+[e6/388ec7] BTC:STAPLE:LOAD_DATASET:ADATA_ADD_METADATA (sample1)            [100%] 2 of 2 ✔
+[11/078f2b] BTC:STAPLE:LOAD_DATASET:ATLAS_MATCH (sample1)                   [100%] 2 of 2 ✔
+[70/e190b7] BTC:STAPLE:DECONVOLVE:RCTD (sample1)                            [100%] 2 of 2 ✔
+[48/59abfc] BTC:STAPLE:DECONVOLVE:RCTD_PROBS (sample2)                      [100%] 2 of 2 ✔
+[8b/23b9de] BTC:STAPLE:ANALYZE:SQUIDPY:SQUIDPY_LIGREC_ANALYSIS (sample1)    [100%] 2 of 2 ✔
+[db/00ca6f] BTC:STAPLE:ANALYZE:SQUIDPY_SPATIAL_PLOTS (sample1)              [100%] 2 of 2 ✔
+[28/f961d1] BTC:STAPLE:ANALYZE:STAPLE_ATTACH_LIGREC (sample1)               [100%] 2 of 2 ✔
+[57/3f8f75] BTC:STAPLE:QC (9)                                               [100%] 10 of 10 ✔
+[76/d2f213] BTC:STAPLE:MULTIQC                                              [100%] 1 of 1 ✔
+Completed at: 01-Feb-2026 12:32:04
+Duration    : 6m 54s
+CPU hours   : 0.9
+Succeeded   : 28
+```
+Examinine the outputs in the `outs/` folder:
+```
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:25 adata
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:26 atlas
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:32 multiqc
+drwxr-xr-x@ 8 user  staff  256 Feb  1 12:32 pipeline_info
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:30 rctd
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:31 squidpy
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:32 staple
+```
+
+### Regular usage
 First, prepare a samplesheet with your input data that looks as follows: [samplesheet.csv](samplesheet.csv), where each row represents a spatial transcriptomics sample.
 
 The default named columns are following:
