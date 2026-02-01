@@ -47,7 +47,7 @@ to set-up Nextflow.
 mkdir tests
 
 # extract the downloaded archive
-tar -xzvf ~/Downloads/break-through-cancer\ btc-spatial-pipelines\ main\ tests.zip -C tests
+unzip ~/Downloads/break-through-cancer\ btc-spatial-pipelines\ main\ tests.zip -d tests
 
 # navigate to tests/data
 cd tests/data
