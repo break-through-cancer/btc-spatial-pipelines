@@ -2,7 +2,7 @@
 
 ## Introduction
 
-**STAPLE** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data. Being a simple preprocessing-deconvolution-interaction pipeline it features multiple tools for reference-free and reference-based deconvolution (cell typing) and cell-cell interaction analysis. In case of reference-based deconvolution, atlas may be fetched from a URL on an S3 location (e.g. CellxGene) or a local file, or matched-scRNA made available.
+**STAPLE** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data that puts the scientific question first. Features are pre-computed on a per-sample basis, then contrasted across samples using metadata provided through the sample sheet, and finally combined in a comprehensive MultiQC report for downstream analysis compatible with LLMs.
 
 
 ```mermaid
@@ -101,42 +101,38 @@ The default named columns are following:
 
   * `expression_profile`: optional, (leave blank if not using), reference expression profiles from matched scRNA (different local path to each scRNA atlas) or a local scRNA atlas (same path for each sample). If using a remotely stored atlas (such as CellXGene), rather pass `params.ref_scrna` and the atlas will be downloaded from the web.
 
-Any extra columns will be treated as metadata and copied into the `meta` map and the resulting `.h5ad` object.
+Any extra columns will be treated as metadata and copied into the `meta` map, the resulting `.h5ad` object, and the final MultiQC report.
 
 
 >[!IMPORTANT]
 `export NXF_SINGULARITY_HOME_MOUNT=true` in order to allow matplotlib to write its logs (and avoid related error) if using singularity.
 
-Run on segmented Visium HD with RCTD for cell typing and squipy ligand-receptor analysis (default) using remote atlas annotation. In case of CellXGene atlas, the cell type column is always `cell_type`, so it does not need to be explicitly specified.
+Run on Visium HD with RCTD (default) for cell typing and squidpy ligand-receptor analysis (default) using remote atlas annotation. In case of CellXGene atlas, the cell type column is always `cell_type`, so it does not need to be explicitly specified. In case a local `.h5ad` atlas is desired, specify the full path to it.
 ```bash
 nextflow run break-through-cancer/btc-spatial-pipelines \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \ 
-   --outdir <OUTDIR> \
-   --visium_hd 'cell_segmentations' \
+   --visium_hd <cell_segmentations/square_008um/square_016um/...> \
    --ref_scrna https://datasets.cellxgene.cziscience.com/d1d90d18-2109-412f-8dc0-e014e8abb338.h5ad
 ```
-In order to specify a different Visium HD resolution, change `visium_hd` param to an existing table name such as `square_008um` or `square_016um`. 
-
-Run on Visium SD or HD with local reference atlas specified in the samplesheet:
-
+Run on Visium SD or HD with matched reference specified in the samplesheet and a custom cell type column `cell_type_column_name` in the reference:
 ```bash
 nextflow run break-through-cancer/btc-spatial-pipelines \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
-   --outdir <OUTDIR>
    --ref_scrna_type_col cell_type_column_name
 ```
 
-Run on Visium SD with reference-free deconvolution:
+Pick a non-default reference-free deconvolution and ligand-receptor interaction tools:
 
 ```bash
 nextflow run break-through-cancer/btc-spatial-pipelines \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
-   --outdir <OUTDIR> \
-   --deconvolve.bayestme \
+   --deconvolve.<bayestme/cogaps/rctd> \
+   --analyze.<spacemarkers/squidpy> \
 ```
+
 
 ## Limitations
 
@@ -146,7 +142,7 @@ Not all the tools support all the formats! Use these guidelines to pick paramete
 | ----------- | --------- | --------- | ------------ | ---------- |
 | RCTD | OK | OK | OK | OK |
 | Squidpy | OK | OK | OK | OK |
-| CoGAPS | OK | reduce gene N | reduce gene N | OK |
+| CoGAPS | OK | reduce gene N | reduce gene N | samples not integrated |
 | BayesTME | OK | | | |
 | SpaceMarkers | OK | OK | | OK |
 
