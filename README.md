@@ -50,10 +50,10 @@ mkdir tests
 unzip ~/Downloads/break-through-cancer\ btc-spatial-pipelines\ main\ tests.zip -d tests
 
 # navigate to tests/data
-cd tests/data
+cd tests/data/samplesheets
 
 # check that --max_memory and --max_cpus match your resources, run
-nextflow run https://github.com/break-through-cancer/btc-spatial-pipelines --input samplesheets/multisample-test.csv  -profile docker --max_memory 8GB --max_cpus 4
+nextflow run https://github.com/break-through-cancer/btc-spatial-pipelines --input multisample-test.csv  -profile docker --max_memory 8GB --max_cpus 4
 ```
 
 Example terminal output:
