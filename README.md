@@ -40,7 +40,7 @@ If you are new to Nextflow and nf-core, please refer to [this page](https://nf-c
 to set-up Nextflow. 
 
 ### Just trying
- Run with test data in under 10 minutes on your laptop (needs docker installed)! Enter this address `download-directory.github.io?url=https://github.com/break-through-cancer/btc-spatial-pipelines/tree/main/tests` in your browser to download ~30Mb of test data, then use the below commands in the terminal. 
+ Run with test data in under 10 minutes on your laptop (needs docker installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/btc-spatial-pipelines/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. 
 
 ```
 # make a clean directory called tests
