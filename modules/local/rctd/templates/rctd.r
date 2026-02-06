@@ -105,7 +105,7 @@ rctd_res <- tryCatch({
   if(grep(pattern="UMI_min_sigma", x=e[["message"]])){
     message('RCTD error caught, retrying with UMI_min_sigma=1')
     spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores, UMI_min_sigma = 1),
-                      doublet_mode = 'full')
+                      doublet_mode = doublet_mode)
   } else {
     stop("Could not catch the error")
   }
@@ -116,7 +116,10 @@ message('getting cell type deconvolution results')
 cell_types <- spacexr::normalize_weights(rctd_res@results[['weights']])
 message(sprintf('saving results to %s/', outdir))
 dir.create(outdir, showWarnings = FALSE)
+#cell types csv
 write.csv(as.matrix(cell_types), file=file.path(outdir, 'rctd_cell_types.csv'))
+#raw object
+saveRDS(rctd_res, file=file.path(outdir, 'rctd.rds'))
 
 #versions
 message("reading session info")
