@@ -102,7 +102,7 @@ rctd_res <- tryCatch({
                     doublet_mode = doublet_mode)
 }, error = function(e) {
   message('RCTD threw error: "',e[["message"]],'"')
-  if(grep(pattern="UMI_min_sigma", x=e[["message"]])){
+  if (grepl(pattern = "UMI_min_sigma", x = e[["message"]])) {
     message('RCTD error caught, retrying with UMI_min_sigma=1')
     spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores, UMI_min_sigma = 1),
                       doublet_mode = doublet_mode)
