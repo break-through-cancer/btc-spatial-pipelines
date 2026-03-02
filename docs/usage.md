@@ -78,7 +78,7 @@ Run on Visium HD with RCTD (default) for cell typing and squidpy ligand-receptor
 ```bash
 nextflow run break-through-cancer/btc-spatial-pipelines \
    -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \ 
+   --input samplesheet.csv \
    --visium_hd <cell_segmentations/square_008um/square_016um/...> \
    --ref_scrna https://datasets.cellxgene.cziscience.com/d1d90d18-2109-412f-8dc0-e014e8abb338.h5ad
 ```

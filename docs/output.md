@@ -45,7 +45,7 @@ Load dataset uses [spatialdata.io](https://spatialdata.scverse.org/projects/io/e
 
 </details>
 
-The deconvolution step performs cell type annotation of the spatial dataset using the provided single-cell reference dataset, by reference-free methods, or using an external annotation provided by the user. The output is stored in the `tool/` directory as an AnnData object containing the cell type annotation in `.obs`, where `tool` is the name of the deconvolution method used (e.g. `RCTD`, `CoGAPS`, `BayesTME`, or `external`). If a tool does not directly output an AnnData object, the tool-agnostic output will be save, too.
+The deconvolution step performs cell type annotation of the spatial dataset using the provided single-cell reference dataset, by reference-free methods, or using an external annotation provided by the user. The output is stored in the `tool/` directory as an AnnData object containing the cell type annotation in `.obs`, where `tool` is the name of the deconvolution method used (e.g. `RCTD`, `CoGAPS`, `BayesTME`, or `external`). If a tool does not directly output an AnnData object, the tool-agnostic output will be saved, too.
 
 ### QC
 
@@ -67,12 +67,12 @@ QC module does not produce any output files, but the results of the QC checks ar
   - `sample/`
       - `tool/` is the name of the deconvolution method used.
         - `spaceMarkersObject.rds`: object containing SpaceMarkers results.
-        - `IMScores.rds`: SpaceMarkers intraction scores (undirected)
+        - `IMScores.rds`: SpaceMarkers interaction scores (undirected)
         - `LRScores.rds`: SpaceMarkers ligand-receptor interaction scores (directed)
 
 </details>
 
-Spatial metrics are computed using [Squidpy](https://squidpy.readthedocs.io/en/stable/). Ligand-receptor analysis is done with Squidpy's ligand-receptor analysis functionality, and also with [SpaceMarkers](https://github.com/DeshpandeLab/SpaceMarkers). The tools provide different outputs that are intermediately save in the `squidpy/` and `spacemarkers/` directories, respectively. Static images of the spatial analyses are also saved in the `figures/` directories. Downstream these results are integrated into the MultiQC report and the final AnnData objects.
+Spatial metrics are computed using [Squidpy](https://squidpy.readthedocs.io/en/stable/). Ligand-receptor analysis is done with Squidpy's ligand-receptor analysis functionality, and also with [SpaceMarkers](https://github.com/DeshpandeLab/SpaceMarkers). The tools provide different outputs that are saved as intermediate outputs in the `squidpy/` and `spacemarkers/` directories, respectively. Static images of the spatial analyses are also saved in the `figures/` directories. Downstream these results are integrated into the MultiQC report and the final AnnData objects.
 
 ### Staple
 <details markdown="1">
@@ -87,7 +87,7 @@ Spatial metrics are computed using [Squidpy](https://squidpy.readthedocs.io/en/s
       - `Moran_I_diff_response_results.csv`: a standalone CSV file containing the results of the Moran's I differential response analysis.
       - `neighbors_mqc.json`: a standalone JSON file containing the results of the neighborhood analysis.
     - `ligrec_diff_response_results.csv`: a standalone CSV file containing the results of the ligand-receptor differential response analysis.
-    - `Moran_I_diff_response_results.csv`: a standatone CSV file containing the results of the Moran's I differential response analysis.
+    - `Moran_I_diff_response_results.csv`: a standalone CSV file containing the results of the Moran's I differential response analysis.
 
 </details>
 The `staple/` directory contains the final integrated results of the pipeline, including the final AnnData objects containing all results in `.obs` and `.uns`.
