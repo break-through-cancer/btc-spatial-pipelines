@@ -1,4 +1,4 @@
-# btc/spatial: Output
+# STAPLE: Output
 
 ## Introduction
 
@@ -6,38 +6,92 @@ This document describes the output produced by the pipeline. Most of the plots a
 
 The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
-<!-- TODO nf-core: Write this documentation describing your workflow's output -->
-
 ## Pipeline overview
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
-- [FastQC](#fastqc) - Raw read QC
-- [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
-- [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
+- [Load dataset](#load-dataset) - Load spatial dataset and optionally the single-cell reference dataset.
+- [Deconvolve](#deconvolve) - Perform deconvolution / cell type annotation of the spatial dataset.
+- [Analyze](#analyze) - Perform downstream analyses on the spatial dataset, including spatial statistics and ligand-receptor analysis.
+- [QC](#qc) - Perform quality control checks on the data.
+- [Staple](#staple) - Perform cross-sample analysis.
+- [MultiQC](#multiqc) - Generate a comprehensive report summarising all metrics.
 
-### FastQC
+
+### Load dataset
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `fastqc/`
-  - `*_fastqc.html`: FastQC report containing quality metrics.
-  - `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
+- `adata/`
+  - `sample/`
+    - `adata.h5ad`: AnnData object containing the spatial dataset.
+- `atlas/`
+  - `sample/`
+    - `adata.h5ad`: AnnData object matched to the single-cell reference dataset, if provided.
+  - `atlas.h5ad`: AnnData object containing the single-cell reference dataset, if provided.
 
 </details>
 
-[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
+Load dataset uses [spatialdata.io](https://spatialdata.scverse.org/projects/io/en/latest/) to load the spatial dataset and optionally the single-cell reference dataset. The output is converted to AnnData objects and stored in the `adata/` directory. If a single-cell reference dataset is provided, the matched AnnData objects are stored in the `atlas/` directory and the atlas object is stored as `atlas.h5ad`.
 
-![MultiQC - FastQC sequence counts plot](images/mqc_fastqc_counts.png)
+### Deconvolve
+<details markdown="1">
+<summary>Output files</summary>
 
-![MultiQC - FastQC mean quality scores plot](images/mqc_fastqc_quality.png)
+- `tool/`
+  - `sample/`
+    - `tool.h5ad`: AnnData object containing cell type annotation in `.obs`.
 
-![MultiQC - FastQC adapter content plot](images/mqc_fastqc_adapter.png)
+</details>
 
-:::note
-The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
-:::
+The deconvolution step performs cell type annotation of the spatial dataset using the provided single-cell reference dataset, by reference-free methods, or using an external annotation provided by the user. The output is stored in the `tool/` directory as an AnnData object containing the cell type annotation in `.obs`, where `tool` is the name of the deconvolution method used (e.g. `RCTD`, `CoGAPS`, `BayesTME`, or `external`). If a tool does not directly output an AnnData object, the tool-agnostic output will be save, too.
+
+### QC
+
+QC module does not produce any output files, but the results of the QC checks are visualised in the MultiQC report and are also available in the `multiqc/multiqc_data/` directory.
+
+### Analyze
+<details markdown="1">
+<summary>Output files</summary>
+
+- `squidpy/`
+  - `sample/`
+      - `tool/` is the name of the deconvolution method used.
+        - `squidpy.h5ad`: object containing the spatial analyses in `.obs` and `.uns`.
+        - `figures/`: directory containing spatial analysis static per-sample images
+        - `ligrec/`
+          - `figures/`: figures directory containing ligand-receptor analysis static per-sample images
+          - `ligrec-interactions.pickle`: Pickle object containing the results of the ligand-receptor analysis.
+- `spacemarkers/`
+  - `sample/`
+      - `tool/` is the name of the deconvolution method used.
+        - `spaceMarkersObject.rds`: object containing SpaceMarkers results.
+        - `IMScores.rds`: SpaceMarkers intraction scores (undirected)
+        - `LRScores.rds`: SpaceMarkers ligand-receptor interaction scores (directed)
+
+</details>
+
+Spatial metrics are computed using [Squidpy](https://squidpy.readthedocs.io/en/stable/). Ligand-receptor analysis is done with Squidpy's ligand-receptor analysis functionality, and also with [SpaceMarkers](https://github.com/DeshpandeLab/SpaceMarkers). The tools provide different outputs that are intermediately save in the `squidpy/` and `spacemarkers/` directories, respectively. Static images of the spatial analyses are also saved in the `figures/` directories. Downstream these results are integrated into the MultiQC report and the final AnnData objects.
+
+### Staple
+<details markdown="1">
+<summary>Output files</summary>
+
+- `staple/`
+  - `sample/`
+    - `staple.h5ad`: AnnData object containing all results in `.obs` and `.uns`.
+  - `reports/`
+    - `mqc/`
+      - `ligrec_diff_response_results.json`: a standalone JSON file containing the results of the ligand-receptor differential response analysis.
+      - `Moran_I_diff_response_results.csv`: a standalone CSV file containing the results of the Moran's I differential response analysis.
+      - `neighbors_mqc.json`: a standalone JSON file containing the results of the neighborhood analysis.
+    - `ligrec_diff_response_results.csv`: a standalone CSV file containing the results of the ligand-receptor differential response analysis.
+    - `Moran_I_diff_response_results.csv`: a standatone CSV file containing the results of the Moran's I differential response analysis.
+
+</details>
+The `staple/` directory contains the final integrated results of the pipeline, including the final AnnData objects containing all results in `.obs` and `.uns`.
+
 
 ### MultiQC
 
