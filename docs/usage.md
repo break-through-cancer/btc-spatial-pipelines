@@ -1,4 +1,4 @@
-# btc/spatial: Usage
+# STAPLE: Usage
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
@@ -6,93 +6,100 @@
 
 <!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
 
-## Samplesheet input
+## Just trying
+ Run with test data in under 10 minutes on your laptop (needs docker installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/btc-spatial-pipelines/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. 
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+```
+# make a clean directory called tests
+mkdir tests
+
+# extract the downloaded archive
+unzip ~/Downloads/break-through-cancer\ btc-spatial-pipelines\ main\ tests.zip -d tests
+
+# navigate to tests/data
+cd tests/data/samplesheets
+
+# check that --max_memory and --max_cpus match your resources, run
+nextflow run https://github.com/break-through-cancer/btc-spatial-pipelines --input multisample-test.csv  -profile docker --max_memory 8GB --max_cpus 4
+```
+
+Example terminal output:
+```
+ N E X T F L O W   ~  version 25.10.2
+
+Launching `https://github.com/break-through-cancer/btc-spatial-pipelines` [silly_rosalind] DSL2 - revision: fbf88bd923 [main]
+
+executor >  local (28)
+[7e/6aa75d] BTC:STAPLE:INPUT_CHECK:SAMPLESHEET_CHECK (multisample-test.csv) [100%] 1 of 1 ✔
+[fb/4e7ece] BTC:STAPLE:LOAD_DATASET:ADATA_FROM_VISIUM (1)                   [100%] 2 of 2 ✔
+[e6/388ec7] BTC:STAPLE:LOAD_DATASET:ADATA_ADD_METADATA (sample1)            [100%] 2 of 2 ✔
+[11/078f2b] BTC:STAPLE:LOAD_DATASET:ATLAS_MATCH (sample1)                   [100%] 2 of 2 ✔
+[70/e190b7] BTC:STAPLE:DECONVOLVE:RCTD (sample1)                            [100%] 2 of 2 ✔
+[48/59abfc] BTC:STAPLE:DECONVOLVE:RCTD_PROBS (sample2)                      [100%] 2 of 2 ✔
+[8b/23b9de] BTC:STAPLE:ANALYZE:SQUIDPY:SQUIDPY_LIGREC_ANALYSIS (sample1)    [100%] 2 of 2 ✔
+[db/00ca6f] BTC:STAPLE:ANALYZE:SQUIDPY_SPATIAL_PLOTS (sample1)              [100%] 2 of 2 ✔
+[28/f961d1] BTC:STAPLE:ANALYZE:STAPLE_ATTACH_LIGREC (sample1)               [100%] 2 of 2 ✔
+[57/3f8f75] BTC:STAPLE:QC (9)                                               [100%] 10 of 10 ✔
+[76/d2f213] BTC:STAPLE:MULTIQC                                              [100%] 1 of 1 ✔
+Completed at: 01-Feb-2026 12:32:04
+Duration    : 6m 54s
+CPU hours   : 0.9
+Succeeded   : 28
+```
+Examine the outputs in the `outs/` folder:
+```
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:25 adata
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:26 atlas
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:32 multiqc
+drwxr-xr-x@ 8 user  staff  256 Feb  1 12:32 pipeline_info
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:30 rctd
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:31 squidpy
+drwxr-xr-x@ 4 user  staff  128 Feb  1 12:32 staple
+```
+
+## Regular use
+First, prepare a samplesheet with your input data that looks as follows: [samplesheet.csv](samplesheet.csv), where each row represents a spatial transcriptomics sample.
+
+The default named columns are following:
+
+  * `sample` required, a unique identifier for the sample
+
+  * `data_directory` required, path to the 10x spaceranger `outs` directory
+
+  * `expression_profile`: optional, (leave blank if not using), reference expression profiles from matched scRNA (different local path to each scRNA atlas) or a local scRNA atlas (same path for each sample). If using a remotely stored atlas (such as CellXGene), rather pass `params.ref_scrna` and the atlas will be downloaded from the web.
+
+Any extra columns will be treated as metadata and copied into the `meta` map, the resulting `.h5ad` object, and the final MultiQC report.
+
+
+>[!IMPORTANT]
+`export NXF_SINGULARITY_HOME_MOUNT=true` in order to allow matplotlib to write its logs (and avoid related error) if using singularity.
+
+Run on Visium HD with RCTD (default) for cell typing and squidpy ligand-receptor analysis (default) using remote atlas annotation. In case of CellXGene atlas, the cell type column is always `cell_type`, so it does not need to be explicitly specified. In case a local `.h5ad` atlas is desired, specify the full path to it.
+```bash
+nextflow run break-through-cancer/btc-spatial-pipelines \
+   -profile <docker/singularity/.../institute> \
+   --input samplesheet.csv \ 
+   --visium_hd <cell_segmentations/square_008um/square_016um/...> \
+   --ref_scrna https://datasets.cellxgene.cziscience.com/d1d90d18-2109-412f-8dc0-e014e8abb338.h5ad
+```
+Run on Visium SD or HD with matched reference specified in the samplesheet and a custom cell type column `cell_type_column_name` in the reference:
+```bash
+nextflow run break-through-cancer/btc-spatial-pipelines \
+   -profile <docker/singularity/.../institute> \
+   --input samplesheet.csv \
+   --ref_scrna_type_col cell_type_column_name
+```
+
+Pick a non-default reference-free deconvolution and ligand-receptor interaction tools:
 
 ```bash
---input '[path to samplesheet file]'
+nextflow run break-through-cancer/btc-spatial-pipelines \
+   -profile <docker/singularity/.../institute> \
+   --input samplesheet.csv \
+   --deconvolve.<bayestme/cogaps/rctd> \
+   --analyze.<spacemarkers/squidpy> \
 ```
 
-### Multiple runs of the same sample
-
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
-
-```console
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
-```
-
-### Full samplesheet
-
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
-
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
-
-```console
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
-```
-
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
-
-## Running the pipeline
-
-The typical command for running the pipeline is as follows:
-
-```bash
-nextflow run btc/spatial --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
-```
-
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
-
-Note that the pipeline will create the following files in your working directory:
-
-```bash
-work                # Directory containing the nextflow working files
-<OUTDIR>            # Finished results in specified location (defined with --outdir)
-.nextflow_log       # Log file from Nextflow
-# Other nextflow hidden files, eg. history of pipeline runs and old logs.
-```
-
-If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.
-
-Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
-
-:::warning
-Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
-:::
-
-The above pipeline run specified with a params file in yaml format:
-
-```bash
-nextflow run btc/spatial -profile docker -params-file params.yaml
-```
-
-with `params.yaml` containing:
-
-```yaml
-input: './samplesheet.csv'
-outdir: './results/'
-genome: 'GRCh37'
-<...>
-```
-
-You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
 
 ### Updating the pipeline
 
@@ -106,7 +113,7 @@ nextflow pull btc/spatial
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [btc/spatial releases page](https://github.com/btc/spatial/releases) and find the latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [btc/spatial releases page](https://github.com/break-through-cancer/btc-spatial-pipelines/releases) and find the latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
 
