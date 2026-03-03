@@ -39,104 +39,12 @@ flowchart LR
 If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
 to set-up Nextflow. 
 
-### Just trying
- Run with test data in under 10 minutes on your laptop (needs docker installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/btc-spatial-pipelines/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. 
-
-```
-# make a clean directory called tests
-mkdir tests
-
-# extract the downloaded archive
-unzip ~/Downloads/break-through-cancer\ btc-spatial-pipelines\ main\ tests.zip -d tests
-
-# navigate to tests/data
-cd tests/data/samplesheets
-
-# check that --max_memory and --max_cpus match your resources, run
-nextflow run https://github.com/break-through-cancer/btc-spatial-pipelines --input multisample-test.csv  -profile docker --max_memory 8GB --max_cpus 4
-```
-
-Example terminal output:
-```
- N E X T F L O W   ~  version 25.10.2
-
-Launching `https://github.com/break-through-cancer/btc-spatial-pipelines` [silly_rosalind] DSL2 - revision: fbf88bd923 [main]
-
-executor >  local (28)
-[7e/6aa75d] BTC:STAPLE:INPUT_CHECK:SAMPLESHEET_CHECK (multisample-test.csv) [100%] 1 of 1 ✔
-[fb/4e7ece] BTC:STAPLE:LOAD_DATASET:ADATA_FROM_VISIUM (1)                   [100%] 2 of 2 ✔
-[e6/388ec7] BTC:STAPLE:LOAD_DATASET:ADATA_ADD_METADATA (sample1)            [100%] 2 of 2 ✔
-[11/078f2b] BTC:STAPLE:LOAD_DATASET:ATLAS_MATCH (sample1)                   [100%] 2 of 2 ✔
-[70/e190b7] BTC:STAPLE:DECONVOLVE:RCTD (sample1)                            [100%] 2 of 2 ✔
-[48/59abfc] BTC:STAPLE:DECONVOLVE:RCTD_PROBS (sample2)                      [100%] 2 of 2 ✔
-[8b/23b9de] BTC:STAPLE:ANALYZE:SQUIDPY:SQUIDPY_LIGREC_ANALYSIS (sample1)    [100%] 2 of 2 ✔
-[db/00ca6f] BTC:STAPLE:ANALYZE:SQUIDPY_SPATIAL_PLOTS (sample1)              [100%] 2 of 2 ✔
-[28/f961d1] BTC:STAPLE:ANALYZE:STAPLE_ATTACH_LIGREC (sample1)               [100%] 2 of 2 ✔
-[57/3f8f75] BTC:STAPLE:QC (9)                                               [100%] 10 of 10 ✔
-[76/d2f213] BTC:STAPLE:MULTIQC                                              [100%] 1 of 1 ✔
-Completed at: 01-Feb-2026 12:32:04
-Duration    : 6m 54s
-CPU hours   : 0.9
-Succeeded   : 28
-```
-Examine the outputs in the `outs/` folder:
-```
-drwxr-xr-x@ 4 user  staff  128 Feb  1 12:25 adata
-drwxr-xr-x@ 4 user  staff  128 Feb  1 12:26 atlas
-drwxr-xr-x@ 4 user  staff  128 Feb  1 12:32 multiqc
-drwxr-xr-x@ 8 user  staff  256 Feb  1 12:32 pipeline_info
-drwxr-xr-x@ 4 user  staff  128 Feb  1 12:30 rctd
-drwxr-xr-x@ 4 user  staff  128 Feb  1 12:31 squidpy
-drwxr-xr-x@ 4 user  staff  128 Feb  1 12:32 staple
-```
-
-### Regular usage
-First, prepare a samplesheet with your input data that looks as follows: [samplesheet.csv](samplesheet.csv), where each row represents a spatial transcriptomics sample.
-
-The default named columns are following:
-
-  * `sample` required, a unique identifier for the sample
-
-  * `data_directory` required, path to the 10x spaceranger `outs` directory
-
-  * `expression_profile`: optional, (leave blank if not using), reference expression profiles from matched scRNA (different local path to each scRNA atlas) or a local scRNA atlas (same path for each sample). If using a remotely stored atlas (such as CellXGene), rather pass `params.ref_scrna` and the atlas will be downloaded from the web.
-
-Any extra columns will be treated as metadata and copied into the `meta` map, the resulting `.h5ad` object, and the final MultiQC report.
-
-
->[!IMPORTANT]
-`export NXF_SINGULARITY_HOME_MOUNT=true` in order to allow matplotlib to write its logs (and avoid related error) if using singularity.
-
-Run on Visium HD with RCTD (default) for cell typing and squidpy ligand-receptor analysis (default) using remote atlas annotation. In case of CellXGene atlas, the cell type column is always `cell_type`, so it does not need to be explicitly specified. In case a local `.h5ad` atlas is desired, specify the full path to it.
-```bash
-nextflow run break-through-cancer/btc-spatial-pipelines \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \ 
-   --visium_hd <cell_segmentations/square_008um/square_016um/...> \
-   --ref_scrna https://datasets.cellxgene.cziscience.com/d1d90d18-2109-412f-8dc0-e014e8abb338.h5ad
-```
-Run on Visium SD or HD with matched reference specified in the samplesheet and a custom cell type column `cell_type_column_name` in the reference:
-```bash
-nextflow run break-through-cancer/btc-spatial-pipelines \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --ref_scrna_type_col cell_type_column_name
-```
-
-Pick a non-default reference-free deconvolution and ligand-receptor interaction tools:
-
-```bash
-nextflow run break-through-cancer/btc-spatial-pipelines \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --deconvolve.<bayestme/cogaps/rctd> \
-   --analyze.<spacemarkers/squidpy> \
-```
+Check out the [usage documentation](docs/usage.md) for instructions on how to run the pipeline on your data. Once you have run the pipeline, jump straight to `multiqc/multiqc_report.html` to see the results of your analysis. Use MultiQC's interactive features to explore the results.
 
 
 ## Limitations
 
-Not all the tools support all the formats! Use these guidelines to pick parameters in case the fully functioning defaults (RCTD + Squidpy) are not desired.
+Not all the tools support all the formats. Use these guidelines to pick parameters in case the fully functioning defaults (RCTD + Squidpy) are not desired.
 
 | tool/format | Visium SD | Visium HD | HD segmented | MultiQC |
 | ----------- | --------- | --------- | ------------ | ---------- |
