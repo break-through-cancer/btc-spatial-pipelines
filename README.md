@@ -1,4 +1,4 @@
-[![test](https://github.com/break-through-cancer/btc-spatial-pipelines/actions/workflows/test.yml/badge.svg)](https://github.com/break-through-cancer/btc-spatial-pipelines/actions/workflows/test.yml)
+[![test](https://github.com/break-through-cancer/staple/actions/workflows/test.yml/badge.svg)](https://github.com/break-through-cancer/staple/actions/workflows/test.yml)
 
 ## Introduction
 

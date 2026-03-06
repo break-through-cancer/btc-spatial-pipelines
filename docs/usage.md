@@ -7,27 +7,34 @@
 <!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
 
 ## Just trying
- Run with test data in under 10 minutes on your laptop (needs docker installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/btc-spatial-pipelines/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. 
+ Run with test data in under 10 minutes on your laptop (needs docker installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/staple/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. 
 
 ```
 # make a clean directory called tests
 mkdir tests
 
 # extract the downloaded archive
-unzip ~/Downloads/break-through-cancer\ btc-spatial-pipelines\ main\ tests.zip -d tests
+unzip ~/Downloads/break-through-cancer\ staple\ main\ tests.zip -d tests
 
 # navigate to tests/data
 cd tests/data/samplesheets
 
 # check that --max_memory and --max_cpus match your resources, run
-nextflow run https://github.com/break-through-cancer/btc-spatial-pipelines --input multisample-test.csv  -profile docker --max_memory 8GB --max_cpus 4
+nextflow run https://github.com/break-through-cancer/staple \
+  --input multisample-test.csv \
+  --max_memory 8GB \
+  --max_cpus 4 \
+  --outdir outs \
+  -profile docker
 ```
+# make a clean directory called tests
+mkdir tests
 
 Example terminal output:
 ```
  N E X T F L O W   ~  version 25.10.2
 
-Launching `https://github.com/break-through-cancer/btc-spatial-pipelines` [silly_rosalind] DSL2 - revision: fbf88bd923 [main]
+Launching `https://github.com/break-through-cancer/staple` [silly_rosalind] DSL2 - revision: fbf88bd923 [main]
 
 executor >  local (28)
 [7e/6aa75d] BTC:STAPLE:INPUT_CHECK:SAMPLESHEET_CHECK (multisample-test.csv) [100%] 1 of 1 ✔
@@ -76,7 +83,7 @@ Any extra columns will be treated as metadata and copied into the `meta` map, th
 
 Run on Visium HD with RCTD (default) for cell typing and squidpy ligand-receptor analysis (default) using remote atlas annotation. In case of CellXGene atlas, the cell type column is always `cell_type`, so it does not need to be explicitly specified. In case a local `.h5ad` atlas is desired, specify the full path to it.
 ```bash
-nextflow run break-through-cancer/btc-spatial-pipelines \
+nextflow run break-through-cancer/staple \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
    --visium_hd <cell_segmentations/square_008um/square_016um/...> \
@@ -84,7 +91,7 @@ nextflow run break-through-cancer/btc-spatial-pipelines \
 ```
 Run on Visium SD or HD with matched reference specified in the samplesheet and a custom cell type column `cell_type_column_name` in the reference:
 ```bash
-nextflow run break-through-cancer/btc-spatial-pipelines \
+nextflow run break-through-cancer/staple \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
    --ref_scrna_type_col cell_type_column_name
@@ -93,7 +100,7 @@ nextflow run break-through-cancer/btc-spatial-pipelines \
 Pick a non-default reference-free deconvolution and ligand-receptor interaction tools:
 
 ```bash
-nextflow run break-through-cancer/btc-spatial-pipelines \
+nextflow run break-through-cancer/staple \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
    --deconvolve.<bayestme/cogaps/rctd> \
@@ -106,14 +113,14 @@ nextflow run break-through-cancer/btc-spatial-pipelines \
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
-nextflow pull break-through-cancer/btc-spatial-pipelines
+nextflow pull break-through-cancer/staple
 ```
 
 ### Reproducibility
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [btc/spatial releases page](https://github.com/break-through-cancer/btc-spatial-pipelines/releases) and find the latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [releases page](https://github.com/break-through-cancer/staple/releases) and find the latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
 
