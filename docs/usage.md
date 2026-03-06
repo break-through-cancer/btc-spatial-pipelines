@@ -20,7 +20,12 @@ unzip ~/Downloads/break-through-cancer\ staple\ main\ tests.zip -d tests
 cd tests/data/samplesheets
 
 # check that --max_memory and --max_cpus match your resources, run
-nextflow run https://github.com/break-through-cancer/staple --input multisample-test.csv  -profile docker --max_memory 8GB --max_cpus 4
+nextflow run https://github.com/break-through-cancer/staple \
+  --input multisample-test.csv \
+  --max_memory 8GB \
+  --max_cpus 4 \
+  --outdir outs \
+  -profile docker
 ```
 
 Example terminal output:
@@ -113,7 +118,7 @@ nextflow pull break-through-cancer/staple
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [btc/spatial releases page](https://github.com/break-through-cancer/staple/releases) and find the latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [releases page](https://github.com/break-through-cancer/staple/releases) and find the latest pipeline version - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
 
