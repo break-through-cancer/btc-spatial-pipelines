@@ -168,7 +168,7 @@
                     "description": "Custom config file to supply to MultiQC.",
                     "fa_icon": "fas fa-cog",
                     "hidden": true,
-                    "default": "assets/multiqc_config.yml"
+                    "default": "/Users/dlvovs/btc/btc-spatial-pipelines/assets/multiqc_config.yml"
                 },
                 "multiqc_logo": {
                     "type": "string",
@@ -200,12 +200,12 @@
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters fails when an unrecognised parameter is found.",
                     "hidden": true,
-                    "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
+                    "help_text": "By default, when an unrecognised parameter is found, it returns a warning."
                 },
                 "validationLenientMode": {
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
-                    "description": "Validation of parameters in lenient more.",
+                    "description": "Validation of parameters in lenient mode.",
                     "hidden": true,
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
@@ -227,6 +227,63 @@
         }
     ],
     "properties": {
+        "deconvolve": {
+            "type": "object",
+            "description": "Cell type annotation options.",
+            "properties": {
+                "rctd": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "bayestme": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "cogaps": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "external": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "n_top_genes": {
+                    "type": "integer",
+                    "default": 1000
+                }
+            }
+        },
+        "analyze": {
+            "type": "object",
+            "description": "Spatial analysis options.",
+            "properties": {
+                "squidpy": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable Squidpy analysis."
+                },
+                "spacemarkers": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable SpaceMarkers analysis."
+                },
+                "xsample": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable cross-sample analysis."
+                },
+                "spotlight": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable Spotlight analysis."
+                },
+                "show_top": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Number of top features to show."
+                }
+            }
+        },
         "npatterns": {
             "type": "string",
             "default": "5,"
