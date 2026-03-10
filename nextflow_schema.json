@@ -334,6 +334,10 @@
         "good_gene_threshold": {
             "type": "integer",
             "default": 1000
+        },
+        "drop_genes_prefix": {
+            "type": "boolean",
+            "default": false
         }
     }
 }
