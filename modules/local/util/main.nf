@@ -178,7 +178,8 @@ sample = "${meta.id}"
 if outname in ["atlas_input", "adata_input", "adata_output"]:
     adata = ad.read_h5ad(adata_path)
     #basic scanpy qc metrics
-    qc = sc.pp.calculate_qc_metrics(adata, inplace=False)
+    adata.var["mito"] = adata.var_names.str.startswith("MT-")
+    qc = sc.pp.calculate_qc_metrics(adata, qc_vars=["mito"], inplace=False)
     report = pd.DataFrame({
         "Sample": [sample],
         "n_genes": adata.shape[1],
@@ -186,6 +187,7 @@ if outname in ["atlas_input", "adata_input", "adata_output"]:
         "mean_genes_by_counts": qc[0]["n_genes_by_counts"].mean(),
         "mean_cells_by_counts": qc[1]["n_cells_by_counts"].mean(),
         "mean_total_nnz_counts": adata.X[adata.X.nonzero()].mean(),
+        "mean_percent_mito": qc[0]["pct_counts_mito"].mean()
     })
     report.to_csv(f"{outname}_report.csv", index=False)
     adata.file.close()

@@ -26,3 +26,35 @@ nextflow_process {
         }
     }
 }
+
+nextflow_process {
+    name    "Test QC"
+    script  "modules/local/util/main.nf"
+    process "QC"
+
+    test("Should run QC successfully with local atlas") {
+
+        tag "process"
+        tag "qc"
+
+        when {
+            params {
+                max_memory = '4.GB'
+                max_cpus   = 1
+            }
+            process {
+                """
+                input[0] = [[id:"atlas"],
+                            file("${projectDir}/tests/data/atlas_small.h5ad"),
+                            "atlas_input"]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.versions
+            assert path(process.out.report.get(0)).readLines().first().contains("Sample,n_genes,n_cells,mean_genes_by_counts,mean_cells_by_counts,mean_total_nnz_counts,mean_percent_mito")
+        }
+    }
+}
