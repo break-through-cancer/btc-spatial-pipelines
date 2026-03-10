@@ -32,7 +32,22 @@ nextflow_process {
     script  "modules/local/util/main.nf"
     process "QC"
 
-    test("Should run QC successfully with local atlas") {
+    setup {
+        run("CREATE_TEST_ADATA") {
+            script "tests/data/create_adata.nf"
+            params {
+                max_cpus = 2
+                max_memory = '4 GB'
+            }
+            process {
+            """
+            input[0] = 2
+            """
+            }
+        }
+    }
+
+    test("Should run QC successfully with test data") {
 
         tag "process"
         tag "qc"
@@ -42,11 +57,10 @@ nextflow_process {
                 max_memory = '4.GB'
                 max_cpus   = 1
             }
+            
             process {
                 """
-                input[0] = [[id:"atlas"],
-                            file("${projectDir}/tests/data/atlas_small.h5ad"),
-                            "atlas_input"]
+                input[0] = CREATE_TEST_ADATA.out.adata.map{ it -> [[id:"sample"], it[1], "atlas_input"] }
                 """
             }
         }
