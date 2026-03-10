@@ -1,0 +1,41 @@
+nextflow_process{
+    name    'xsample'
+    script  'modules/local/xsample/main.nf'
+    process 'STAPLE_XSAMPLE'
+
+    setup {
+        run("SQUIDPY_SPATIAL_PLOTS"){
+            script "modules/local/squidpy/main.nf"
+            params {
+                max_cpus = 2
+                max_memory = '4 GB'
+            }
+            process {
+            """
+            input[0] = Channel.from(
+                            [[id:"sample"], file("${projectDir}/tests/data/rctd.h5ad")],
+                            [[id:"sample2"], file("${projectDir}/tests/data/rctd.h5ad")]
+                        )
+            """
+            }
+        }
+    }
+
+    test("Run Xsample with multiple samples") {
+
+        tag     'xsample'
+        tag     'xsample-spatial'
+
+        when {
+            process {
+                """
+                input[0] = SQUIDPY_SPATIAL_PLOTS.out.adata.map{ it -> it[1] }.collect()
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+    }
+}
