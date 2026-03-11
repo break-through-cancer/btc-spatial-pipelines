@@ -34,7 +34,7 @@ nextflow_process{
         then {
             assert process.success
             assert process.out.versions
-            assert process.out.mqc
+            assert process.out.multiqc_files
         }
     }
 }
