@@ -1,5 +1,5 @@
 nextflow_process{
-    name    'xsample'
+    name    'Test xsample'
     script  'modules/local/xsample/main.nf'
     process 'STAPLE_XSAMPLE'
 
