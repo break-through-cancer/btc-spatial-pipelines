@@ -27,8 +27,6 @@ nextflow run https://github.com/break-through-cancer/staple \
   --outdir outs \
   -profile docker
 ```
-# make a clean directory called tests
-mkdir tests
 
 Example terminal output:
 ```
