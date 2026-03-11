@@ -350,7 +350,7 @@ process ADATA_FROM_SEGMENTED_VISIUM {
 }
 
 process ADATA_PREPROCESS {
-    //filter genes from an adata file based on a list of genes to keep
+    //filter genes from an adata file by dropping genes whose names match a specified prefix (via drop_genes_prefix)
     tag "$meta.id"
     label "process_medium"
     container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"

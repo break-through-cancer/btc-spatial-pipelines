@@ -49,16 +49,17 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample'):
     # attach cell type interaction report
     sq.gr.interaction_matrix(adata, cluster_key='cell_type')
     
-    # add a random cell type assignment of 3 cel types: tumor, stroma, other
+    # add a random cell type assignment of 3 cell types: tumor, stroma, other
     cell_types = ['tumor', 'stroma', 'other']
     adata.obs['cell_type'] = np.random.choice(cell_types, size=n)
+    adata.obs['cell_type'] = pd.Categorical(adata.obs['cell_type'], categories=cell_types)
 
     # add sample id for testing
     adata.obs['id'] = sample_id
     # add a random response variable for testing
     adata.obs['response'] = np.random.choice(['responder', 'non-responder'], size=n)
     
-    #simulate staple behaovior of added metadata from samplesheet
+    #simulate staple behavior of added metadata from samplesheet
     adata.uns['added_metadata_fields'] = ['response', 'id']
 
     return adata

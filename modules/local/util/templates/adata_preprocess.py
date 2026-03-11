@@ -9,7 +9,7 @@ adata_path = "${adata}"
 sample = "${meta.id}"
 
 def adata_preprocess(adata, drop_prefix):
-    if "drop_genes_prefix" not in drop_prefix:
+    if drop_prefix:
         adata = adata[:, ~adata.var_names.str.startswith(drop_prefix)]
     adata.file.close()
     return adata

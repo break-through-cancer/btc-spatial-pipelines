@@ -336,8 +336,9 @@
             "default": 1000
         },
         "drop_genes_prefix": {
-            "type": "boolean",
-            "default": false
+            "type": "string",
+            "default": "",
+            "description": "String prefix of gene names to drop (e.g. 'MT-'). Use an empty string to disable dropping by prefix."
         }
     }
 }
