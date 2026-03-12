@@ -79,7 +79,7 @@ if __name__ == "__main__":
         "sq_pl_ligrec_max_interactions": ${params.sq_pl_ligrec_max_interactions},
         "seed": ${params.seed}
     }
-    
+
     if '${params.sq_gr_ligrec_interactions_params}':
         par["sq_gr_ligrec_interactions_params"] = json.loads('${params.sq_gr_ligrec_interactions_params}')
     else:
