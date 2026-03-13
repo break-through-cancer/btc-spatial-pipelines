@@ -94,7 +94,7 @@ def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, to
     return mqc_report, res
 
 def neighbors_report(adatas, spotlight=None):
-    if spotlight is not None and spotlight != 'false':
+    if spotlight:
         cell_types = spotlight    
     else:
         cell_types = {}
