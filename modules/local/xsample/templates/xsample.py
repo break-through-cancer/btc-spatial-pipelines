@@ -25,7 +25,7 @@ def ligrec_from_adatas(adatas, type='ligrec_means', axis=1,
     res = combined.stack(future_stack=True)
 
     # if a cell type or pair has been specified, filter to that only
-    if spotlight is not None and spotlight != 'false':
+    if spotlight:
         sp_index = [np.all([y in x for y in spotlight ]) for x in res.index.get_level_values(-1)]
         res = res[sp_index]
 
