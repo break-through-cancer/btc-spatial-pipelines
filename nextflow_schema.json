@@ -228,51 +228,51 @@
         }
     ],
     "properties": {
-        "deconvolve" :{
+        "deconvolve": {
             "type": "object",
             "description": "Deconvolution method to run",
             "properties": {
-                "rctd":{
+                "rctd": {
                     "type": "boolean",
                     "default": true
                 },
-                "cogaps":{
-                    "type":"boolean",
+                "cogaps": {
+                    "type": "boolean",
                     "default": false
                 },
-                "bayestme":{
-                    "type":"boolean",
+                "bayestme": {
+                    "type": "boolean",
                     "default": false
                 },
-                "external":{
-                    "type":"boolean",
+                "external": {
+                    "type": "boolean",
                     "default": false
                 }
             }
         },
-        "analyze":{
+        "analyze": {
             "type": "object",
             "description": "Analysis methods to run",
             "properties": {
-                "squidpy":{
+                "squidpy": {
                     "type": "boolean",
                     "default": true
                 },
-                "spacemarkers":{
-                    "type":"boolean",
+                "spacemarkers": {
+                    "type": "boolean",
                     "default": false
                 },
-                "xsample":{
-                    "type":"boolean",
+                "xsample": {
+                    "type": "boolean",
                     "default": false
                 },
-                "spotlight":{
-                    "type":"string",
+                "spotlight": {
+                    "type": "string",
                     "default": false,
                     "description": "Focus on these cell types in the final reports"
                 },
-                "show_top":{
-                    "type":"integer",
+                "show_top": {
+                    "type": "integer",
                     "default": 100,
                     "description": "Number of top items to show in the final reports"
                 }
