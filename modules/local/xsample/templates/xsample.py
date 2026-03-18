@@ -35,7 +35,7 @@ def ligrec_from_adatas(adatas, type='ligrec_means', axis=1,
 
     return res
 
-def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, tool=None):
+def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, tool=None):
     samples = [a.obs['id'].unique()[0] for a in adatas]
     pvalues = None
     if tool =='squidpy_ligrec':
@@ -56,22 +56,24 @@ def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, to
 
     if groups is not None:
         ligrecs_ttest = xsample_ttest(ligrecs, groups[0], groups[1])
+        ligrecs_ttest_sig = ligrecs_ttest[ligrecs_ttest['pval_adj'] <= filter]
 
         # if no t-test results found, fall back to mean across samples
-        if(len(ligrecs_ttest) == 0):
-            log.warning(f"No differential interactions found for {tool}.")
-            ligrecs['mean'] = ligrecs.mean(axis=1)
-            res = ligrecs.sort_values('mean', ascending=False)[samples]
-            memo = f"Mean interaction across samples shown as no differential interactions were found between {groups[0]} and {groups[1]}."
+        if(len(ligrecs_ttest_sig) == 0):
+            log.warning(f"No significant differential interactions found for {tool}.")
+            res = ligrecs.sort_values('pval', ascending=False)[samples]
+            memo = f"Top {show} differential interactions across samples shown as no significant (p_adj<={filter}) interactions were found between {groups[0]} and {groups[1]}."
         else:
-            res = ligrecs_ttest.sort_values('pval')
-            memo = f"Differential interactions between {groups[0]} and {groups[1]}. "
-            pval_annot = ligrecs_ttest['pval_adj'][:show]
-            memo += f"Top {show} shown sorted by adjusted p-value between {min(pval_annot):.2e} and {max(pval_annot):.2e}."
+            res = ligrecs_ttest_sig.sort_values('pval')
+            memo = f"Significant differential interactions (p_adj<={filter}) between {groups[0]} and {groups[1]}. "
+            pval_annot = ligrecs_ttest_sig['pval_adj'][:show]
+            memo += f"There are {len(ligrecs_ttest_sig['pval_adj'])} significant interactions (p_adj {min(pval_annot):.2e} to {max(pval_annot):.2e})."
+            if len(ligrecs_ttest_sig['pval_adj']) > show:
+                memo += f" Top {show} shown."
     else:
         ligrecs['mean'] = ligrecs.mean(axis=1)
         res = ligrecs.sort_values('mean', ascending=False)[samples]
-        memo = "Mean interaction across samples shown as no groups were specified."
+        memo = f"Top {show} mean interactions across samples shown as no groups were specified."
     
     #join multiindex of squidpy ligrec into single index
     if(isinstance(res.index, pd.MultiIndex)):
@@ -111,7 +113,7 @@ def pseudobulk_from_adatas(adatas):
     df = pd.DataFrame(pseudobulks)
     return df
 
-def pydeseq_report(pseudobulks, spotlight=None, groups=None, show=100, filter=0.05, cpus=1):
+def pydeseq_results(pseudobulks, spotlight=None, groups=None, show=100, filter=0.05, cpus=1):
     inference = DefaultInference(n_cpus=cpus)
     # construct metadata dataframe for deseq2
     metadata = pd.DataFrame({
@@ -192,14 +194,13 @@ def plot_hist(df_pair, title=None, save=True):
     if save:
         plt.savefig(title.replace(" ", "_")+".png", dpi=300, bbox_inches='tight')
 
-def xsample_ttest(df, group1, group2, filter=0.05):
+def xsample_ttest(df, group1, group2):
     res = df.copy()
     test = sp.stats.ttest_ind(res[group1], res[group2], axis=1)
     res['statistic'] = test.statistic
     res['pval'] = test.pvalue
     res.dropna(inplace=True)
     res['pval_adj'] = sp.stats.false_discovery_control(res['pval'], method='bh')
-    res = res[res['pval_adj'] <= filter]
     res.sort_values('pval_adj', inplace=True)
 
     return res
@@ -295,17 +296,17 @@ if __name__ == '__main__':
     # if no cats found, just produce overall ligrec report
     if len(cats) == 0:
         try:
-            res_mqc, res = ligrec_report(adatas, spotlight=spotlight, show=show, tool='squidpy_ligrec')
+            res_mqc, res = heatmap_report(adatas, spotlight=spotlight, show=show, tool='squidpy_ligrec')
             save_reports(res_mqc, res, "ligrec_overall_mqc")
         except Exception as e:
             log.warning(f"Could not generate overall ligand-receptor report: {e}")
         try:
-            lrs_mqc, lrs = ligrec_report(adatas, spotlight=spotlight, show=show, tool='spacemarkers_LRscores')
+            lrs_mqc, lrs = heatmap_report(adatas, spotlight=spotlight, show=show, tool='spacemarkers_LRscores')
             save_reports(lrs_mqc, lrs, "lrscores_overall_mqc")
         except Exception as e:
             log.warning(f"Could not generate overall LR scores report: {e}")
         try:
-            moran_mqc, moran = ligrec_report(adatas, spotlight=spotlight, show=show, tool='Moran_I')
+            moran_mqc, moran = heatmap_report(adatas, spotlight=spotlight, show=show, tool='Moran_I')
             save_reports(moran_mqc, moran, "moranI_overall_mqc")
         except Exception as e:
             log.warning(f"Could not generate overall Moran's I report: {e}")
@@ -318,20 +319,20 @@ if __name__ == '__main__':
             
             #squidpy ligrec
             try:
-                res_mqc, res = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool="squidpy_ligrec")
+                res_mqc, res = heatmap_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool="squidpy_ligrec")
                 save_reports(res_mqc, res, f"ligrec_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate ligand-receptor report for variable {var}: {e}")
             # SpaceMarkers LR scores
             try:
-                lrs_mqc, lrs = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='spacemarkers_LRscores')
+                lrs_mqc, lrs = heatmap_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='spacemarkers_LRscores')
                 save_reports(lrs_mqc, lrs, f"lrscores_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate LR scores report for variable {var}: {e}")
 
             # Moran's I
             try:
-                moran_mqc, moran = ligrec_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='Moran_I')
+                moran_mqc, moran = heatmap_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='Moran_I')
                 save_reports(moran_mqc, moran, f"Moran_I_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate Moran's I report for variable {var}: {e}")
@@ -340,7 +341,7 @@ if __name__ == '__main__':
             try:
                 pseudobulks = pseudobulk_from_adatas(adatas)
                 pseudobulks = pseudobulks.fillna(0)  # fill missing values with 0
-                deseq_res = pydeseq_report(pseudobulks, groups=[group1,group2], filter=0.05, cpus=cpus)
+                deseq_res = pydeseq_results(pseudobulks, groups=[group1,group2], filter=0.05, cpus=cpus)
                 deseq_res.to_csv(f"{reports_dir}/deseq2_diff_{var}_results.csv")
             except Exception as e:
                 log.warning(f"Could not perform DESeq2 analysis for variable {var}: {e}")
