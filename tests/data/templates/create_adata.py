@@ -61,6 +61,10 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample'):
     
     #simulate staple behavior of added metadata from samplesheet
     adata.uns['added_metadata_fields'] = ['response', 'id']
+    
+    # add Moran's I to obs for testing
+    sq.gr.spatial_autocorr(adata, mode="moran", n_perms=100, n_jobs=1)
+
 
     return adata
 
