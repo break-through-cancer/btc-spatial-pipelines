@@ -62,18 +62,23 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
         if(len(ligrecs_ttest_sig) == 0):
             log.warning(f"No significant differential interactions found for {tool}.")
             res = ligrecs.sort_values('pval', ascending=False)[samples]
-            memo = f"Top {show} differential interactions across samples shown as no significant (p_adj<={filter}) interactions were found between {groups[0]} and {groups[1]}."
+            memo = f"Top {show} differential interactions across samples shown \
+                as no significant (p_adj<={filter}) interactions were found \
+                between {groups[0]} and {groups[1]}."
         else:
             res = ligrecs_ttest_sig.sort_values('pval')
-            memo = f"Significant differential interactions (p_adj<={filter}) between {groups[0]} and {groups[1]}. "
+            memo = f"Significant differential interactions (p_adj<={filter}) \
+                between {groups[0]} and {groups[1]}. "
             pval_annot = ligrecs_ttest_sig['pval_adj'][:show]
-            memo += f"There are {len(ligrecs_ttest_sig['pval_adj'])} significant interactions (p_adj {min(pval_annot):.2e} to {max(pval_annot):.2e})."
+            memo += f"There are {len(ligrecs_ttest_sig['pval_adj'])} significant \
+                interactions (p_adj {min(pval_annot):.2e} to {max(pval_annot):.2e})."
             if len(ligrecs_ttest_sig['pval_adj']) > show:
                 memo += f" Top {show} shown."
     else:
         ligrecs['mean'] = ligrecs.mean(axis=1)
         res = ligrecs.sort_values('mean', ascending=False)[samples]
-        memo = f"Top {show} mean interactions across samples shown as no groups were specified."
+        memo = f"Top {show} mean interactions across samples shown as no groups \
+            were specified."
     
     #join multiindex of squidpy ligrec into single index
     if(isinstance(res.index, pd.MultiIndex)):
@@ -169,7 +174,10 @@ def neighbors_report(adatas, spotlight=None):
     mqc_report = {
         "id": "spatial_neighbors",
         "plot_type": "bar",
-        "description": "Cell type immediate neighborhood across samples",
+        "description": "Cell type immediate neighborhood across samples. \
+        The rate of self-neighborhood indicates clustering of a cell type. \
+        The rate of neighbors with other cell types (self omitted) indicates \
+            how these clusters interact with each other.",
         "pconfig": {
             "title": "Cell type neighborhood across samples",
             "ylab": "Neighboring cell type share",
