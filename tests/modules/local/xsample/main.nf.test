@@ -22,6 +22,7 @@ nextflow_process{
 
         tag     'xsample'
         tag     'xsample-spatial'
+        tag     'process'
 
         when {
             process {

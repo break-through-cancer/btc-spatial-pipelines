@@ -57,7 +57,7 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample'):
     # add sample id for testing
     adata.obs['id'] = sample_id
     # add a random response variable for testing
-    adata.obs['response'] = np.random.choice(['responder', 'non-responder'], size=n)
+    adata.obs['response'] = np.random.choice(['responder', 'non-responder'])
     
     #simulate staple behavior of added metadata from samplesheet
     adata.uns['added_metadata_fields'] = ['response', 'id']

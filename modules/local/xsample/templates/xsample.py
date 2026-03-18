@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Cross-sample analysis template script
-# Input is a space-delimirted string with adatas
+# Input is a space-delimited string with adatas
+
 import os
 import logging
 import pandas as pd
@@ -8,6 +9,9 @@ import scipy as sp
 import anndata as ad
 import numpy as np
 import json
+from pydeseq2.dds import DeseqDataSet
+from pydeseq2.default_inference import DefaultInference
+from pydeseq2.ds import DeseqStats
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
@@ -92,6 +96,41 @@ def ligrec_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, to
         "data": res_dict
     }
     return mqc_report, res
+
+def pseudobulk_from_adatas(adatas):
+    # collect pseudobulk expression for each adata
+    pseudobulks = {}
+    for adata in adatas:
+        adata = adata.to_memory() if adata.isbacked else adata
+        id = adata.obs['id'].unique()[0]
+        bulk = adata.X.sum(axis=0).A1 if sp.sparse.issparse(adata.X) else adata.X.sum(axis=0)
+        bulk = pd.Series(bulk, index=adata.var_names)
+        pseudobulks[id] = bulk
+        #check that raw integer counts are provided
+        assert np.all(np.mod(bulk, 1) == 0), f"Non-integer counts found in adata {id}"
+    df = pd.DataFrame(pseudobulks)
+    return df
+
+def pydeseq_report(pseudobulks, spotlight=None, groups=None, show=100, filter=0.05, cpus=1):
+    inference = DefaultInference(n_cpus=cpus)
+    # construct metadata dataframe for deseq2
+    metadata = pd.DataFrame({
+        'sample': pseudobulks.columns,
+        'group': [1 if s in groups[0] else 2 for s in pseudobulks.columns]
+    })
+    metadata.set_index('sample', inplace=True)
+    # run deseq2
+    dds = DeseqDataSet(counts=pseudobulks.transpose(),
+                       metadata=metadata,
+                       design='~group',
+                       inference=inference)
+    dds.deseq2()
+    ds = DeseqStats(dds, contrast=["group", 1, 2], inference=inference)
+    ds.summary()
+
+    return ds.results_df
+
+
 
 def neighbors_report(adatas, spotlight=None):
     if spotlight:
@@ -217,6 +256,7 @@ if __name__ == '__main__':
     process = "${task.process}"
     collected = "${collected_items}"          # these are whitespace separated paths to anndatas
     show = int("${params.analyze.show_top}")  # how many top results to show
+    cpus = int("${task.cpus}")
 
     adata_paths = collected.split(" ")
     adatas = [ad.read_h5ad(path, backed="r") for path in adata_paths]
@@ -270,7 +310,7 @@ if __name__ == '__main__':
         except Exception as e:
             log.warning(f"Could not generate overall Moran's I report: {e}")
     else:
-        # for variables with 2 groups, perform ligrec t-test
+        # for variables with 2 groups, perform appropriate tests
         for var in cats.keys():
             groups = [x for x in cats[var]]
             group1 = cats[var][groups[0]].tolist()
@@ -295,6 +335,15 @@ if __name__ == '__main__':
                 save_reports(moran_mqc, moran, f"Moran_I_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate Moran's I report for variable {var}: {e}")
+
+            # deseq2 on pseudobulks
+            try:
+                pseudobulks = pseudobulk_from_adatas(adatas)
+                pseudobulks = pseudobulks.fillna(0)  # fill missing values with 0
+                deseq_res = pydeseq_report(pseudobulks, groups=[group1,group2], filter=0.05, cpus=cpus)
+                deseq_res.to_csv(f"{reports_dir}/deseq2_diff_{var}_results.csv")
+            except Exception as e:
+                log.warning(f"Could not perform DESeq2 analysis for variable {var}: {e}")
 
     #wrapup
     for adata in adatas:
