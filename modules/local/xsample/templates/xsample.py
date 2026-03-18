@@ -61,7 +61,7 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
         # if no t-test results found, fall back to mean across samples
         if(len(ligrecs_ttest_sig) == 0):
             log.warning(f"No significant differential interactions found for {tool}.")
-            res = ligrecs.sort_values('pval', ascending=False)[samples]
+            res = ligrecs_ttest.sort_values('pval', ascending=False)[samples]
             memo = f"Top {show} differential interactions across samples shown \
                 as no significant (p_adj<={filter}) interactions were found \
                 between {groups[0]} and {groups[1]}."
