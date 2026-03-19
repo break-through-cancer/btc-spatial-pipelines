@@ -104,38 +104,50 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
     }
     return mqc_report, res
 
-def pseudobulk_from_adatas(adatas):
-    # collect pseudobulk expression for each adata
-    pseudobulks = {}
-    for adata in adatas:
-        adata = adata.to_memory() if adata.isbacked else adata
-        id = adata.obs['id'].unique()[0]
-        bulk = adata.X.sum(axis=0).A1 if sp.sparse.issparse(adata.X) else adata.X.sum(axis=0)
-        bulk = pd.Series(bulk, index=adata.var_names)
-        pseudobulks[id] = bulk
-        #check that raw integer counts are provided
-        assert np.all(np.mod(bulk, 1) == 0), f"Non-integer counts found in adata {id}"
-    df = pd.DataFrame(pseudobulks)
-    return df
+def pseudobulk_from_adatas(adatas, filter=None):
+    # collect pseudobulk expression for each cell type and each adata
+    pseudobulk_dict = {}
+    cell_types = set()
+    cell_types = cell_types.union(*[set(adata.obs['cell_type'].cat.categories) for adata in adatas if 'cell_type' in adata.obs])
+    for cell_type in cell_types:
+        pseudobulk_dict[cell_type] = {}
+        for adata in adatas:
+            if 'cell_type' in adata.obs and cell_type in adata.obs['cell_type'].cat.categories:
+                adata = adata.to_memory() if adata.isbacked else adata
+                id = adata.obs['id'].unique()[0]
+                subset = adata[adata.obs['cell_type'] == cell_type]
+                bulk = subset.X.sum(axis=0).A1 if sp.sparse.issparse(subset.X) else subset.X.sum(axis=0)
+                bulk = pd.Series(bulk, index=subset.var_names)
+                pseudobulk_dict[cell_type][id] = bulk
+                #check that raw integer counts are provided
+                assert np.all(np.mod(bulk, 1) == 0), f"Non-integer counts found in {id} {cell_type} pseudobulk"
+    return pseudobulk_dict
 
-def pydeseq_results(pseudobulks, spotlight=None, groups=None, show=100, filter=0.05, cpus=1):
+def pydeseq_results(pseudobulk_df, spotlight=None, groups=None, filter=0.05, cpus=1):
     inference = DefaultInference(n_cpus=cpus)
     # construct metadata dataframe for deseq2
     metadata = pd.DataFrame({
-        'sample': pseudobulks.columns,
-        'group': [1 if s in groups[0] else 2 for s in pseudobulks.columns]
+        'sample': pseudobulk_df.columns,
+        'group': [1 if s in groups[0] else 2 for s in pseudobulk_df.columns]
     })
     metadata.set_index('sample', inplace=True)
     # run deseq2
-    dds = DeseqDataSet(counts=pseudobulks.transpose(),
+    dds = DeseqDataSet(counts=pseudobulk_df.transpose(),
                        metadata=metadata,
                        design='~group',
                        inference=inference)
     dds.deseq2()
     ds = DeseqStats(dds, contrast=["group", 1, 2], inference=inference)
+    #print summary
     ds.summary()
+    res = ds.results_df
 
-    return ds.results_df
+    # filter by p-value and sort
+    if filter:
+        res = res[res['padj'] <= filter]
+    res.sort_values('padj', inplace=True)
+
+    return res
 
 
 
@@ -263,9 +275,10 @@ def get_cat_vars(adatas):
 
 if __name__ == '__main__':
     process = "${task.process}"
-    collected = "${collected_items}"          # these are whitespace separated paths to anndatas
-    show = int("${params.analyze.show_top}")  # how many top results to show
+    collected = "${collected_items}"            # these are whitespace separated paths to anndatas
+    show = int("${params.analyze.show_top}")    # how many top results to show
     cpus = int("${task.cpus}")
+    filter = float("${params.analyze.filter}")  # p-value or adjusted p-value threshold for significance
 
     adata_paths = collected.split(" ")
     adatas = [ad.read_h5ad(path, backed="r") for path in adata_paths]
@@ -304,17 +317,17 @@ if __name__ == '__main__':
     # if no cats found, just produce overall ligrec report
     if len(cats) == 0:
         try:
-            res_mqc, res = heatmap_report(adatas, spotlight=spotlight, show=show, tool='squidpy_ligrec')
+            res_mqc, res = heatmap_report(adatas, spotlight=spotlight, show=show, tool='squidpy_ligrec', filter=filter)
             save_reports(res_mqc, res, "ligrec_overall_mqc")
         except Exception as e:
             log.warning(f"Could not generate overall ligand-receptor report: {e}")
         try:
-            lrs_mqc, lrs = heatmap_report(adatas, spotlight=spotlight, show=show, tool='spacemarkers_LRscores')
+            lrs_mqc, lrs = heatmap_report(adatas, spotlight=spotlight, show=show, tool='spacemarkers_LRscores', filter=filter)
             save_reports(lrs_mqc, lrs, "lrscores_overall_mqc")
         except Exception as e:
             log.warning(f"Could not generate overall LR scores report: {e}")
         try:
-            moran_mqc, moran = heatmap_report(adatas, spotlight=spotlight, show=show, tool='Moran_I')
+            moran_mqc, moran = heatmap_report(adatas, spotlight=spotlight, show=show, tool='Moran_I', filter=filter)
             save_reports(moran_mqc, moran, "moranI_overall_mqc")
         except Exception as e:
             log.warning(f"Could not generate overall Moran's I report: {e}")
@@ -327,30 +340,39 @@ if __name__ == '__main__':
             
             #squidpy ligrec
             try:
-                res_mqc, res = heatmap_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool="squidpy_ligrec")
+                res_mqc, res = heatmap_report(adatas, groups=[group1,group2],
+                                              spotlight=spotlight, show=show, tool="squidpy_ligrec", filter=filter)
                 save_reports(res_mqc, res, f"ligrec_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate ligand-receptor report for variable {var}: {e}")
             # SpaceMarkers LR scores
             try:
-                lrs_mqc, lrs = heatmap_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='spacemarkers_LRscores')
+                lrs_mqc, lrs = heatmap_report(adatas, groups=[group1,group2],
+                                              spotlight=spotlight, show=show, tool='spacemarkers_LRscores', filter=filter)
                 save_reports(lrs_mqc, lrs, f"lrscores_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate LR scores report for variable {var}: {e}")
 
             # Moran's I
             try:
-                moran_mqc, moran = heatmap_report(adatas, groups=[group1,group2], spotlight=spotlight, show=show, tool='Moran_I')
+                moran_mqc, moran = heatmap_report(adatas, groups=[group1,group2],
+                                                  spotlight=spotlight, show=show, tool='Moran_I', filter=filter)
                 save_reports(moran_mqc, moran, f"Moran_I_diff_{var}_results")
             except Exception as e:
                 log.warning(f"Could not generate Moran's I report for variable {var}: {e}")
 
             # deseq2 on pseudobulks
             try:
-                pseudobulks = pseudobulk_from_adatas(adatas)
-                pseudobulks = pseudobulks.fillna(0)  # fill missing values with 0
-                deseq_res = pydeseq_results(pseudobulks, groups=[group1,group2], filter=0.05, cpus=cpus)
-                deseq_res.to_csv(f"{reports_dir}/deseq2_diff_{var}_results.csv")
+                pseudobulks_by_ct = pseudobulk_from_adatas(adatas)
+                for ct, pseudobulks in pseudobulks_by_ct.items():
+                    pseudobulks = pd.DataFrame(pseudobulks)
+                    pseudobulks = pseudobulks.fillna(0)  # fill missing values with 0
+                    deseq_res = pydeseq_results(pseudobulks, groups=[group1,group2], filter=filter, cpus=cpus)
+                    log.info(f"Deseq2 results for {ct} cell type with variable {var}: {deseq_res.shape[0]} significant genes found.")
+                    if(deseq_res.empty):
+                        log.warning(f"No significant DE genes found for {ct} cell type with variable {var}.")
+                    else:
+                        deseq_res.to_csv(f"{reports_dir}/deseq2_diff_{var}_results_{ct}.csv")
             except Exception as e:
                 log.warning(f"Could not perform DESeq2 analysis for variable {var}: {e}")
 
