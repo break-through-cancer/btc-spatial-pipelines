@@ -104,7 +104,7 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
     }
     return mqc_report, res
 
-def pseudobulk_from_adatas(adatas, split_by='cell_type'):
+def pseudobulk_from_adatas(adatas, split_by='cell_type', sample_id_key='id'):
     # collect pseudobulk expression for each cell type and each adata
     pseudobulk_dict = {}
     split_values = set()
@@ -114,7 +114,7 @@ def pseudobulk_from_adatas(adatas, split_by='cell_type'):
         for adata in adatas:
             if split_by in adata.obs and split_value in adata.obs[split_by].cat.categories:
                 adata = adata.to_memory() if adata.isbacked else adata
-                id = adata.obs['id'].unique()[0]
+                id = adata.obs[sample_id_key].unique()[0]
                 subset = adata[adata.obs[split_by] == split_value]
                 bulk = subset.X.sum(axis=0).A1 if sp.sparse.issparse(subset.X) else subset.X.sum(axis=0)
                 bulk = pd.Series(bulk, index=subset.var_names)
@@ -363,7 +363,7 @@ if __name__ == '__main__':
 
             # deseq2 on pseudobulks split by cell type
             try:
-                pseudobulks_by_ct = pseudobulk_from_adatas(adatas, split_by='cell_type')
+                pseudobulks_by_ct = pseudobulk_from_adatas(adatas, split_by='cell_type', sample_id_key='id')
                 for ct, pseudobulks in pseudobulks_by_ct.items():
                     pseudobulks = pd.DataFrame(pseudobulks)
                     pseudobulks = pseudobulks.fillna(0)  # fill missing values with 0
