@@ -104,23 +104,23 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
     }
     return mqc_report, res
 
-def pseudobulk_from_adatas(adatas, filter=None):
+def pseudobulk_from_adatas(adatas, split_by='cell_type'):
     # collect pseudobulk expression for each cell type and each adata
     pseudobulk_dict = {}
-    cell_types = set()
-    cell_types = cell_types.union(*[set(adata.obs['cell_type'].cat.categories) for adata in adatas if 'cell_type' in adata.obs])
-    for cell_type in cell_types:
-        pseudobulk_dict[cell_type] = {}
+    split_values = set()
+    split_values = split_values.union(*[set(adata.obs[split_by].cat.categories) for adata in adatas if split_by in adata.obs])
+    for split_value in split_values:
+        pseudobulk_dict[split_value] = {}
         for adata in adatas:
-            if 'cell_type' in adata.obs and cell_type in adata.obs['cell_type'].cat.categories:
+            if split_by in adata.obs and split_value in adata.obs[split_by].cat.categories:
                 adata = adata.to_memory() if adata.isbacked else adata
                 id = adata.obs['id'].unique()[0]
-                subset = adata[adata.obs['cell_type'] == cell_type]
+                subset = adata[adata.obs[split_by] == split_value]
                 bulk = subset.X.sum(axis=0).A1 if sp.sparse.issparse(subset.X) else subset.X.sum(axis=0)
                 bulk = pd.Series(bulk, index=subset.var_names)
-                pseudobulk_dict[cell_type][id] = bulk
+                pseudobulk_dict[split_value][id] = bulk
                 #check that raw integer counts are provided
-                assert np.all(np.mod(bulk, 1) == 0), f"Non-integer counts found in {id} {cell_type} pseudobulk"
+                assert np.all(np.mod(bulk, 1) == 0), f"Non-integer counts found in {id} {split_value} pseudobulk"
     return pseudobulk_dict
 
 def pydeseq_results(pseudobulk_df, spotlight=None, groups=None, filter=0.05, cpus=1):
@@ -361,9 +361,9 @@ if __name__ == '__main__':
             except Exception as e:
                 log.warning(f"Could not generate Moran's I report for variable {var}: {e}")
 
-            # deseq2 on pseudobulks
+            # deseq2 on pseudobulks split by cell type
             try:
-                pseudobulks_by_ct = pseudobulk_from_adatas(adatas)
+                pseudobulks_by_ct = pseudobulk_from_adatas(adatas, split_by='cell_type')
                 for ct, pseudobulks in pseudobulks_by_ct.items():
                     pseudobulks = pd.DataFrame(pseudobulks)
                     pseudobulks = pseudobulks.fillna(0)  # fill missing values with 0
