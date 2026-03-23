@@ -328,8 +328,8 @@ if __name__ == '__main__':
             pb_vars.append('cell_type')  # add cell type as grouping variable
         if 'id' not in pb_vars:
             pb_vars.append('id')
-        pb_adata = pseudobulk_adatas(adatas, vars=pb_vars)
-        pb_adata.write(f"{reports_dir}/pseudobulk.h5ad")
+    pb_adata = pseudobulk_adatas(adatas, vars=pb_vars)
+    pb_adata.write(f"{reports_dir}/pseudobulk.h5ad")
     
     # make reports
     # if no cats found, just produce overall ligrec report
@@ -383,12 +383,15 @@ if __name__ == '__main__':
             # deseq2 on pseudobulks split by cell type
             try:
                 contrasts = [var]+[k for k in cats[var].keys()]
-                for ct in pb_adata.obs['cell_type'].unique():
-                    ct_adata = pb_adata[pb_adata.obs['cell_type'] == ct].copy()
-                    if ct_adata.shape[0] < 2:
+                stratify_var = 'cell_type' if 'cell_type' in pb_adata.obs else None
+                strata = pb_adata.obs[stratify_var].unique() if stratify_var else ['unstratified']
+                for ct in strata:
+                    mask = pb_adata.obs[stratify_var] == ct if stratify_var else np.array([True]*pb_adata.shape[0])
+                    adata = pb_adata[mask].copy()
+                    if adata.shape[0] < 2:
                         log.warning(f"Not enough samples for DESeq2 analysis for cell type {ct} with variable {var}, skipping.")
                         continue
-                    de = pydeseq_results(ct_adata, 
+                    de = pydeseq_results(adata, 
                                         spotlight=spotlight, 
                                         cpus=cpus, 
                                         design=f"~{var}", 
