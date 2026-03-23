@@ -275,8 +275,17 @@
                     "type": "integer",
                     "default": 100,
                     "description": "Number of top items to show in the final reports"
+                },
+                "filter": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "P-value or adjusted p-value threshold for significance in the final reports"
+                },
+                "pb_vars": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Custom vars to use for pseudobulk grouping, comma-separated string. By default, pseudobulk samples are generated using all metadata available + cell_type. Use this parameter to specify custom vars to group by instead. The vars specified here should be present in the `obs` dataframe of the input AnnData objects."
                 }
-            }
         },
         "npatterns": {
             "type": "string",

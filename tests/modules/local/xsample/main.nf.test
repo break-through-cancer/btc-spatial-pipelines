@@ -26,6 +26,7 @@ nextflow_process{
 
         when {
             params {
+                outdir = 'output'
                 analyze{
                     xsample = true
                     filter = 1
@@ -42,6 +43,9 @@ nextflow_process{
             assert process.success
             assert process.out.versions
             assert process.out.multiqc_files
+            assert file("${outputDir}/staple/reports/deseq2_diff_response_results_tumor.csv").exists()
+            assert file("${outputDir}/staple/reports/Moran_I_diff_response_results.csv").exists()
+            assert file("${outputDir}/staple/reports/pseudobulk.h5ad").exists()
         }
     }
 }

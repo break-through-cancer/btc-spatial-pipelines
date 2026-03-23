@@ -2,11 +2,13 @@
 # Cross-sample analysis template script
 # Input is a space-delimited string with adatas
 
+import pickle
 import os
 import logging
 import pandas as pd
 import scipy as sp
 import anndata as ad
+import scanpy as sc
 import numpy as np
 import json
 from pydeseq2.dds import DeseqDataSet
@@ -104,51 +106,31 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
     }
     return mqc_report, res
 
-def pseudobulk_from_adatas(adatas, split_by='cell_type', sample_id_key='id'):
-    # collect pseudobulk expression for each cell type and each adata
-    pseudobulk_dict = {}
-    split_values = set()
-    split_values = split_values.union(*[set(adata.obs[split_by].cat.categories) for adata in adatas if split_by in adata.obs])
-    for split_value in split_values:
-        pseudobulk_dict[split_value] = {}
-        for adata in adatas:
-            if split_by in adata.obs and split_value in adata.obs[split_by].cat.categories:
-                adata = adata.to_memory() if adata.isbacked else adata
-                id = adata.obs[sample_id_key].unique()[0]
-                subset = adata[adata.obs[split_by] == split_value]
-                bulk = subset.X.sum(axis=0).A1 if sp.sparse.issparse(subset.X) else subset.X.sum(axis=0)
-                bulk = pd.Series(bulk, index=subset.var_names)
-                pseudobulk_dict[split_value][id] = bulk
-                #check that raw integer counts are provided
-                assert np.all(np.mod(bulk, 1) == 0), f"Non-integer counts found in {id} {split_value} pseudobulk"
-    return pseudobulk_dict
 
-def pydeseq_results(pseudobulk_df, spotlight=None, groups=None, filter=0.05, cpus=1):
+def pseudobulk_adatas(adatas, vars=None):
+    # collect pseudobulk expression for each adata
+    pb_adatas = []
+    for adata in adatas:
+        pb_adatas.append(sc.get.aggregate(adata.to_memory(), by=vars, func='sum'))
+    pb_adata = ad.concat(pb_adatas, axis=0, join='outer')
+    counts = pb_adata.layers['sum'].copy()  # keep raw counts in X for pydeseq2
+    counts[np.isnan(counts)] = 0            # replace NaNs with zeros for pydeseq2
+    pb_adata.X = counts
+    del pb_adata.layers['sum']
+
+    return pb_adata
+
+
+def pydeseq_results(pb_adata, spotlight=None, cpus=1, design=None, contrast=None):
+    # estimate size factors and dispersions with pydeseq2
     inference = DefaultInference(n_cpus=cpus)
-    # construct metadata dataframe for deseq2
-    metadata = pd.DataFrame({
-        'sample': pseudobulk_df.columns,
-        'group': [1 if s in groups[0] else 2 for s in pseudobulk_df.columns]
-    })
-    metadata.set_index('sample', inplace=True)
-    # run deseq2
-    dds = DeseqDataSet(counts=pseudobulk_df.transpose(),
-                       metadata=metadata,
-                       design='~group',
+    dds = DeseqDataSet(adata=pb_adata,
+                       design=design,
                        inference=inference)
     dds.deseq2()
-    ds = DeseqStats(dds, contrast=["group", 1, 2], inference=inference)
-    #print summary
-    ds.summary()
-    res = ds.results_df
+    de = DeseqStats(dds, contrast=contrast)
 
-    # filter by p-value and sort
-    if filter:
-        res = res[res['padj'] <= filter]
-    res.sort_values('padj', inplace=True)
-
-    return res
-
+    return de
 
 
 def neighbors_report(adatas, spotlight=None):
@@ -235,7 +217,7 @@ def versions():
         f.write(f"    json: {json.__version__}\\n")
 
 
-def get_cat_vars(adatas):
+def get_vars(adatas, only=None):
     # find vars added by the staple pipeline
     vars = [x.uns['added_metadata_fields'].tolist() for x in adatas if 'added_metadata_fields' in x.uns]
     if (len(vars) == 0):
@@ -252,26 +234,34 @@ def get_cat_vars(adatas):
     if len(common_vars) == 0:
         log.warning("No common added metadata fields found across all provided anndatas.")
 
-    
-    # check that vars are categorical, same inside sample and differ across samples
-    cats = {}
-    for var in common_vars:
-        is_categorical = all([isinstance(x.obs[var].dtype, pd.CategoricalDtype) for x in adatas])
-        if not is_categorical:
-            log.warning(f"Variable {var} is not categorical in all samples, skipping.")
-            continue
-        n_categories = [x.obs[var].nunique() for x in adatas]
-        if len(set(n_categories)) != 1:
-            log.warning(f"Variable {var} differs across individual samples .obs, skipping.")
-            continue
-        combined_categories = pd.concat([x.obs[[var,'id']] for x in adatas])
-        levels = combined_categories.groupby(var, observed=True)['id'].unique()
-        if (len(levels) != 2):
-            log.warning(f"Can only contrast vars with 2 levels ({var} has {len(levels)}), skipping.")
-            continue
-        cats[var] = levels.to_dict()
+    res = common_vars
 
-    return cats
+    if(only=='categorical'):
+        # check that vars are categorical, same inside sample and differ across samples
+        cats = {}
+        for var in common_vars:
+            is_categorical = all([isinstance(x.obs[var].dtype, pd.CategoricalDtype) for x in adatas])
+            if not is_categorical:
+                log.warning(f"Variable {var} is not categorical in all samples, skipping.")
+                continue
+            n_categories = [x.obs[var].nunique() for x in adatas]
+            if len(set(n_categories)) != 1:
+                log.warning(f"Variable {var} differs across individual samples .obs, skipping.")
+                continue
+            combined_categories = pd.concat([x.obs[[var,'id']] for x in adatas])
+            levels = combined_categories.groupby(var, observed=True)['id'].unique()
+            if (len(levels) != 2):
+                log.warning(f"Can only contrast vars with 2 levels ({var} has {len(levels)}), skipping.")
+                continue
+            cats[var] = levels.to_dict()
+        res = cats
+
+    return res
+
+def save_reports(mqc, res, name, mqc_reports="reports/mqc", reports="reports"):
+    with open(f"{mqc_reports}/{name}_mqc.json","w") as f:
+        json.dump(mqc, f, indent=4)
+    res.to_csv(f"{reports}/{name}.csv")
 
 if __name__ == '__main__':
     process = "${task.process}"
@@ -279,10 +269,11 @@ if __name__ == '__main__':
     show = int("${params.analyze.show_top}")    # how many top results to show
     cpus = int("${task.cpus}")
     filter = float("${params.analyze.filter}")  # p-value or adjusted p-value threshold for significance
+    pb_vars = "${params.analyze.pb_vars}"       # vars to use for pseudobulk grouping, comma-separated string
 
     adata_paths = collected.split(" ")
     adatas = [ad.read_h5ad(path, backed="r") for path in adata_paths]
-    spotlight = "${params.analyze.spotlight}" # this is a comma-separated string of cell type pairs to spotlight
+    spotlight = "" # this is a comma-separated string of cell type pairs to spotlight
     if ',' in spotlight:
         spotlight = spotlight.split(',')
 
@@ -304,16 +295,25 @@ if __name__ == '__main__':
     versions()
 
     # generate reports using added meta vars
-    cats = get_cat_vars(adatas)
-    log.info(f"Variables and number of groups suitable for cross-sample analysis: {cats}")
+    all_vars = get_vars(adatas)
+    log.info(f"All variables added upstream for analysis: {all_vars}")
+    cats = get_vars(adatas, only='categorical')
+    log.info(f"Cat variables suitable for cross-sample contrasts: {cats}")
     
-    # make ligand-receptor reports
-    # mqc report is for showing, but csv should have full data
-    def save_reports(mqc, res, name, mqc_reports=mqc_reports_dir, reports=reports_dir):
-        with open(f"{mqc_reports}/{name}_mqc.json","w") as f:
-            json.dump(mqc, f, indent=4)
-        res.to_csv(f"{reports}/{name}.csv")
-
+    # prepare pseudobulk adata for deseq2, with all variables as grouping variables
+    if pb_vars:
+        pb_vars = pb_vars.split(",")
+        log.info(f"Using specified variables for pseudobulk grouping: {pb_vars}")
+        pb_vars = set(pb_vars)
+    else:
+        pb_vars = all_vars
+        log.info(f"No specific variables for pseudobulk grouping specified, using all variables: {pb_vars}")
+        pb_vars.add('cell_type') # add cell type as grouping variable
+        pb_vars.add('id')
+        pb_adata = pseudobulk_adatas(adatas, vars=pb_vars)
+        pb_adata.write(f"{reports_dir}/pseudobulk.h5ad")
+    
+    # make reports
     # if no cats found, just produce overall ligrec report
     if len(cats) == 0:
         try:
@@ -361,17 +361,28 @@ if __name__ == '__main__':
             except Exception as e:
                 log.warning(f"Could not generate Moran's I report for variable {var}: {e}")
 
+
             # deseq2 on pseudobulks split by cell type
             try:
-                pseudobulks_by_ct = pseudobulk_from_adatas(adatas, split_by='cell_type', sample_id_key='id')
-                for ct, pseudobulks in pseudobulks_by_ct.items():
-                    pseudobulks = pd.DataFrame(pseudobulks)
-                    pseudobulks = pseudobulks.fillna(0)  # fill missing values with 0
-                    deseq_res = pydeseq_results(pseudobulks, groups=[group1,group2], filter=filter, cpus=cpus)
-                    log.info(f"Deseq2 results for {ct} cell type with variable {var}: {deseq_res.shape[0]} significant genes found.")
+                contrasts = [var]+[k for k in cats[var].keys()]
+                for ct in pb_adata.obs['cell_type'].unique():
+                    ct_adata = pb_adata[pb_adata.obs['cell_type'] == ct].copy()
+                    if ct_adata.shape[0] < 2:
+                        log.warning(f"Not enough samples for DESeq2 analysis for cell type {ct} with variable {var}, skipping.")
+                        continue
+                    de = pydeseq_results(ct_adata, 
+                                        spotlight=spotlight, 
+                                        cpus=cpus, 
+                                        design=f"~{var}", 
+                                        contrast= contrasts)
+                    de.summary()
+                    deseq_res = de.results_df
+                    deseq_res = deseq_res[deseq_res['padj'] <= filter]
                     if(deseq_res.empty):
                         log.warning(f"No significant DE genes found for {ct} cell type with variable {var}.")
                     else:
+                        log.info(f"Deseq2 results for {ct} cell type with variable {var}: \
+                            {deseq_res.shape[0]} significant genes found.")
                         deseq_res.to_csv(f"{reports_dir}/deseq2_diff_{var}_results_{ct}.csv")
             except Exception as e:
                 log.warning(f"Could not perform DESeq2 analysis for variable {var}: {e}")

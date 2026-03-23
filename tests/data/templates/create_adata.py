@@ -56,15 +56,18 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample'):
 
     # add sample id for testing
     adata.obs['id'] = sample_id
+
     # add a random response variable for testing
     adata.obs['response'] = np.random.choice(['responder', 'non-responder'])
-    
+
+    # add a continuous variable for testing
+    adata.obs['age'] = np.random.randint(20, 100)
+
     #simulate staple behavior of added metadata from samplesheet
-    adata.uns['added_metadata_fields'] = ['response', 'id']
-    
+    adata.uns['added_metadata_fields'] = ['response', 'id', 'age']
+
     # add Moran's I to obs for testing
     sq.gr.spatial_autocorr(adata, mode="moran", n_perms=100, n_jobs=1)
-
 
     return adata
 
