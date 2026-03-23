@@ -2,7 +2,6 @@
 # Cross-sample analysis template script
 # Input is a space-delimited string with adatas
 
-import pickle
 import os
 import logging
 import pandas as pd
@@ -63,7 +62,7 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
         # if no t-test results found, fall back to mean across samples
         if(len(ligrecs_ttest_sig) == 0):
             log.warning(f"No significant differential interactions found for {tool}.")
-            res = ligrecs_ttest.sort_values('pval', ascending=False)[samples]
+            res = ligrecs_ttest.sort_values('pval', ascending=True)[samples]
             memo = f"Top {show} differential interactions across samples shown \
                 as no significant (p_adj<={filter}) interactions were found \
                 between {groups[0]} and {groups[1]}."
@@ -113,8 +112,18 @@ def pseudobulk_adatas(adatas, vars=None):
     for adata in adatas:
         pb_adatas.append(sc.get.aggregate(adata.to_memory(), by=vars, func='sum'))
     pb_adata = ad.concat(pb_adatas, axis=0, join='outer')
-    counts = pb_adata.layers['sum'].copy()  # keep raw counts in X for pydeseq2
-    counts[np.isnan(counts)] = 0            # replace NaNs with zeros for pydeseq2
+    counts = pb_adata.layers['sum']
+    # keep raw counts in X for pydeseq2, handling both dense and sparse matrices
+    if sp.sparse.issparse(counts):
+        counts = counts.tocsr().copy()
+        # replace NaNs with zeros in the underlying sparse data array
+        data = counts.data
+        nan_mask = np.isnan(data)
+        if np.any(nan_mask):
+            data[nan_mask] = 0
+    else:
+        counts = np.asarray(counts).copy()
+        counts[np.isnan(counts)] = 0
     pb_adata.X = counts
     del pb_adata.layers['sum']
 
@@ -273,7 +282,7 @@ if __name__ == '__main__':
 
     adata_paths = collected.split(" ")
     adatas = [ad.read_h5ad(path, backed="r") for path in adata_paths]
-    spotlight = "" # this is a comma-separated string of cell type pairs to spotlight
+    spotlight = "${params.analyze.spotlight}"  # this is a comma-separated string of cell type pairs to spotlight
     if ',' in spotlight:
         spotlight = spotlight.split(',')
 
@@ -302,14 +311,23 @@ if __name__ == '__main__':
     
     # prepare pseudobulk adata for deseq2, with all variables as grouping variables
     if pb_vars:
-        pb_vars = pb_vars.split(",")
+        # split comma-separated variables, trim whitespace, and preserve order without duplicates
+        raw_vars = pb_vars.split(",")
+        pb_vars = []
+        for v in raw_vars:
+            v = v.strip()
+            if v and v not in pb_vars:
+                pb_vars.append(v)
         log.info(f"Using specified variables for pseudobulk grouping: {pb_vars}")
-        pb_vars = set(pb_vars)
     else:
-        pb_vars = all_vars
+        # start from all_vars as a list, preserving order and removing duplicates
+        pb_vars = list(dict.fromkeys(all_vars)) if all_vars is not None else []
         log.info(f"No specific variables for pseudobulk grouping specified, using all variables: {pb_vars}")
-        pb_vars.add('cell_type') # add cell type as grouping variable
-        pb_vars.add('id')
+        # ensure required grouping variables are present while preserving order
+        if 'cell_type' not in pb_vars:
+            pb_vars.append('cell_type')  # add cell type as grouping variable
+        if 'id' not in pb_vars:
+            pb_vars.append('id')
         pb_adata = pseudobulk_adatas(adatas, vars=pb_vars)
         pb_adata.write(f"{reports_dir}/pseudobulk.h5ad")
     

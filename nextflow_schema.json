@@ -286,6 +286,7 @@
                     "default": "",
                     "description": "Custom vars to use for pseudobulk grouping, comma-separated string. By default, pseudobulk samples are generated using all metadata available + cell_type. Use this parameter to specify custom vars to group by instead. The vars specified here should be present in the `obs` dataframe of the input AnnData objects."
                 }
+            }
         },
         "npatterns": {
             "type": "string",
