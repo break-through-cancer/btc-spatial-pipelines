@@ -301,9 +301,11 @@ def get_vars(adatas, only=None):
     return res
 
 def save_reports(mqc, res, name, mqc_reports="reports/mqc", reports="reports"):
-    with open(f"{mqc_reports}/{name}_mqc.json","w") as f:
-        json.dump(mqc, f, indent=4)
-    res.to_csv(f"{reports}/{name}.csv")
+    if mqc is not None:
+        with open(f"{mqc_reports}/{name}_mqc.json","w") as f:
+            json.dump(mqc, f, indent=4)
+    if res is not None:
+        res.to_csv(f"{reports}/{name}.csv")
 
 if __name__ == '__main__':
     process = "${task.process}"
