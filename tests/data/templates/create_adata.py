@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import squidpy as sq
 
+#set random seed for reproducibility
+np.random.seed(42)
 
 num_adatas = "${num_adatas}"
 

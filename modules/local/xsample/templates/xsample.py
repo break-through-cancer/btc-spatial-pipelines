@@ -141,6 +141,39 @@ def pydeseq_results(pb_adata, spotlight=None, cpus=1, design=None, contrast=None
 
     return de
 
+def de_report(de_dict, spotlight=None, filter=0.05, show=100, contrast=None, p='padj'):
+    #plot logfoldchangs vs -log padj for all genes
+    # multiqc want this format: "gene1": {"x": 1, "y": 2}
+    # x is log2 fold change, y is -log10 adjusted p-value
+    # show_p is mainly for testng purposes to allow plotting
+    reports = []
+    for de in de_dict.values():
+        res_sig = de[de[p] <= filter]
+        res_sig_show = res_sig.sort_values(p).head(show)
+        res_sig_show.rename(columns={"log2FoldChange": "x", p: "y"}, inplace=True)
+        res_sig_show['y'] = -np.log10(res_sig_show['y'])
+        res_dict = res_sig_show.loc[:, ['x','y']].to_dict(orient='index')
+        reports.append(res_dict)
+    memo = f"DESeq2 results for {contrast[0]} variable with significant DE genes ({p}<={filter}) between {contrast[1]} and {contrast[2]}. Log2 fold change (X) and -log10 adjusted p-value (Y) shown."
+    mqc_report = {
+        "id": f"deseq2_{contrast[0]}",
+        "description": memo,
+        "plot_type": "scatter",
+        "pconfig": {
+            "xlab": "log2 fold change",
+            "ylab": "-log10 adjusted p-value",
+            "title": f"DESeq2 results for {contrast[0]}",
+            "data_labels": list(de_dict.keys()),
+            "ymin": 0,
+            "y_lines": [
+                {"value": -np.log10(filter), "color": "#ff0000", "width": 1, "dash": "dash", "label": "significance"}
+            ]
+        },
+        "data": reports
+    }
+    return mqc_report
+
+
 
 def neighbors_report(adatas, spotlight=None):
     if spotlight:
@@ -385,6 +418,7 @@ if __name__ == '__main__':
                 contrasts = [var]+[k for k in cats[var].keys()]
                 stratify_var = 'cell_type' if 'cell_type' in pb_adata.obs else None
                 strata = pb_adata.obs[stratify_var].unique() if stratify_var else ['unstratified']
+                de_results = {}
                 for ct in strata:
                     mask = pb_adata.obs[stratify_var] == ct if stratify_var else np.array([True]*pb_adata.shape[0])
                     adata = pb_adata[mask].copy()
@@ -402,9 +436,13 @@ if __name__ == '__main__':
                     if(deseq_res.empty):
                         log.warning(f"No significant DE genes found for {ct} cell type with variable {var}.")
                     else:
-                        log.info(f"Deseq2 results for {ct} cell type with variable {var}: \
-                            {deseq_res.shape[0]} significant genes found.")
+                        log.info(f"Deseq2 results for {ct} cell type with variable {var}:{deseq_res.shape[0]} significant genes found.")
+                        de_results[ct] = deseq_res
                         deseq_res.to_csv(f"{reports_dir}/deseq2_diff_{var}_results_{ct}.csv")
+                mqc_report = de_report(de_results, spotlight=spotlight, filter=filter, show=show, contrast=contrasts)
+                save_reports(mqc_report, None, f"deseq2_diff_{var}_results",
+                                mqc_reports_dir, reports_dir)
+
             except Exception as e:
                 log.warning(f"Could not perform DESeq2 analysis for variable {var}: {e}")
 
