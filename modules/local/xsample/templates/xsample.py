@@ -261,7 +261,7 @@ def versions():
 
 def get_vars(adatas, only=None):
     # find vars added by the staple pipeline
-    vars = [x.uns['added_metadata_fields'].tolist() for x in adatas if 'added_metadata_fields' in x.uns]
+    vars = [x.uns['staple_meta_fields'].tolist() for x in adatas if 'staple_meta_fields' in x.uns]
     if (len(vars) == 0):
         log.warning("No added metadata fields found in any of the provided anndatas.")
         return None
