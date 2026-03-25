@@ -372,17 +372,17 @@ if __name__ == '__main__':
     if cats is None or len(cats) == 0:
         try:
             res_mqc, res = heatmap_report(adatas, spotlight=spotlight, show=show, tool='squidpy_ligrec', filter=filter)
-            save_reports(res_mqc, res, "ligrec_overall_mqc")
+            save_reports(res_mqc, res, "ligrec_overall")
         except Exception as e:
             log.warning(f"Could not generate overall ligand-receptor report: {e}")
         try:
             lrs_mqc, lrs = heatmap_report(adatas, spotlight=spotlight, show=show, tool='spacemarkers_LRscores', filter=filter)
-            save_reports(lrs_mqc, lrs, "lrscores_overall_mqc")
+            save_reports(lrs_mqc, lrs, "lrscores_overall")
         except Exception as e:
             log.warning(f"Could not generate overall LR scores report: {e}")
         try:
             moran_mqc, moran = heatmap_report(adatas, spotlight=spotlight, show=show, tool='Moran_I', filter=filter)
-            save_reports(moran_mqc, moran, "moranI_overall_mqc")
+            save_reports(moran_mqc, moran, "moranI_overall")
         except Exception as e:
             log.warning(f"Could not generate overall Moran's I report: {e}")
     else:
