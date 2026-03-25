@@ -13,6 +13,7 @@ nextflow_process{
             process {
             """
             input[0] = 10
+            input[1] = true // create adata with added metadata
             """
             }
         }

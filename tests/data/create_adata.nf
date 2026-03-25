@@ -5,6 +5,7 @@ process CREATE_TEST_ADATA {
 
     input:
         val num_adatas
+        val with_metadata
 
     output:
         path "*adata.h5ad", emit: adata

@@ -8,8 +8,9 @@ import squidpy as sq
 np.random.seed(42)
 
 num_adatas = "${num_adatas}"
+with_metadata = "${with_metadata}"
 
-def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample'):
+def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata=True):
 
     # create anndata object n obs by m vars with random counts
     adata = ad.AnnData(X=np.random.poisson(1, (n, m)), 
@@ -66,7 +67,8 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample'):
     adata.obs['age'] = np.random.randint(20, 100)
 
     #simulate staple behavior of added metadata from samplesheet
-    adata.uns['added_metadata_fields'] = ['response', 'id', 'age']
+    if with_metadata:
+        adata.uns['added_metadata_fields'] = ['response', 'id', 'age']
 
     # compute Moran's I (results stored in adata.uns['moranI']) for testing
     sq.gr.spatial_autocorr(adata, mode="moran", n_perms=100, n_jobs=1)
@@ -74,14 +76,14 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample'):
     return adata
 
 
-def make_many_adata(num_adatas=2, n=25, m=1000, pct_mito=0.1):
+def make_many_adata(num_adatas=2, n=25, m=1000, pct_mito=0.1, with_metadata=True):
     adatas = []
     for i in range(num_adatas):
-        adata = make_one_adata(n=n, m=m, pct_mito=pct_mito, sample_id=f'sample_{i}')
+        adata = make_one_adata(n=n, m=m, pct_mito=pct_mito, sample_id=f'sample_{i}', with_metadata=with_metadata)
         adatas.append(adata)
     return adatas
 
 if __name__ == "__main__":
-    adatas = make_many_adata(num_adatas=int(num_adatas), n=25, m=1000, pct_mito=0.1)
+    adatas = make_many_adata(num_adatas=int(num_adatas), n=25, m=1000, pct_mito=0.1, with_metadata=with_metadata)
     for i, adata in enumerate(adatas):
         adata.write_h5ad(f'{i}_adata.h5ad')
