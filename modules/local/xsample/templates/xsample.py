@@ -264,6 +264,7 @@ def get_vars(adatas, only=None):
     vars = [x.uns['added_metadata_fields'].tolist() for x in adatas if 'added_metadata_fields' in x.uns]
     if (len(vars) == 0):
         log.warning("No added metadata fields found in any of the provided anndatas.")
+        return None
 
     # drop id var from analysis vars
     for v in vars:
@@ -368,7 +369,7 @@ if __name__ == '__main__':
     
     # make reports
     # if no cats found, just produce overall ligrec report
-    if len(cats) == 0:
+    if cats is None or len(cats) == 0:
         try:
             res_mqc, res = heatmap_report(adatas, spotlight=spotlight, show=show, tool='squidpy_ligrec', filter=filter)
             save_reports(res_mqc, res, "ligrec_overall_mqc")

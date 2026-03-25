@@ -8,7 +8,7 @@ import squidpy as sq
 np.random.seed(42)
 
 num_adatas = "${num_adatas}"
-with_metadata = "${with_metadata}"
+with_metadata = "${with_metadata}".lower() == 'true'
 
 def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata=True):
 
