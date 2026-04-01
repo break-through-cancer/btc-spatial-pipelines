@@ -61,9 +61,9 @@ nextflow_process{
             params {
                 outdir = 'output'
                 analyze{
-                    xsample = true
-                    filter = 0.99 // set high to get some significant genes for testing purposes
-                    pb_vars = 'id,response'
+                    xsample  = true
+                    filter   = 1 // set high to get some significant genes for testing purposes
+                    pb_vars  = 'id,response'
                     show_top = 100
                 }
             }
