@@ -7,10 +7,10 @@ process STAPLE_XSAMPLE {
     path collected_items, stageAs: "?/*" // stage numbers the files as 0,1,2...
 
     output:
-    path "reports/*.csv",               emit: reports,          optional: true //full csv reports
-    path "reports/mqc/*mqc*",           emit: multiqc_files,    optional: true //multiqc reports for viewing and ai
-    path "reports/pseudobulk.h5ad",     emit: pb_adata,         optional: true //pseudobulk adata for downstream analysis
-    path "versions.yml",                emit: versions
+    path "reports/*.csv",                emit: reports,          optional: true //full csv reports
+    path "reports/mqc/*mqc*",            emit: multiqc_files,    optional: true //multiqc reports for viewing and ai
+    path "reports/*pseudobulk.h5ad",     emit: pb_adata,         optional: true //pseudobulk adata for downstream analysis
+    path "versions.yml",                 emit: versions
 
     script:
     template 'xsample.py'

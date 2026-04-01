@@ -60,7 +60,7 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata
     # add sample id for testing
     adata.obs['id'] = sample_id
 
-    # add a random response variable for testing
+    # add a random response variable for testing (no variation within adata)
     adata.obs['response'] = np.random.choice(['responder', 'non-responder'])
 
     # add a continuous variable for testing
@@ -69,9 +69,18 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata
     #simulate staple behavior of added metadata from samplesheet
     if with_metadata:
         adata.uns['staple_meta_fields'] = ['response', 'id', 'age']
+    
+    # make some genes differentially expressed in stroma vs tumor for testing
+    stroma = adata.obs['cell_type'] == 'stroma'
+    tumor = adata.obs['cell_type'] == 'tumor'
+    adata.X[stroma, :50] += np.random.poisson(5, (stroma.sum(), 50))
+    adata.X[tumor, :50] += np.random.poisson(1, (tumor.sum(), 50))
 
     # compute Moran's I (results stored in adata.uns['moranI']) for testing
-    sq.gr.spatial_autocorr(adata, mode="moran", n_perms=100, n_jobs=1)
+    sq.gr.spatial_autocorr(adata, mode="moran", n_jobs=1)
+    
+    # mark some genes as spatially variable for testing
+    adata.var['spatially_variable'] = adata.uns['moranI']['I'] > adata.uns['moranI']['I'].median() 
 
     return adata
 

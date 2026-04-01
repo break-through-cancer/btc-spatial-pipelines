@@ -106,11 +106,15 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
     return mqc_report, res
 
 
-def pseudobulk_adatas(adatas, vars=None):
+def pseudobulk_adatas(adatas, vars=None, only_spatial=False):
     # collect pseudobulk expression for each adata
+    # if only_spatial, select only genes with spatially variable expression
     pb_adatas = []
     for adata in adatas:
-        pb_adatas.append(sc.get.aggregate(adata.to_memory(), by=vars, func='sum'))
+        adata = adata.to_memory()
+        if only_spatial:
+            adata = adata[:, adata.var['spatially_variable']==True]
+        pb_adatas.append(sc.get.aggregate(adata, by=vars, func='sum'))
     pb_adata = ad.concat(pb_adatas, axis=0, join='outer')
     counts = pb_adata.layers['sum']
     # keep raw counts in X for pydeseq2, handling both dense and sparse matrices
@@ -309,12 +313,14 @@ def save_reports(mqc, res, name, mqc_reports="reports/mqc", reports="reports"):
         res.to_csv(f"{reports}/{name}.csv")
 
 if __name__ == '__main__':
-    process = "${task.process}"
-    collected = "${collected_items}"            # these are whitespace separated paths to anndatas
-    show = int("${params.analyze.show_top}")    # how many top results to show
-    cpus = int("${task.cpus}")
-    filter = float("${params.analyze.filter}")  # p-value or adjusted p-value threshold for significance
-    pb_vars = "${params.analyze.pb_vars}"       # vars to use for pseudobulk grouping, comma-separated string
+    process       = "${task.process}"
+    collected     = "${collected_items}"                 # these are whitespace separated paths to anndatas
+    show          = int("${params.analyze.show_top}")    # how many top results to show
+    cpus          = int("${task.cpus}")
+    filter        = float("${params.analyze.filter}")    # p-value or adjusted p-value threshold for significance
+    pb_vars       = "${params.analyze.pb_vars}"          # vars to use for pseudobulk grouping, comma-separated string
+    only_spatial  = "${params.analyze.only_spatial}"\
+                                    .lower() == 'true'   # only use spatially variable genes for ligrec and pseudobulk 
 
     adata_paths = collected.split(" ")
     adatas = [ad.read_h5ad(path, backed="r") for path in adata_paths]
@@ -364,8 +370,13 @@ if __name__ == '__main__':
             pb_vars.append('cell_type')  # add cell type as grouping variable
         if 'id' not in pb_vars:
             pb_vars.append('id')
-    pb_adata = pseudobulk_adatas(adatas, vars=pb_vars)
-    pb_adata.write(f"{reports_dir}/pseudobulk.h5ad")
+    pb_adata = pseudobulk_adatas(adatas, vars=pb_vars, only_spatial=only_spatial)
+    if(only_spatial):
+        log.info(f"Used only spatially variable genes for pseudobulk, resulting in {pb_adata.shape[1]} genes.")
+        pb_adata.write(f"{reports_dir}/svg_pseudobulk.h5ad")
+    else:
+        log.info(f"Used all genes for pseudobulk, resulting in {pb_adata.shape[1]} genes.")
+        pb_adata.write(f"{reports_dir}/pseudobulk.h5ad")
     
     # make reports
     # if no cats found, just produce overall ligrec report
