@@ -139,6 +139,44 @@ def neighbors_report(adatas, spotlight=None):
     }
     return mqc_report
 
+def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_centrality_scores'):
+    #separately for each score as multiqc does not support data_labels for heatmaps
+    memos = {
+        'closeness_centrality': "This graph measure reflects how close the group is to other nodes.",
+        'average_clustering': "This graph measure shows the degree to which nodes cluster together.",
+        'degree_centrality': "This graph measure is the fraction of non-group members connected to group members"
+    }
+
+    adatas_scores = [a.uns[uns_key].keys().tolist() for a in adatas if uns_key in a.uns]
+    all_scores = set.union(*[set(s) for s in adatas_scores])
+    if scores:
+        scores = all_scores.intersection(set(scores))
+    else:
+        scores = all_scores
+    reports = {}
+    for score in scores:
+        sample_dict = {}
+        for adata in adatas:
+                centrality_scores = adata.uns[uns_key][score]
+                cell_types = adata.obs['cell_type'].cat.categories.tolist()
+                centrality_dict = {}
+                for i, cell_type in enumerate(cell_types):
+                    centrality_dict[cell_type] = centrality_scores.iloc[i]
+                sample_dict[adata.obs['id'].unique()[0]] = centrality_dict
+
+        mqc_report = {
+            "id": f"{score}",
+            "description": memos.get(score, f"Centrality score {score} across samples"),
+            "plot_type": "table",
+            "pconfig": {
+                "ylab": "Sample",
+                "xlab": "Cell type",
+                "title": f"{score} centrality score across samples"
+            },
+            "data": sample_dict
+        }
+        reports[score] = mqc_report
+    return reports
 
 
 def plot_hist(df_pair, title=None, save=True):
@@ -232,11 +270,22 @@ if __name__ == '__main__':
 
     # generate neighbors report
     try:
+        log.info("Generating neighbors report.")
         neighbors = neighbors_report(adatas, spotlight=spotlight)
         with open(f"{mqc_reports_dir}/neighbors_mqc.json","w") as f:
             json.dump(neighbors, f, indent=4)
     except Exception as e:
         log.warning(f"Could not generate neighbors report: {e}")
+
+    # generate centrality report - separately
+    try:
+        log.info("Generating centrality report.")
+        centrality = centrality_reports(adatas, spotlight=spotlight)
+        for score, report in centrality.items():
+            with open(f"{mqc_reports_dir}/{score}_mqc.json","w") as f:
+                json.dump(report, f, indent=4)
+    except Exception as e:
+        log.warning(f"Could not generate centrality report for score {score}: {e}")
 
     # print versions now because later may be too late
     versions()
