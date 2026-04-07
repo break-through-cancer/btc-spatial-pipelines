@@ -49,15 +49,15 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
         ligrecs = ligrec_from_adatas(adatas, type='moranI', spotlight=None, samples=samples)
         #pick only the Moran's I value index
         ligrecs = ligrecs[ligrecs.index.get_level_values(-1) == 'I']
-    
-        #join multiindex of squidpy ligrec into single index
-    if(isinstance(ligrecs.index, pd.MultiIndex)):
-        ligrecs.index = ['-'.join(map(str, idx)) for idx in ligrecs.index]
 
     if pvalues is not None:
         # filter sample ligrec pairs by p-value to reduce multiple testing
         sig_mask = (pvalues <= filter).any(axis=1)
         ligrecs = ligrecs[sig_mask]
+
+    #join multiindex of squidpy ligrec into single index
+    if(isinstance(ligrecs.index, pd.MultiIndex)):
+        ligrecs.index = ['-'.join(map(str, idx)) for idx in ligrecs.index]
 
     if groups is not None:
         ligrecs_ttest = xsample_ttest(ligrecs, groups[0], groups[1])
