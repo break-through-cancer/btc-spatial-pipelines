@@ -49,9 +49,13 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
         ligrecs = ligrec_from_adatas(adatas, type='moranI', spotlight=None, samples=samples)
         #pick only the Moran's I value index
         ligrecs = ligrecs[ligrecs.index.get_level_values(-1) == 'I']
+    
+        #join multiindex of squidpy ligrec into single index
+    if(isinstance(ligrecs.index, pd.MultiIndex)):
+        ligrecs.index = ['-'.join(map(str, idx)) for idx in ligrecs.index]
 
     if pvalues is not None:
-        # filter sample ligrec pairs by p-value
+        # filter sample ligrec pairs by p-value to reduce multiple testing
         sig_mask = (pvalues <= filter).any(axis=1)
         ligrecs = ligrecs[sig_mask]
 
@@ -59,32 +63,28 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
         ligrecs_ttest = xsample_ttest(ligrecs, groups[0], groups[1])
         ligrecs_ttest_sig = ligrecs_ttest[ligrecs_ttest['pval_adj'] <= filter]
 
-        # if no t-test results found, fall back to mean across samples
+        #mark significant with a star in the index for plotting purposes
+        ligrecs_ttest.index = [idx + '*' if idx in ligrecs_ttest_sig.index \
+            else idx for idx in ligrecs_ttest.index]
+
         if(len(ligrecs_ttest_sig) == 0):
             log.warning(f"No significant differential interactions found for {tool}.")
-            res = ligrecs_ttest.sort_values('pval', ascending=True)[samples]
-            memo = f"Top {show} differential interactions across samples shown \
-                as no significant (p_adj<={filter}) interactions were found \
-                between {groups[0]} and {groups[1]}."
         else:
-            res = ligrecs_ttest_sig.sort_values('pval')
-            memo = f"Significant differential interactions (p_adj<={filter}) \
-                between {groups[0]} and {groups[1]}. "
-            pval_annot = ligrecs_ttest_sig['pval_adj'][:show]
-            memo += f"There are {len(ligrecs_ttest_sig['pval_adj'])} significant \
-                interactions (p_adj {min(pval_annot):.2e} to {max(pval_annot):.2e})."
-            if len(ligrecs_ttest_sig['pval_adj']) > show:
-                memo += f" Top {show} shown."
+            log.info(f"{len(ligrecs_ttest_sig)} significant differential \
+                interactions found for {tool} with p_adj<={filter}.")
+
+        res = ligrecs_ttest.sort_values('pval', ascending=True)
+        memo = f"Top {show} differential interactions across samples. There are \
+                {len(ligrecs_ttest_sig['pval_adj'])} significant differential \
+                interactions (p_adj<={filter}) found between \
+                {groups[0]} and {groups[1]}, marked with *."
+
     else:
         ligrecs['mean'] = ligrecs.mean(axis=1)
-        res = ligrecs.sort_values('mean', ascending=False)[samples]
+        res = ligrecs.sort_values('mean', ascending=False)
         memo = f"Top {show} mean interactions across samples shown as no groups \
-            were specified."
-    
-    #join multiindex of squidpy ligrec into single index
-    if(isinstance(res.index, pd.MultiIndex)):
-        res.index = ['-'.join(map(str, idx)) for idx in res.index]
-    
+                 were specified in the sample sheet."
+
     res_show = res[samples][:show]
     res_dict = res_show.to_dict()
 
