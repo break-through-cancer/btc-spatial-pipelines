@@ -3,6 +3,7 @@ import anndata as ad
 import numpy as np
 import pandas as pd
 import squidpy as sq
+import scanpy as sc
 
 #set random seed for reproducibility
 np.random.seed(42)
@@ -80,7 +81,19 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata
     sq.gr.spatial_autocorr(adata, mode="moran", n_jobs=1)
     
     # mark some genes as spatially variable for testing
-    adata.var['spatially_variable'] = adata.uns['moranI']['I'] > adata.uns['moranI']['I'].median() 
+    adata.var['spatially_variable'] = adata.uns['moranI']['I'] > adata.uns['moranI']['I'].median()
+    
+    # add dummy ligand-receptor interactions for testing. ligand receptor data
+    # is adata.uns['ligrec_means'], adata.uns['ligrec_pvalues']
+    # with gene-pairs in row index, and celltype pairs in columns
+    cell_types = adata.obs['cell_type'].cat.categories
+    gene_pairs =  ['-'.join(['var_' + str(i), 'var_' + str(j)]) for i in range(10) for j in range(10)]
+    celltype_pairs = ['-'.join([ct1, ct2]) for ct1 in cell_types for ct2 in cell_types]
+    ligrec_means = pd.DataFrame(np.random.rand(len(gene_pairs), len(celltype_pairs)), index=gene_pairs, columns=celltype_pairs)
+    ligrec_pvalues = pd.DataFrame(np.random.rand(len(gene_pairs), len(celltype_pairs)), index=gene_pairs, columns=celltype_pairs)
+    adata.uns['ligrec_means'] = ligrec_means
+    adata.uns['ligrec_pvalues'] = ligrec_pvalues
+
 
     return adata
 
