@@ -3,7 +3,7 @@ nextflow_process {
     script  "modules/local/rctd/rctd.nf"
     process "RCTD"
 
-    test("Should run RCTD deconvolution successfully") {
+    test("Should run RCTD default mode successfully") {
 
         tag "process"
         tag "rctd"
@@ -26,6 +26,36 @@ nextflow_process {
         then {
             assert process.success
             assert process.out.rctd_cell_types
+            assert process.out.rctd_object
+            assert process.out.versions
+        }
+    }
+
+    test("Should run RCTD doublet mode successfully") {
+
+        tag "process"
+        tag "rctd"
+        tag "visiumhd"
+
+        when {
+            params {
+                max_memory = '8.GB'
+                max_cpus   = 2
+                doublet_mode = 'doublet'
+            }
+            process {
+                """
+                input[0] = [[id:"sample"],
+                            file("${projectDir}/tests/data/atlas_small.h5ad"),
+                            file("${projectDir}/tests/data/adata_matched.h5ad")]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.rctd_cell_types
+            assert process.out.rctd_object
             assert process.out.versions
         }
     }

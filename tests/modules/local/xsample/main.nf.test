@@ -1,0 +1,40 @@
+nextflow_process{
+    name    'Test xsample'
+    script  'modules/local/xsample/main.nf'
+    process 'STAPLE_XSAMPLE'
+
+    setup {
+        run("CREATE_TEST_ADATA") {
+            script "tests/data/create_adata.nf"
+            params {
+                max_cpus = 2
+                max_memory = '4 GB'
+            }
+            process {
+            """
+            input[0] = 10
+            """
+            }
+        }
+    }
+
+    test("Run Xsample with multiple samples") {
+
+        tag     'xsample'
+        tag     'xsample-spatial'
+
+        when {
+            process {
+                """
+                input[0] = CREATE_TEST_ADATA.out.adata.collect()
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.versions
+            assert process.out.multiqc_files
+        }
+    }
+}

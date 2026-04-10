@@ -178,7 +178,8 @@ sample = "${meta.id}"
 if outname in ["atlas_input", "adata_input", "adata_output"]:
     adata = ad.read_h5ad(adata_path)
     #basic scanpy qc metrics
-    qc = sc.pp.calculate_qc_metrics(adata, inplace=False)
+    adata.var["mito"] = adata.var_names.str.startswith("MT-")
+    qc = sc.pp.calculate_qc_metrics(adata, qc_vars=["mito"], inplace=False)
     report = pd.DataFrame({
         "Sample": [sample],
         "n_genes": adata.shape[1],
@@ -186,6 +187,7 @@ if outname in ["atlas_input", "adata_input", "adata_output"]:
         "mean_genes_by_counts": qc[0]["n_genes_by_counts"].mean(),
         "mean_cells_by_counts": qc[1]["n_cells_by_counts"].mean(),
         "mean_total_nnz_counts": adata.X[adata.X.nonzero()].mean(),
+        "mean_percent_mito": qc[0]["pct_counts_mito"].mean()
     })
     report.to_csv(f"{outname}_report.csv", index=False)
     adata.file.close()
@@ -345,6 +347,23 @@ process ADATA_FROM_SEGMENTED_VISIUM {
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
     template 'adata_from_segmented_visium.py'
+}
+
+process ADATA_PREPROCESS {
+    //filter genes from an adata file by dropping genes whose names match a specified prefix (via drop_genes_prefix)
+    tag "$meta.id"
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+
+    input:
+        tuple val(meta), path(adata)
+    output:
+        tuple val(meta), path("${prefix}/adata.h5ad"),   emit: adata
+        path("versions.yml"),                            emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    template 'adata_preprocess.py'
 }
 
 process ATTACH_CELL_PROBS {

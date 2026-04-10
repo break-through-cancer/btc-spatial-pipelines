@@ -3,7 +3,8 @@ include { ATLAS_GET;
           ADATA_FROM_VISIUM;
           ADATA_FROM_VISIUM_HD;
           ADATA_FROM_SEGMENTED_VISIUM;
-          ADATA_ADD_METADATA } from '../../modules/local/util/'
+          ADATA_ADD_METADATA;
+          ADATA_PREPROCESS } from '../../modules/local/util/'
 
 
 workflow LOAD_DATASET {
@@ -42,6 +43,15 @@ workflow LOAD_DATASET {
         //report stats after reading
         ch_report = ch_report.mix( ch_raw_adata.map {it -> tuple(it[0], it[1], 'adata_input')} )
 
+        // preprocess
+        if (params.drop_genes_prefix) {
+            ADATA_PREPROCESS( ch_raw_adata )
+            ch_processed_adata = ADATA_PREPROCESS.out.adata
+            versions = versions.mix(ADATA_PREPROCESS.out.versions)
+        } else {
+            ch_processed_adata = ch_raw_adata
+        }
+
         // If an atlas has been provided download and prepare it
         if (params.ref_scrna) {
             ATLAS_GET(params.ref_scrna)
@@ -63,7 +73,7 @@ workflow LOAD_DATASET {
         }
 
         // attach metadata fields for downstream analysis
-        ADATA_ADD_METADATA( ch_raw_adata )
+        ADATA_ADD_METADATA( ch_processed_adata )
         versions = versions.mix(ADATA_ADD_METADATA.out.versions)
         ch_adata = ADATA_ADD_METADATA.out.adata
 
