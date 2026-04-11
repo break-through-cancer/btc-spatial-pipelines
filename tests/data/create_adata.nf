@@ -1,7 +1,7 @@
 process CREATE_TEST_ADATA {
     tag "create_test_adata"
     label 'process_single'
-    container 'ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216'
+    container 'ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc'
 
     input:
         val num_adatas
