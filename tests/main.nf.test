@@ -6,6 +6,7 @@ nextflow_pipeline {
     test("Just check samplesheet and read visium to adata") {
 
         tag "samplesheet"
+        tag "pipeline"
 
         when {
             params {
@@ -39,6 +40,7 @@ nextflow_pipeline {
         test("Fail on empty samplesheet") {
 
         tag "samplesheet"
+        tag "pipeline"
 
         when {
             params {
@@ -58,6 +60,7 @@ nextflow_pipeline {
     test("RCTD on Visium SD with local ref") {
 
         tag "local"
+        tag "pipeline"
 
         when {
             params {
@@ -90,7 +93,7 @@ nextflow_pipeline {
     test("RCTD on Multisample Visium SD with local matched ref scRNA") {
 
         tag "multisample"
-
+        tag "pipeline"
         when {
             params {
                 input = "../../../tests/data/samplesheets/multisample-test.csv"
@@ -123,7 +126,7 @@ nextflow_pipeline {
 
         tag "multisample"
         tag "localfile"
-
+        tag "pipeline"
         when {
             params {
                 input = "../../../tests/data/samplesheets/multisample-test.csv"
@@ -156,6 +159,7 @@ nextflow_pipeline {
     test("RCTD full pipeline on Visium SD with remote ref") {
 
         tag "visiumsd"
+        tag "pipeline"
 
         when {
             params {
@@ -168,6 +172,7 @@ nextflow_pipeline {
                     cogaps = false
                     rctd = true
                     external = false
+                    n_top_genes = 500
                 }
                 analyze {
                     spacemarkers = true
@@ -199,7 +204,7 @@ nextflow_pipeline {
     test("RCTD full pipeline on Visium HD with remote ref") {
 
         tag "visiumhd"
-
+        tag "pipeline"
         when {
             params {
                 input = "../../../tests/data/samplesheets/hdvisium-test.csv"
@@ -238,6 +243,7 @@ nextflow_pipeline {
     test("RCTD full pipeline on segmented Visium HD with remote ref") {
 
         tag "segmented"
+        tag "pipeline"
 
         when {
             params {
@@ -280,6 +286,7 @@ nextflow_pipeline {
     test("Visium SD with external deconvolution") {
 
         tag "external"
+        tag "pipeline"
 
         when {
             params {

@@ -61,3 +61,37 @@ nextflow_process {
 }
 
 
+nextflow_process {
+    name    "Test Squidpy Spatial Analysis"
+    script  "modules/local/squidpy/main.nf"
+    process "SQUIDPY_SPATIAL_PLOTS"
+
+    test("Should run Squidpy Spatial Analysis successfully") {
+
+        tag "process"
+        tag "spatial"
+        tag "visiumhd"
+        tag "squidpy"
+
+        when {
+            params {
+                max_memory = '8.GB'
+                max_cpus   = 2
+                analyze {
+                    filter = 1
+                }
+            }
+            process {
+                """
+                input[0] = [[id:"sample"],
+                            file("${projectDir}/tests/data/rctd.h5ad")]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.versions
+        }
+    }
+}
