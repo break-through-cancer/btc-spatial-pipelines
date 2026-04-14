@@ -28,9 +28,9 @@ nextflow_process{
         when {
             params {
                 outdir = 'output'
-                analyze{
+                analyze {
                     xsample = true
-                    filter = 0.99
+                    filter = 1
                     show_top = 100
                 }
             }
@@ -60,9 +60,9 @@ nextflow_process{
         when {
             params {
                 outdir = 'output'
-                analyze{
+                analyze {
                     xsample  = true
-                    filter   = 1 // set high to get some significant genes for testing purposes
+                    filter   = 1
                     pb_vars  = 'id,response'
                     show_top = 100
                 }
@@ -92,7 +92,7 @@ nextflow_process{
         when {
             params {
                 outdir = 'output'
-                analyze{
+                analyze {
                     xsample = true
                     filter = 1
                     show_top = 100
@@ -103,9 +103,6 @@ nextflow_process{
                 """
                 input[0] = CREATE_TEST_ADATA.out.adata.collect()
                 """
-            }
-            params {
-                outdir = "output"
             }
         }
 
