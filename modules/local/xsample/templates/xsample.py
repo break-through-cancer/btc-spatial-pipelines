@@ -248,19 +248,19 @@ def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_c
     for score in scores:
         sample_dict = {}
         for adata in adatas:
-                if uns_key not in adata.uns or score not in adata.uns[uns_key]:
-                    continue
-                centrality_scores = adata.uns[uns_key][score]
-                available_cell_types = adata.obs['cell_type'].cat.categories.tolist()
-                if spotlight:
-                    cell_types = [cell_type for cell_type in available_cell_types if cell_type in spotlight]
-                else:
-                    cell_types = available_cell_types
-                centrality_dict = {}
-                for i, cell_type in enumerate(available_cell_types):
-                    if cell_type in cell_types:
-                        centrality_dict[cell_type] = centrality_scores.iloc[i]
-                sample_dict[adata.obs['id'].unique()[0]] = centrality_dict
+            if uns_key not in adata.uns or score not in adata.uns[uns_key]:
+                continue
+            centrality_scores = adata.uns[uns_key][score]
+            available_cell_types = adata.obs['cell_type'].cat.categories.tolist()
+            if spotlight:
+                cell_types = [cell_type for cell_type in available_cell_types if cell_type in spotlight]
+            else:
+                cell_types = available_cell_types
+            centrality_dict = {}
+            for i, cell_type in enumerate(available_cell_types):
+                if cell_type in cell_types:
+                    centrality_dict[cell_type] = centrality_scores.iloc[i]
+            sample_dict[adata.obs['id'].unique()[0]] = centrality_dict
 
         mqc_report = {
             "id": f"{score}",

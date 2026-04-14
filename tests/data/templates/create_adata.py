@@ -94,6 +94,9 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata
     adata.uns['ligrec_means'] = ligrec_means
     adata.uns['ligrec_pvalues'] = ligrec_pvalues
 
+    # recompute interactions using the final cell_type categories so that
+    # the stored interaction matrix and centrality scores stay in sync
+    sq.gr.interaction_matrix(adata, cluster_key='cell_type')
 
     #add centrality measures
     sq.gr.centrality_scores(adata, cluster_key='cell_type')
