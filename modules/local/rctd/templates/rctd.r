@@ -12,6 +12,7 @@ adata_st_path <- '${adata_st}'
 ncores <- ${task.cpus}
 outdir <- '${prefix}'
 process <- '${task.process}'
+umi_min <- ${params.umi_min}
 
 set.seed(${params.seed})
 
@@ -98,14 +99,18 @@ gc()
 
 message('run rctd')
 rctd_res <- tryCatch({
-  spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores),
-                    doublet_mode = doublet_mode)
+  spacexr::run.RCTD(
+    spacexr::create.RCTD(spatialRNA=query, reference=ref,
+                         max_cores = ncores, UMI_min = umi_min),
+    doublet_mode = doublet_mode)
 }, error = function(e) {
   message('RCTD threw error: "',e[["message"]],'"')
   if (grepl(pattern = "UMI_min_sigma", x = e[["message"]])) {
     message('RCTD error caught, retrying with UMI_min_sigma=1')
-    spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores, UMI_min_sigma = 1),
-                      doublet_mode = doublet_mode)
+    spacexr::run.RCTD(
+      spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores, 
+                           UMI_min_sigma = 1, UMI_min = umi_min),
+      doublet_mode = doublet_mode)
   } else {
     stop("Could not catch the error")
   }

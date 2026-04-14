@@ -1,0 +1,121 @@
+nextflow_process{
+    name    'Test xsample'
+    script  'modules/local/xsample/main.nf'
+    process 'STAPLE_XSAMPLE'
+
+    setup {
+        run("CREATE_TEST_ADATA") {
+            script "tests/data/create_adata.nf"
+            params {
+                max_cpus = 2
+                max_memory = '4 GB'
+            }
+            process {
+            """
+            input[0] = 10
+            input[1] = true // create adata with added metadata
+            """
+            }
+        }
+    }
+
+    test("Run Xsample with multiple samples") {
+
+        tag     'xsample'
+        tag     'xsample-spatial'
+        tag     'process'
+
+        when {
+            params {
+                outdir = 'output'
+                analyze {
+                    xsample = true
+                    filter = 1
+                    show_top = 100
+                }
+            }
+            process {
+                """
+                input[0] = CREATE_TEST_ADATA.out.adata.collect()
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.versions
+            assert process.out.multiqc_files
+            assert file("${outputDir}/staple/reports/deseq2_diff_response_results_tumor.csv").exists()
+            assert file("${outputDir}/staple/reports/Moran_I_diff_response_results.csv").exists()
+            assert file("${outputDir}/staple/reports/pseudobulk.h5ad").exists()
+        }
+    }
+
+    test("Run Xsample with user-defined pseudobulk") {
+
+        tag     'xsample'
+        tag     'xsample-spatial'
+        tag     'process'
+
+        when {
+            params {
+                outdir = 'output'
+                analyze {
+                    xsample  = true
+                    filter   = 1
+                    pb_vars  = 'id,response'
+                    show_top = 100
+                }
+            }
+            process {
+                """
+                input[0] = CREATE_TEST_ADATA.out.adata.collect()
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.versions
+            assert process.out.multiqc_files
+            assert file("${outputDir}/staple/reports/pseudobulk.h5ad").exists()
+            assert file("${outputDir}/staple/reports/deseq2_diff_response_results_unstratified.csv").exists()
+        }
+    }
+
+    test("Run Xsample with only SVG option") {
+
+        tag     'xsample'
+        tag     'xsample-svg'
+        tag     'process'
+
+        when {
+            params {
+                outdir = 'output'
+                analyze {
+                    xsample = true
+                    filter = 1
+                    show_top = 100
+                    only_spatial = true
+                }
+            }
+            process {
+                """
+                input[0] = CREATE_TEST_ADATA.out.adata.collect()
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.versions
+            assert process.out.multiqc_files
+            assert file("${outputDir}/staple/reports/mqc/average_clustering_mqc.json").exists()
+            assert file("${outputDir}/staple/reports/mqc/closeness_centrality_mqc.json").exists()
+            assert file("${outputDir}/staple/reports/mqc/degree_centrality_mqc.json").exists()
+            assert file("${outputDir}/staple/reports/deseq2_diff_response_results_tumor.csv").exists()
+            assert file("${outputDir}/staple/reports/Moran_I_diff_response_results.csv").exists()
+            assert file("${outputDir}/staple/reports/svg_pseudobulk.h5ad").exists()
+        }
+    }
+}

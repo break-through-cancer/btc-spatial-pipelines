@@ -229,58 +229,61 @@
     "properties": {
         "deconvolve": {
             "type": "object",
-            "description": "Cell type annotation options.",
+            "description": "Deconvolution method to run",
             "properties": {
                 "rctd": {
                     "type": "boolean",
                     "default": true
                 },
-                "bayestme": {
+                "cogaps": {
                     "type": "boolean",
                     "default": false
                 },
-                "cogaps": {
+                "bayestme": {
                     "type": "boolean",
                     "default": false
                 },
                 "external": {
                     "type": "boolean",
                     "default": false
-                },
-                "n_top_genes": {
-                    "type": "integer",
-                    "default": 1000
                 }
             }
         },
         "analyze": {
             "type": "object",
-            "description": "Spatial analysis options.",
+            "description": "Analysis methods to run",
             "properties": {
                 "squidpy": {
                     "type": "boolean",
-                    "default": true,
-                    "description": "Enable Squidpy analysis."
+                    "default": true
                 },
                 "spacemarkers": {
                     "type": "boolean",
-                    "default": false,
-                    "description": "Enable SpaceMarkers analysis."
+                    "default": false
                 },
                 "xsample": {
                     "type": "boolean",
-                    "default": false,
-                    "description": "Enable cross-sample analysis."
+                    "default": false
                 },
                 "spotlight": {
-                    "type": "boolean",
+                    "type": "string",
                     "default": false,
-                    "description": "Enable Spotlight analysis."
+                    "description": "Focus on these cell types in the final reports"
                 },
                 "show_top": {
                     "type": "integer",
                     "default": 100,
-                    "description": "Number of top features to show."
+                    "description": "Number of top items to show in the final reports"
+                },
+                "filter": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "P-value or adjusted p-value threshold for significance in the final reports"
+                },
+                "pb_vars": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Custom vars to use for pseudobulk grouping, comma-separated string. By default, pseudobulk samples are generated using all metadata available + cell_type. Use this parameter to specify custom vars to group by instead. The vars specified here should be present in the `obs` dataframe of the input AnnData objects."
                 }
             }
         },
@@ -391,6 +394,19 @@
         "good_gene_threshold": {
             "type": "integer",
             "default": 1000
+        },
+        "drop_genes_prefix": {
+            "type": "string",
+            "description": "String prefix of gene names to drop (e.g. 'MT-'). Use an empty string to disable dropping by prefix."
+        },
+        "sq_gr_ligrec_interactions_params": {
+            "type": "string",
+            "description": "JSON string specifying database for sq.gr.ligrec() (e.g., '{\"resources\": \"CellPhoneDB\"}')."
+        },
+        "umi_min": {
+            "type": "integer",
+            "default": 100,
+            "description": "min UMI counts, passed to RCTD UMI_min parameter"
         }
     }
 }

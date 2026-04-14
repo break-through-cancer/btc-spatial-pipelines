@@ -2,7 +2,7 @@ process ATLAS_MATCH {
     //return adata_sc with gene index matching adata_st by gene name or gene id
     tag "$meta.id"
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
 
     //adata_sc adata_sc
     //adata_st adata_st
@@ -97,7 +97,7 @@ with open ("versions.yml", "w") as f:
 process ATLAS_GET {
     //download an atlas anndata file from a url
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
 
     input:
         val(url)
@@ -154,7 +154,7 @@ with open("versions.yml", "w") as f:
 process QC {
     //generate a simple report of the atlas adata
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
 
     input:
         tuple val(meta), path(adata), val(report_name)
@@ -178,7 +178,8 @@ sample = "${meta.id}"
 if outname in ["atlas_input", "adata_input", "adata_output"]:
     adata = ad.read_h5ad(adata_path)
     #basic scanpy qc metrics
-    qc = sc.pp.calculate_qc_metrics(adata, inplace=False)
+    adata.var["mito"] = adata.var_names.str.startswith("MT-")
+    qc = sc.pp.calculate_qc_metrics(adata, qc_vars=["mito"], inplace=False)
     report = pd.DataFrame({
         "Sample": [sample],
         "n_genes": adata.shape[1],
@@ -186,6 +187,7 @@ if outname in ["atlas_input", "adata_input", "adata_output"]:
         "mean_genes_by_counts": qc[0]["n_genes_by_counts"].mean(),
         "mean_cells_by_counts": qc[1]["n_cells_by_counts"].mean(),
         "mean_total_nnz_counts": adata.X[adata.X.nonzero()].mean(),
+        "mean_percent_mito": qc[0]["pct_counts_mito"].mean()
     })
     report.to_csv(f"{outname}_report.csv", index=False)
     adata.file.close()
@@ -229,7 +231,7 @@ with open("versions.yml", "w") as f:
 process ADATA_FROM_VISIUM_HD {
     //convert vhd file to h5ad
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
 
     input:
         tuple val(meta), path(data)
@@ -281,7 +283,7 @@ with open("versions.yml", "w") as f:
 process ADATA_FROM_VISIUM {
     //convert visium dir to h5ad
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
 
     input:
         tuple val(meta), path(data)
@@ -334,7 +336,7 @@ process ADATA_FROM_SEGMENTED_VISIUM {
     //convert visium dir to h5ad with cells instead of spots 
     //and cell centers as coordinates
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
 
     input:
         tuple val(meta), path(data)
@@ -347,11 +349,28 @@ process ADATA_FROM_SEGMENTED_VISIUM {
     template 'adata_from_segmented_visium.py'
 }
 
+process ADATA_PREPROCESS {
+    //filter genes from an adata file by dropping genes whose names match a specified prefix (via drop_genes_prefix)
+    tag "$meta.id"
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
+
+    input:
+        tuple val(meta), path(adata)
+    output:
+        tuple val(meta), path("${prefix}/adata.h5ad"),   emit: adata
+        path("versions.yml"),                            emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    template 'adata_preprocess.py'
+}
+
 process ATTACH_CELL_PROBS {
     //attach cell type probabilities to anndata obsm
     tag "$meta.id"
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
 
     input:
         tuple val(meta), path(cell_probs), path(adata), val(out_name)
@@ -387,7 +406,7 @@ process CELL_TYPES_FROM_COGAPS {
     //this overwrites previously created andata.h5ad files
     tag "$meta.id"
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
 
     input:
         tuple val(meta), path(adata)
@@ -404,7 +423,7 @@ process CELL_TYPES_FROM_COGAPS {
 process STAPLE_ATTACH_LIGREC {
     tag "$meta.id"
     label 'process_medium'
-    container 'ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216'
+    container 'ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc'
 
     input:
         tuple val(meta), path(adata), path(ligrec)

@@ -13,6 +13,7 @@ nextflow_process {
             params {
                 max_memory = '8.GB'
                 max_cpus   = 2
+                outdir = 'output'
             }
             process {
                 """
@@ -42,6 +43,37 @@ nextflow_process {
                 max_memory = '8.GB'
                 max_cpus   = 2
                 doublet_mode = 'doublet'
+                outdir = 'output'
+            }
+            process {
+                """
+                input[0] = [[id:"sample"],
+                            file("${projectDir}/tests/data/atlas_small.h5ad"),
+                            file("${projectDir}/tests/data/adata_matched.h5ad")]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.rctd_cell_types
+            assert process.out.rctd_object
+            assert process.out.versions
+        }
+    }
+    
+    test("Should run RCTD with custom UMI_min") {
+
+        tag "process"
+        tag "rctd"
+        tag "visiumhd"
+
+        when {
+            params {
+                max_memory = '8.GB'
+                max_cpus   = 2
+                umi_min = 1
+                outdir = 'output'
             }
             process {
                 """

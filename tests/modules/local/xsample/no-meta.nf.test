@@ -1,0 +1,54 @@
+nextflow_process{
+    name    'Test xsample'
+    script  'modules/local/xsample/main.nf'
+    process 'STAPLE_XSAMPLE'
+
+    setup {
+        run("CREATE_TEST_ADATA") {
+            script "tests/data/create_adata.nf"
+            params {
+                max_cpus = 2
+                max_memory = '4 GB'
+            }
+            process {
+            """
+            input[0] = 10
+            input[1] = false // create adata without added metadata
+            """
+            }
+        }
+    }
+
+    test("Run Xsample without added metadata") {
+
+        tag     'xsample'
+        tag     'xsample-spatial'
+        tag     'process'
+        tag     'no-metadata'
+
+        when {
+            params {
+                outdir = 'output'
+                analyze{
+                    xsample = true
+                    filter = 0.99
+                    show_top = 100
+                }
+            }
+            process {
+                """
+                input[0] = CREATE_TEST_ADATA.out.adata.collect()
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.versions
+            assert process.out.multiqc_files
+            assert file("${outputDir}/staple/reports/mqc/moranI_overall_mqc.json").exists()
+            assert file("${outputDir}/staple/reports/mqc/neighbors_mqc.json").exists()
+            assert file("${outputDir}/staple/reports/pseudobulk.h5ad").exists()
+        }
+    }
+}

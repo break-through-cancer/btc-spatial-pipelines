@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import anndata as ad
 import squidpy as sq
 import logging
@@ -22,6 +23,7 @@ def default_ligrec(adata, par, **kwargs):
         copy=True,
         use_raw=False,
         corr_method="fdr_bh",
+        interactions_params=par["sq_gr_ligrec_interactions_params"],
         transmitter_params={"categories": "ligand"},
         receiver_params={"categories": "receptor"},
         alpha=par["sq_gr_ligrec_alpha"],
@@ -69,6 +71,7 @@ if __name__ == "__main__":
     process = "${task.process}"
     cpus = ${task.cpus}
 
+
     par = {"sq_gr_ligrec_threshold": ${params.sq_gr_ligrec_threshold},
         "sq_gr_ligrec_alpha": ${params.sq_gr_ligrec_alpha},
         "sq_gr_ligrec_nperms": ${params.sq_gr_ligrec_nperms},
@@ -77,8 +80,12 @@ if __name__ == "__main__":
         "seed": ${params.seed}
     }
 
-    log.info(f"received params:{par}")
+    if '${params.sq_gr_ligrec_interactions_params}':
+        par["sq_gr_ligrec_interactions_params"] = json.loads('${params.sq_gr_ligrec_interactions_params}')
+    else:
+        par["sq_gr_ligrec_interactions_params"] = None
 
+    log.info(f"received params:{par}")
     log.info(f"loading {adata_path}")
     adata = ad.read_h5ad(adata_path)
     log.info(f"adata is {adata}")

@@ -6,6 +6,7 @@ nextflow_pipeline {
     test("Just check samplesheet and read visium to adata") {
 
         tag "samplesheet"
+        tag "pipeline"
 
         when {
             params {
@@ -39,12 +40,14 @@ nextflow_pipeline {
         test("Fail on empty samplesheet") {
 
         tag "samplesheet"
+        tag "pipeline"
 
         when {
             params {
                 input = "../../../tests/data/samplesheets/samplesheet-empty-test.csv"
                 max_memory = "8.GB"
                 max_cpus = 4
+                outdir = "output"
             }
         }
 
@@ -57,12 +60,14 @@ nextflow_pipeline {
     test("RCTD on Visium SD with local ref") {
 
         tag "local"
+        tag "pipeline"
 
         when {
             params {
                 input = "../../../tests/data/samplesheets/localatlas-test.csv"
                 max_memory = "8.GB"
                 max_cpus = 4
+                outdir = "output"
                 deconvolve {
                     bayestme = false
                     cogaps = false
@@ -88,12 +93,13 @@ nextflow_pipeline {
     test("RCTD on Multisample Visium SD with local matched ref scRNA") {
 
         tag "multisample"
-
+        tag "pipeline"
         when {
             params {
                 input = "../../../tests/data/samplesheets/multisample-test.csv"
                 max_memory = "8.GB"
                 max_cpus = 4
+                outdir = "output"
                 deconvolve {
                     bayestme = false
                     cogaps = false
@@ -109,7 +115,8 @@ nextflow_pipeline {
 
         then {
             assertAll(
-                { assert workflow.success }
+                { assert workflow.success
+                  assert file("${outputDir}/multiqc/multiqc_report.html").exists() },
             )
 
         }
@@ -119,13 +126,14 @@ nextflow_pipeline {
 
         tag "multisample"
         tag "localfile"
-
+        tag "pipeline"
         when {
             params {
                 input = "../../../tests/data/samplesheets/multisample-test.csv"
                 ref_scrna = "${projectDir}/tests/data/atlas_small.h5ad"
                 max_memory = "8.GB"
                 max_cpus = 4
+                outdir = "output"
                 deconvolve {
                     bayestme = false
                     cogaps = false
@@ -141,7 +149,8 @@ nextflow_pipeline {
 
         then {
             assertAll(
-                { assert workflow.success }
+                { assert workflow.success
+                  assert file("${outputDir}/multiqc/multiqc_report.html").exists() },
             )
 
         }
@@ -150,17 +159,20 @@ nextflow_pipeline {
     test("RCTD full pipeline on Visium SD with remote ref") {
 
         tag "visiumsd"
+        tag "pipeline"
 
         when {
             params {
                 input = "../../../tests/data/samplesheets/sdvisium-test.csv"
                 max_memory = "8.GB"
                 max_cpus = 4
+                outdir = "output"
                 deconvolve {
                     bayestme = false
                     cogaps = false
                     rctd = true
                     external = false
+                    n_top_genes = 500
                 }
                 analyze {
                     spacemarkers = true
@@ -168,7 +180,7 @@ nextflow_pipeline {
                     xsample = true
 
                 }
-                outdir = "output"
+
                 ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
             }
         }
@@ -181,7 +193,8 @@ nextflow_pipeline {
                 { assert file("${outputDir}/atlas/sample1/adata_matched.h5ad").exists() },
                 { assert file("${outputDir}/rctd/sample1/rctd_cell_types.csv").exists() },
                 { assert file("${outputDir}/spacemarkers/sample1/rctd_cell_types/IMScores.rds").exists() },
-                { assert file("${outputDir}/squidpy/sample1/rctd/figures/spatial_scatter.png").exists() }
+                { assert file("${outputDir}/squidpy/sample1/rctd/figures/spatial_scatter.png").exists() },
+                { assert file("${outputDir}/multiqc/multiqc_report.html").exists() }
             )
         }
 
@@ -191,12 +204,13 @@ nextflow_pipeline {
     test("RCTD full pipeline on Visium HD with remote ref") {
 
         tag "visiumhd"
-
+        tag "pipeline"
         when {
             params {
                 input = "../../../tests/data/samplesheets/hdvisium-test.csv"
                 max_memory = "8.GB"
                 max_cpus = 4
+                outdir = "output"
                 deconvolve {
                     bayestme = false
                     cogaps = false
@@ -208,7 +222,6 @@ nextflow_pipeline {
                     squidpy = true
                 }
                 visium_hd = "square_016um"
-                outdir = "output"
                 ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
             }
         }
@@ -221,7 +234,8 @@ nextflow_pipeline {
                 { assert file("${outputDir}/atlas/sample1/adata_matched.h5ad").exists() },
                 { assert file("${outputDir}/rctd/sample1/rctd_cell_types.csv").exists() },
                 { assert file("${outputDir}/spacemarkers/sample1/rctd_cell_types/LRscores.rds").exists() },
-                { assert file("${outputDir}/squidpy/sample1/rctd/figures/spatial_scatter.png").exists() }
+                { assert file("${outputDir}/squidpy/sample1/rctd/figures/spatial_scatter.png").exists() },
+                { assert file("${outputDir}/multiqc/multiqc_report.html").exists() }
             )
         }
     }
@@ -229,12 +243,14 @@ nextflow_pipeline {
     test("RCTD full pipeline on segmented Visium HD with remote ref") {
 
         tag "segmented"
+        tag "pipeline"
 
         when {
             params {
                 input = "../../../tests/data/samplesheets/hdvisium-test.csv"
                 max_memory = "8.GB"
                 max_cpus = 4
+                outdir = "output"
                 deconvolve {
                     bayestme = false
                     cogaps = false
@@ -247,7 +263,6 @@ nextflow_pipeline {
                     squidpy = true
                 }
                 visium_hd = "cell_segmentations"
-                outdir = "output"
                 ref_scrna = "https://datasets.cellxgene.cziscience.com/6c29f947-d85b-483e-b346-b163277dae5e.h5ad"
             }
         }
@@ -260,7 +275,8 @@ nextflow_pipeline {
                 { assert file("${outputDir}/atlas/sample1/adata_matched.h5ad").exists() },
                 { assert file("${outputDir}/rctd/sample1/rctd_cell_types.csv").exists() },
                 //{ assert file("${outputDir}/spacemarkers/sample1/rctd_cell_types/LRscores.rds").exists() }, // will not work yet with segmented outputs
-                { assert file("${outputDir}/squidpy/sample1/rctd/figures/spatial_scatter.png").exists() }
+                { assert file("${outputDir}/squidpy/sample1/rctd/figures/spatial_scatter.png").exists() },
+                { assert file("${outputDir}/multiqc/multiqc_report.html").exists() }
             )
         }
     }
@@ -270,6 +286,7 @@ nextflow_pipeline {
     test("Visium SD with external deconvolution") {
 
         tag "external"
+        tag "pipeline"
 
         when {
             params {
