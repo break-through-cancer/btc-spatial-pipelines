@@ -168,7 +168,7 @@
                     "description": "Custom config file to supply to MultiQC.",
                     "fa_icon": "fas fa-cog",
                     "hidden": true,
-                    "default": "assets/multiqc_config.yml"
+                    "default": "${projectDir}/assets/multiqc_config.yml"
                 },
                 "multiqc_logo": {
                     "type": "string",
