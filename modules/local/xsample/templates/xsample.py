@@ -111,6 +111,14 @@ def pseudobulk_adatas(adatas, vars=None, only_spatial=False):
     # if only_spatial, select only genes with spatially variable expression
     pb_adatas = []
     for adata in adatas:
+        # check that there are no NA values in grouping
+        if vars is not None:
+            for var in vars:
+                if adata.obs[var].isna().any():
+                    log.warning(f"NA values found in grouping variable {var} for sample {adata.obs['id'].unique()[0]}.\
+                        Replacing NA with 'NA' string for pseudobulk grouping.")
+                    adata.obs[var] = adata.obs[var].cat.add_categories('NA')
+                    adata.obs[var] = adata.obs[var].fillna('NA')
         adata = adata.to_memory()
         if only_spatial:
             adata = adata[:, adata.var['spatially_variable']==True]
