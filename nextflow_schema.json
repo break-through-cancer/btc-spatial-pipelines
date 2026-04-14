@@ -168,7 +168,7 @@
                     "description": "Custom config file to supply to MultiQC.",
                     "fa_icon": "fas fa-cog",
                     "hidden": true,
-                    "default": "/Users/dlvovs/btc/btc-spatial-pipelines/assets/multiqc_config.yml"
+                    "default": "${projectDir}/assets/multiqc_config.yml"
                 },
                 "multiqc_logo": {
                     "type": "string",
@@ -200,12 +200,12 @@
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters fails when an unrecognised parameter is found.",
                     "hidden": true,
-                    "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
+                    "help_text": "By default, when an unrecognised parameter is found, it returns a warning."
                 },
                 "validationLenientMode": {
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
-                    "description": "Validation of parameters in lenient more.",
+                    "description": "Validation of parameters in lenient mode.",
                     "hidden": true,
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
