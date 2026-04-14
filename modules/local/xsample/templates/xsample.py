@@ -148,6 +148,8 @@ def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_c
     }
 
     adatas_scores = [a.uns[uns_key].keys().tolist() for a in adatas if uns_key in a.uns]
+    if not adatas_scores:
+        return {}
     all_scores = set.union(*[set(s) for s in adatas_scores])
     if scores:
         scores = all_scores.intersection(set(scores))
@@ -157,11 +159,18 @@ def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_c
     for score in scores:
         sample_dict = {}
         for adata in adatas:
+                if uns_key not in adata.uns or score not in adata.uns[uns_key]:
+                    continue
                 centrality_scores = adata.uns[uns_key][score]
-                cell_types = adata.obs['cell_type'].cat.categories.tolist()
+                available_cell_types = adata.obs['cell_type'].cat.categories.tolist()
+                if spotlight:
+                    cell_types = [cell_type for cell_type in available_cell_types if cell_type in spotlight]
+                else:
+                    cell_types = available_cell_types
                 centrality_dict = {}
-                for i, cell_type in enumerate(cell_types):
-                    centrality_dict[cell_type] = centrality_scores.iloc[i]
+                for i, cell_type in enumerate(available_cell_types):
+                    if cell_type in cell_types:
+                        centrality_dict[cell_type] = centrality_scores.iloc[i]
                 sample_dict[adata.obs['id'].unique()[0]] = centrality_dict
 
         mqc_report = {
@@ -285,7 +294,7 @@ if __name__ == '__main__':
             with open(f"{mqc_reports_dir}/{score}_mqc.json","w") as f:
                 json.dump(report, f, indent=4)
     except Exception as e:
-        log.warning(f"Could not generate centrality report for score {score}: {e}")
+        log.warning(f"Could not generate centrality report: {e}")
 
     # print versions now because later may be too late
     versions()

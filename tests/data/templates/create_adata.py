@@ -62,7 +62,7 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample'):
     #simulate staple behavior of added metadata from samplesheet
     adata.uns['added_metadata_fields'] = ['response', 'id']
 
-    #add centraloty measures
+    #add centrality measures
     sq.gr.centrality_scores(adata, cluster_key='cell_type')
 
     return adata
