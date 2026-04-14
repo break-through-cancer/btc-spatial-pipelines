@@ -117,8 +117,13 @@ def pseudobulk_adatas(adatas, vars=None, only_spatial=False):
                 if adata.obs[var].isna().any():
                     log.warning(f"NA values found in grouping variable {var} for sample {adata.obs['id'].unique()[0]}.\
                         Replacing NA with 'NA' string for pseudobulk grouping.")
-                    adata.obs[var] = adata.obs[var].cat.add_categories('NA')
-                    adata.obs[var] = adata.obs[var].fillna('NA')
+                    series = adata.obs[var]
+                    if isinstance(series.dtype, pd.CategoricalDtype):
+                        if 'NA' not in series.cat.categories:
+                            series = series.cat.add_categories(['NA'])
+                        adata.obs[var] = series.fillna('NA')
+                    else:
+                        adata.obs[var] = series.astype(object).fillna('NA')
         adata = adata.to_memory()
         if only_spatial:
             adata = adata[:, adata.var['spatially_variable']==True]

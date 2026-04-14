@@ -102,7 +102,8 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata
     sq.gr.centrality_scores(adata, cluster_key='cell_type')
 
     #set a small number of cell types to NA for testing NA handling
-    na_indices = np.random.choice(adata.obs.shape[0], size=10, replace=False)
+    na_sample_size = min(10, adata.obs.shape[0])
+    na_indices = np.random.choice(adata.obs.shape[0], size=na_sample_size, replace=False)
     adata.obs.loc[adata.obs.index[na_indices], 'cell_type'] = np.nan
 
     return adata
