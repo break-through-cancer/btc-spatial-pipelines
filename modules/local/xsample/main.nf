@@ -1,5 +1,6 @@
 process STAPLE_XSAMPLE {
     tag "cross-sample"
+    label "process_medium"
     container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
 
 
