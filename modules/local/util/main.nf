@@ -200,7 +200,7 @@ if outname in ["atlas_counts", "adata_counts"]:
     else:
         cell_type_col = "${params.ref_scrna_type_col}"
     if cell_type_col in adata.obs.columns:
-        ct_counts = adata.obs[cell_type_col].value_counts()
+        ct_counts = adata.obs[cell_type_col].value_counts(dropna=False)
         ct_counts.columns = ["cell_type", "n_cells"]
         ct_counts = pd.DataFrame(ct_counts).transpose()
         ct_counts.insert(0, "Sample", sample)
