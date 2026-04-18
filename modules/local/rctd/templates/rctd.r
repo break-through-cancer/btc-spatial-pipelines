@@ -93,7 +93,7 @@ celltypes_sc <- droplevels(celltypes_sc)
 counts_sc <- as(counts_sc, "CsparseMatrix")
 
 #4. create reference object and cleanup
-ref <- spacexr::Reference(cell_types=celltypes_sc, counts=counts_sc)
+ref <- spacexr::Reference(cell_types=celltypes_sc, counts=counts_sc, min_UMI = umi_min)
 counts_sc <- NULL
 gc()
 
