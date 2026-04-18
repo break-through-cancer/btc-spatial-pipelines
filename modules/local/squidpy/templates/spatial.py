@@ -13,10 +13,11 @@ sample = "${sample}"
 out = "${prefix}"
 process = "${task.process}"
 cell_type = "cell_type"
-na_as_value = "${params.na_as_value}"
+na_as_value = "${params.na_as_value}".lower() == 'true'
 seed = ${params.seed}
 nperms = ${params.sq_gr_spatial_autocorr_nperms}
 n_jobs = ${task.cpus}
+filter = ${params.analyze.filter}
 
 
 os.makedirs(out, exist_ok=True)
@@ -31,14 +32,17 @@ if nperms <= 0:
     nperms = None
 sq.gr.spatial_neighbors(adata)
 sq.gr.spatial_autocorr(adata, mode="moran", seed=seed, n_perms=nperms, n_jobs=n_jobs)
+# transfer significant genes from uns to var for easier access
+adata.var['spatially_variable'] = adata.var.index.isin(adata.uns['moranI']\
+    .index[adata.uns['moranI']['pval_norm_fdr_bh'].fillna(1) <= filter])
 
-#get most abundant cell type from bayestme
+# get most abundant cell type from bayestme
 if cell_type not in adata.obs.columns:
     log.info("cell_type {} not found in adata.obs, calculating from bayestme_cell_type_counts")
     most_abundant = np.argmax(adata.obsm['bayestme_cell_type_counts'], axis=1)
     adata.obs[cell_type] = most_abundant.astype('str')
 
-#squidpy insists on dir naming, not creating outdir as usually
+# squidpy insists on dir naming, not creating outdir as usually
 main_dir = os.getcwd()
 os.chdir(out)
 
