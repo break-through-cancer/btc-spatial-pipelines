@@ -179,7 +179,7 @@ if outname in ["atlas_input", "adata_input", "adata_output"]:
     adata = ad.read_h5ad(adata_path)
     #basic scanpy qc metrics
     adata.var["mito"] = adata.var_names.str.startswith("MT-")
-    qc = sc.pp.calculate_qc_metrics(adata, qc_vars=["mito"], inplace=False)
+    qc = sc.pp.calculate_qc_metrics(adata, qc_vars=["mito"], percent_top=None, inplace=False)
     report = pd.DataFrame({
         "Sample": [sample],
         "n_genes": adata.shape[1],
@@ -347,6 +347,51 @@ process ADATA_FROM_SEGMENTED_VISIUM {
     script:
     prefix = task.ext.prefix ?: "${meta.id}"
     template 'adata_from_segmented_visium.py'
+}
+
+process ADATA_FROM_XENIUM {
+    //convert xenium dir to h5ad
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
+
+    input:
+        tuple val(meta), path(data)
+    output:
+        tuple val(meta), path("${prefix}/adata.h5ad"),   emit: adata
+        path("versions.yml"),                            emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    """
+#!/usr/bin/env python3
+
+import os
+import spatialdata_io as sd
+from spatialdata_io.experimental import to_legacy_anndata
+import squidpy as sq
+
+sample = "${prefix}"
+data = "${data}"
+
+os.makedirs(sample, exist_ok=True)
+
+#read xenium dataset
+ds = sd.xenium(data)
+
+#convert to anndata
+adata = to_legacy_anndata(ds, include_images=True)
+adata.var_names_make_unique()
+
+#save
+outname = os.path.join(sample, "adata.h5ad")
+adata.write_h5ad(filename=outname, compression='gzip')
+
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
+    f.write("    squidpy: {}\\n".format(sq.__version__))
+    """
 }
 
 process ADATA_PREPROCESS {
