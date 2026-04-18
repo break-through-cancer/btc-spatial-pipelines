@@ -3,6 +3,7 @@ include { ATLAS_GET;
           ADATA_FROM_VISIUM;
           ADATA_FROM_VISIUM_HD;
           ADATA_FROM_SEGMENTED_VISIUM;
+          ADATA_FROM_XENIUM;
           ADATA_ADD_METADATA;
           ADATA_PREPROCESS } from '../../modules/local/util/'
 
@@ -33,7 +34,25 @@ workflow LOAD_DATASET {
                 versions = versions.mix(ADATA_FROM_VISIUM_HD.out.versions)
             }
 
+        } else if (params.xenium) {
+            ADATA_FROM_XENIUM( ch_input.map {it -> tuple(it.meta, it.data_directory) } )
+            ch_raw_adata = ADATA_FROM_XENIUM.out.adata
+            data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory) }
+            versions = versions.mix(ADATA_FROM_XENIUM.out.versions)
+
+        } else if (params.anndata) {
+            // in this case data_directory is the actual path to anndata file
+            ch_raw_adata = ch_input.map {it -> tuple(it.meta, it.data_directory) }
+            data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory) }
+
+        }  else if (params.visium) {
+            ADATA_FROM_VISIUM( ch_input.map {it -> tuple(it.meta, it.data_directory) } )
+            ch_raw_adata = ADATA_FROM_VISIUM.out.adata
+            data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory) }
+            versions = versions.mix(ADATA_FROM_VISIUM.out.versions)
+
         } else {
+            //duplicate to keep the default behaviorstandard visium for now
             ADATA_FROM_VISIUM( ch_input.map {it -> tuple(it.meta, it.data_directory) } )
             ch_raw_adata = ADATA_FROM_VISIUM.out.adata
             data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory) }
