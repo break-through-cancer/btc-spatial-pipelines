@@ -62,7 +62,7 @@ if 'spatial' in adata.uns:
     except IndexError:
         log.warning("no hires library found, using the first one")
         try:
-            lib_id = adata.uns["spatial"].keys()[0]
+            lib_id = [k for k in adata.uns["spatial"].keys()][0]
         except:
             log.error("no library data found in adata.uns['spatial']")
             raise
