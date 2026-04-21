@@ -375,7 +375,6 @@ with open("versions.yml", "w") as f:
     f.write("${task.process}:\\n")
     f.write("    spatialdata_io: {}\\n".format(sd.__version__))
     f.write("    squidpy: {}\\n".format(sq.__version__))
-    """
 
 sample = "${prefix}"
 data = "${data}"
@@ -392,7 +391,7 @@ adata.var_names_make_unique()
 #save
 outname = os.path.join(sample, "adata.h5ad")
 adata.write_h5ad(filename=outname, compression='gzip')
-
+    """
 }
 
 process ADATA_PREPROCESS {
