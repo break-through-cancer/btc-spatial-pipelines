@@ -351,7 +351,7 @@ process ADATA_FROM_SEGMENTED_VISIUM {
 
 process ADATA_FROM_XENIUM {
     //convert xenium dir to h5ad
-    label "process_medium"
+    label "process_high"
     container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"
 
     input:
