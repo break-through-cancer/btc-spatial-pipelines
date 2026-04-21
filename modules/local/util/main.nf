@@ -370,6 +370,13 @@ import spatialdata_io as sd
 from spatialdata_io.experimental import to_legacy_anndata
 import squidpy as sq
 
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
+    f.write("    squidpy: {}\\n".format(sq.__version__))
+    """
+
 sample = "${prefix}"
 data = "${data}"
 
@@ -386,12 +393,6 @@ adata.var_names_make_unique()
 outname = os.path.join(sample, "adata.h5ad")
 adata.write_h5ad(filename=outname, compression='gzip')
 
-#versions
-with open("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
-    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
-    f.write("    squidpy: {}\\n".format(sq.__version__))
-    """
 }
 
 process ADATA_PREPROCESS {
