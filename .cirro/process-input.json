@@ -18,8 +18,8 @@
     "ref_scrna": "$.dataset.params.ref_deconvolution.reference_scrna",
     "ref_scrna_type_col": "$.dataset.params.ref_deconvolution.type_col_scrna",
     "visium_hd": "$.dataset.params.data.hd",
-    "xenium": "$.dataset.params.data.format == 'xenium'",
-    "anndata": "$.dataset.params.data.format == 'anndata'",
-    "visium": "$.dataset.params.data.format == 'visium'"
+    "xenium": "$.dataset.params.format == 'xenium'",
+    "anndata": "$.dataset.params.format == 'anndata'",
+    "visium": "$.dataset.params.format == 'visium'"
     
 }
