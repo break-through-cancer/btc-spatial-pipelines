@@ -352,7 +352,7 @@ process ADATA_FROM_SEGMENTED_VISIUM {
 process ADATA_FROM_XENIUM {
     //convert xenium dir to h5ad
     label "process_high"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ab063a34c0de7de4834e83d60647cd3301169475dd31bb435104bea75ab6d445"  //for spatialdata_io
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:0471909d51c29a5a4cb391ac86f5cf58dad448da7f6862577d206ae8eb831216"  //spatialdata_io 0.5.1
 
     input:
         tuple val(meta), path(data)
