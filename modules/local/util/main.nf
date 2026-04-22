@@ -20,6 +20,11 @@ import os
 import anndata as ad
 import numpy as np
 
+with open ("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    anndata: {}\\n".format(ad.__version__))
+    f.write("    numpy: {}\\n".format(np.__version__))
+
 print("Reading adata_sc in the backed mode")
 adata_sc = ad.read_h5ad("$adata_sc", backed='r')
 print("adata_sc:")
@@ -86,11 +91,6 @@ else:
 
 adata_sc.file.close()
 adata_st.file.close()
-
-with open ("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
-    f.write("    anndata: {}\\n".format(ad.__version__))
-    f.write("    numpy: {}\\n".format(np.__version__))
 """
 }
 
@@ -113,6 +113,12 @@ import os
 import requests
 from urllib.parse import urlparse
 import boto3
+
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    requests: {}\\n".format(requests.__version__))
+    f.write("    boto3: {}\\n".format(boto3.__version__))
 
 myurl = "${url}"
 
@@ -142,12 +148,6 @@ else:
     os.symlink(myurl, os.path.basename(myurl))
 
 print(f"Got atlas from {myurl}")
-
-#versions
-with open("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
-    f.write("    requests: {}\\n".format(requests.__version__))
-    f.write("    boto3: {}\\n".format(boto3.__version__))
 """
 }
 
@@ -170,6 +170,11 @@ import anndata as ad
 import pandas as pd
 import scanpy as sc
 
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    anndata: {}\\n".format(ad.__version__))
+    f.write("    pandas: {}\\n".format(pd.__version__))
 
 adata_path = "$adata"
 outname = "$report_name"
@@ -219,12 +224,6 @@ if outname in ["cell_probs"]:
     else:
         print("cell_type_prob not found in adata.obs")
     adata.file.close()
-
-#versions
-with open("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
-    f.write("    anndata: {}\\n".format(ad.__version__))
-    f.write("    pandas: {}\\n".format(pd.__version__))
 """
 }
 
@@ -249,6 +248,12 @@ import spatialdata_io as sd
 from spatialdata_io.experimental import to_legacy_anndata
 import squidpy as sq
 
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
+    f.write("    squidpy: {}\\n".format(sq.__version__))
+
 sample = "${prefix}"
 data = "${data}"
 table = "${params.visium_hd}"
@@ -271,12 +276,6 @@ adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 #save
 outname = os.path.join(sample, "adata.h5ad")
 adata.write_h5ad(filename=outname, compression='gzip')
-
-#versions
-with open("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
-    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
-    f.write("    squidpy: {}\\n".format(sq.__version__))
 """
 }
 
@@ -304,6 +303,12 @@ import squidpy as sq
 sample = "${prefix}"
 data = "${data}"
 
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
+    f.write("    squidpy: {}\\n".format(sq.__version__))
+
 os.makedirs(sample, exist_ok=True)
 
 #read visium dataset
@@ -323,12 +328,6 @@ adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 #save
 outname = os.path.join(sample, "adata.h5ad")
 adata.write_h5ad(filename=outname, compression='gzip')
-
-#versions
-with open("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
-    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
-    f.write("    squidpy: {}\\n".format(sq.__version__))
 """
 }
 
