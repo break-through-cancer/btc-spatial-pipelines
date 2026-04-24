@@ -52,7 +52,7 @@ workflow LOAD_DATASET {
             versions = versions.mix(ADATA_FROM_VISIUM.out.versions)
 
         } else {
-            //duplicate to keep the default behaviorstandard visium for now
+            // duplicate to keep the default behavior (standard Visium) for now
             ADATA_FROM_VISIUM( ch_input.map {it -> tuple(it.meta, it.data_directory) } )
             ch_raw_adata = ADATA_FROM_VISIUM.out.adata
             data_directory = ch_input.map{ it -> tuple(it.meta, it.data_directory) }
