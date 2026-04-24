@@ -2,7 +2,7 @@ process ATLAS_MATCH {
     //return adata_sc with gene index matching adata_st by gene name or gene id
     tag "$meta.id"
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ed44380c6e6e73fc575b743eba864941c26880053e50c3d70b5c9bfc526c0520"
 
     //adata_sc adata_sc
     //adata_st adata_st
@@ -19,6 +19,11 @@ process ATLAS_MATCH {
 import os
 import anndata as ad
 import numpy as np
+
+with open ("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    anndata: {}\\n".format(ad.__version__))
+    f.write("    numpy: {}\\n".format(np.__version__))
 
 print("Reading adata_sc in the backed mode")
 adata_sc = ad.read_h5ad("$adata_sc", backed='r')
@@ -86,18 +91,13 @@ else:
 
 adata_sc.file.close()
 adata_st.file.close()
-
-with open ("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
-    f.write("    anndata: {}\\n".format(ad.__version__))
-    f.write("    numpy: {}\\n".format(np.__version__))
 """
 }
 
 process ATLAS_GET {
     //download an atlas anndata file from a url
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ed44380c6e6e73fc575b743eba864941c26880053e50c3d70b5c9bfc526c0520"
 
     input:
         val(url)
@@ -113,6 +113,12 @@ import os
 import requests
 from urllib.parse import urlparse
 import boto3
+
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    requests: {}\\n".format(requests.__version__))
+    f.write("    boto3: {}\\n".format(boto3.__version__))
 
 myurl = "${url}"
 
@@ -142,19 +148,13 @@ else:
     os.symlink(myurl, os.path.basename(myurl))
 
 print(f"Got atlas from {myurl}")
-
-#versions
-with open("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
-    f.write("    requests: {}\\n".format(requests.__version__))
-    f.write("    boto3: {}\\n".format(boto3.__version__))
 """
 }
 
 process QC {
     //generate a simple report of the atlas adata
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ed44380c6e6e73fc575b743eba864941c26880053e50c3d70b5c9bfc526c0520"
 
     input:
         tuple val(meta), path(adata), val(report_name)
@@ -170,6 +170,11 @@ import anndata as ad
 import pandas as pd
 import scanpy as sc
 
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    anndata: {}\\n".format(ad.__version__))
+    f.write("    pandas: {}\\n".format(pd.__version__))
 
 adata_path = "$adata"
 outname = "$report_name"
@@ -179,7 +184,7 @@ if outname in ["atlas_input", "adata_input", "adata_output"]:
     adata = ad.read_h5ad(adata_path)
     #basic scanpy qc metrics
     adata.var["mito"] = adata.var_names.str.startswith("MT-")
-    qc = sc.pp.calculate_qc_metrics(adata, qc_vars=["mito"], inplace=False)
+    qc = sc.pp.calculate_qc_metrics(adata, qc_vars=["mito"], percent_top=None, inplace=False)
     report = pd.DataFrame({
         "Sample": [sample],
         "n_genes": adata.shape[1],
@@ -219,19 +224,13 @@ if outname in ["cell_probs"]:
     else:
         print("cell_type_prob not found in adata.obs")
     adata.file.close()
-
-#versions
-with open("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
-    f.write("    anndata: {}\\n".format(ad.__version__))
-    f.write("    pandas: {}\\n".format(pd.__version__))
 """
 }
 
 process ADATA_FROM_VISIUM_HD {
     //convert vhd file to h5ad
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ed44380c6e6e73fc575b743eba864941c26880053e50c3d70b5c9bfc526c0520"
 
     input:
         tuple val(meta), path(data)
@@ -248,6 +247,12 @@ import os
 import spatialdata_io as sd
 from spatialdata_io.experimental import to_legacy_anndata
 import squidpy as sq
+
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
+    f.write("    squidpy: {}\\n".format(sq.__version__))
 
 sample = "${prefix}"
 data = "${data}"
@@ -271,19 +276,13 @@ adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 #save
 outname = os.path.join(sample, "adata.h5ad")
 adata.write_h5ad(filename=outname, compression='gzip')
-
-#versions
-with open("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
-    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
-    f.write("    squidpy: {}\\n".format(sq.__version__))
 """
 }
 
 process ADATA_FROM_VISIUM {
     //convert visium dir to h5ad
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ed44380c6e6e73fc575b743eba864941c26880053e50c3d70b5c9bfc526c0520"
 
     input:
         tuple val(meta), path(data)
@@ -304,6 +303,12 @@ import squidpy as sq
 sample = "${prefix}"
 data = "${data}"
 
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
+    f.write("    squidpy: {}\\n".format(sq.__version__))
+
 os.makedirs(sample, exist_ok=True)
 
 #read visium dataset
@@ -323,12 +328,6 @@ adata.obsp['connectivities'] = adata.obsp['spatial_connectivities'].astype(bool)
 #save
 outname = os.path.join(sample, "adata.h5ad")
 adata.write_h5ad(filename=outname, compression='gzip')
-
-#versions
-with open("versions.yml", "w") as f:
-    f.write("${task.process}:\\n")
-    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
-    f.write("    squidpy: {}\\n".format(sq.__version__))
 """
 }
 
@@ -336,7 +335,7 @@ process ADATA_FROM_SEGMENTED_VISIUM {
     //convert visium dir to h5ad with cells instead of spots 
     //and cell centers as coordinates
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ed44380c6e6e73fc575b743eba864941c26880053e50c3d70b5c9bfc526c0520"
 
     input:
         tuple val(meta), path(data)
@@ -349,11 +348,56 @@ process ADATA_FROM_SEGMENTED_VISIUM {
     template 'adata_from_segmented_visium.py'
 }
 
+process ADATA_FROM_XENIUM {
+    //convert xenium dir to h5ad
+    label "process_medium"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ed44380c6e6e73fc575b743eba864941c26880053e50c3d70b5c9bfc526c0520"
+
+    input:
+        tuple val(meta), path(data)
+    output:
+        tuple val(meta), path("${prefix}/adata.h5ad"),   emit: adata
+        path("versions.yml"),                            emit: versions
+
+    script:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    """
+#!/usr/bin/env python3
+
+import os
+import spatialdata_io as sd
+from spatialdata_io.experimental import to_legacy_anndata
+import squidpy as sq
+
+#versions
+with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
+    f.write("    spatialdata_io: {}\\n".format(sd.__version__))
+    f.write("    squidpy: {}\\n".format(sq.__version__))
+
+sample = "${prefix}"
+data = "${data}"
+
+os.makedirs(sample, exist_ok=True)
+
+#read xenium dataset
+ds = sd.xenium(data)
+
+#convert to anndata
+adata = to_legacy_anndata(ds, include_images=True)
+adata.var_names_make_unique()
+
+#save
+outname = os.path.join(sample, "adata.h5ad")
+adata.write_h5ad(filename=outname, compression='gzip')
+    """
+}
+
 process ADATA_PREPROCESS {
     //filter genes from an adata file by dropping genes whose names match a specified prefix (via drop_genes_prefix)
     tag "$meta.id"
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ed44380c6e6e73fc575b743eba864941c26880053e50c3d70b5c9bfc526c0520"
 
     input:
         tuple val(meta), path(adata)
@@ -370,7 +414,7 @@ process ATTACH_CELL_PROBS {
     //attach cell type probabilities to anndata obsm
     tag "$meta.id"
     label "process_low"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ed44380c6e6e73fc575b743eba864941c26880053e50c3d70b5c9bfc526c0520"
 
     input:
         tuple val(meta), path(cell_probs), path(adata), val(out_name)
@@ -406,7 +450,7 @@ process CELL_TYPES_FROM_COGAPS {
     //this overwrites previously created andata.h5ad files
     tag "$meta.id"
     label "process_medium"
-    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc"
+    container "ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ed44380c6e6e73fc575b743eba864941c26880053e50c3d70b5c9bfc526c0520"
 
     input:
         tuple val(meta), path(adata)
@@ -423,7 +467,7 @@ process CELL_TYPES_FROM_COGAPS {
 process STAPLE_ATTACH_LIGREC {
     tag "$meta.id"
     label 'process_medium'
-    container 'ghcr.io/break-through-cancer/btc-containers/scverse@sha256:47a5a7292df74c7d4446609a5fae9676235292a60a1fa46ff02762cb3d10d0dc'
+    container 'ghcr.io/break-through-cancer/btc-containers/scverse@sha256:ed44380c6e6e73fc575b743eba864941c26880053e50c3d70b5c9bfc526c0520'
 
     input:
         tuple val(meta), path(adata), path(ligrec)
