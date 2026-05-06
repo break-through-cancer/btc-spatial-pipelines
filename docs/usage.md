@@ -7,7 +7,10 @@
 ### Hardware requirements
 Enough RAM and cpu to run spatial transcriptomics datasets that you have.
 
-## STAPLE has been tested on
+### Software requirements
+Linux/mac OS or Cirro (https://cirro.bio/) is required to run STAPLE.
+
+### STAPLE has been tested on
 ```
 macOS 26.3.1 (a)
 Cirro web platform (https://cirro.bio/)
