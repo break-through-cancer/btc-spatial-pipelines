@@ -4,7 +4,15 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+### Hardware requirements
+Enough RAM and cpu to run spatial transcriptomics datasets that you have.
+
+## STAPLE has been teted on
+```
+macOS 26.3.1 (a)
+Cirro web platform (https://cirro.bio/)
+slurm 23.11.6
+```
 
 ## Just trying
  Run with test data in under 10 minutes on your laptop (needs docker and nextflow installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/staple/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. 
