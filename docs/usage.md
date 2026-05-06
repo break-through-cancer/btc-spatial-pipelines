@@ -7,7 +7,7 @@
 <!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
 
 ## Just trying
- Run with test data in under 10 minutes on your laptop (needs docker installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/staple/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. 
+ Run with test data in under 10 minutes on your laptop (needs docker and nextflow installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/staple/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. 
 
 ```
 # make a clean directory called tests
