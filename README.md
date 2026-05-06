@@ -2,7 +2,7 @@
 
 ## Introduction
 
-**STAPLE** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data that puts the scientific question first. Features are pre-computed on a per-sample basis, then contrasted across samples using metadata provided through the sample sheet, and finally combined in a comprehensive MultiQC report for downstream analysis compatible with LLMs.
+**STAPLE** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data that puts the scientific question first. Features are pre-computed on a per-sample basis, then contrasted across samples using metadata provided through the sample sheet, and finally combined in a comprehensive MultiQC report for downstream analysis compatible with LLMs. Learn more in the [preprint](https://www.biorxiv.org/content/10.64898/2026.03.30.715127v1), see the interactive examples on the supplement [mini web-site](https://fertiglab.github.io/staple-paper/).
 
 
 ```mermaid
