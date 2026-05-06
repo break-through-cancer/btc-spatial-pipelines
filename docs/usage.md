@@ -18,7 +18,7 @@ slurm 23.11.6
 ```
 
 ## Just trying
- Run with test data in under 10 minutes on your laptop (needs docker and nextflow installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/staple/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. 
+ Run with test data in under 10 minutes on your laptop (needs docker and nextflow installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/staple/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. Note that running STAPLE for the first time will trigger the download of the docker images, thus the actual time to run will be longer and will depend on the speed of your Internet connection. It may get up to 1h on slower speeds.
 
 ```
 # make a clean directory called tests
