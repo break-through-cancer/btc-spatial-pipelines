@@ -15,6 +15,7 @@ Linux/mac OS with Docker, a slurm cluster with Docker or Singularity/Apptainer, 
 macOS 26.3.1 (a)
 Cirro web platform (https://cirro.bio/)
 slurm 23.11.6
+github Ubuntu runners
 ```
 
 ## Just trying
