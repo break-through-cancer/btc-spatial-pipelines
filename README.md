@@ -2,7 +2,7 @@
 
 ## Introduction
 
-**STAPLE** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data that puts the scientific question first. Features are pre-computed on a per-sample basis, then contrasted across samples using metadata provided through the sample sheet, and finally combined in a comprehensive MultiQC report for downstream analysis compatible with LLMs.
+**STAPLE** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data that puts the scientific question first. Features are pre-computed on a per-sample basis, then contrasted across samples using metadata provided through the sample sheet, and finally combined in a comprehensive MultiQC report for downstream analysis compatible with LLMs. Learn more in the [preprint](https://www.biorxiv.org/content/10.64898/2026.03.30.715127v1), see the interactive examples on the supplement [mini web-site](https://fertiglab.github.io/staple-paper/).
 
 
 ```mermaid
@@ -34,6 +34,12 @@ flowchart LR
 
 
 ## Usage
+>[!IMPORTANT]
+Since Nextflow [Version 26.0.4](https://github.com/nextflow-io/nextflow/releases/tag/v26.04.1), released on May-11, if running that or a later version while we are making refactoring changes to support the strict syntax, turn the strict syntax off:
+```
+export NXF_SYNTAX_PARSER=v1
+```
+
 
 >[!note]
 If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
