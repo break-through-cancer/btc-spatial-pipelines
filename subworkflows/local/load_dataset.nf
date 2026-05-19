@@ -98,8 +98,9 @@ workflow LOAD_DATASET {
 
         // match scRNA atlas to spatial data
         ATLAS_MATCH(ch_scrna.join( ch_adata ))
-        ch_matched_adata = ATLAS_MATCH.out.adata_matched
+        
         versions = versions.mix(ATLAS_MATCH.out.versions)
+        ch_matched_adata = ATLAS_MATCH.out.adata_matched
 
 
     emit:
