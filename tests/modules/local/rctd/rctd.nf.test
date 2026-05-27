@@ -91,4 +91,36 @@ nextflow_process {
             assert process.out.versions
         }
     }
+
+        test("Should run with filtered n_top_genes for RCTD") {
+
+        tag "process"
+        tag "rctd"
+        tag "filtered_n_top_genes"
+
+        when {
+            params {
+                max_memory = '8.GB'
+                max_cpus   = 2
+                deconvolve {
+                    n_top_genes = 100
+                }
+                outdir = 'output'
+            }
+            process {
+                """
+                input[0] = [[id:"sample"],
+                            file("${projectDir}/tests/data/atlas_small.h5ad"),
+                            file("${projectDir}/tests/data/adata_matched.h5ad")]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.rctd_cell_types
+            assert process.out.rctd_object
+            assert process.out.versions
+        }
+    }
 }
