@@ -117,6 +117,17 @@ nextflow run break-through-cancer/staple \
    --analyze.<spacemarkers/squidpy> \
 ```
 
+Control squidpy [ligand-receptor interaction](https://squidpy.readthedocs.io/en/stable/notebooks/examples/graph/compute_ligrec.html) parameters:
+
+Run in mouse data (or any other organism via ortholog conversion):
+```bash
+--sq_gr_ligrec_interactions_params '{"organism":"10090"}'
+```
+
+Use only CellPhoneDB:
+```bash
+--sq_gr_ligrec_interactions_params '{"resources": "CellPhoneDB"}'
+```
 
 ### Updating the pipeline
 
