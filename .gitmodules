@@ -1,12 +1,12 @@
 [submodule "modules/bayestme"]
 	path = modules/local/bayestme
 	url = https://github.com/tansey-lab/bayestme.git
-	update = merge
+	update = checkout
 [submodule "modules/local/spacemarkers"]
 	path = modules/local/spacemarkers
 	url = https://github.com/DeshpandeLab/SpaceMarkers
-	update = merge
+	update = checkout
 [submodule "modules/local/cogaps"]
 	path = modules/local/cogaps
 	url = https://github.com/FertigLab/CoGAPS
-	update = merge
+	update = checkout
