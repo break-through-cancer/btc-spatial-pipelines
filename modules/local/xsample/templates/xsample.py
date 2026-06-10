@@ -322,22 +322,26 @@ def co_occurrence_report(adatas, spotlight=None, uns_key='cell_type_co_occurrenc
                 # init a pandas dataframe with this cell and partner cell 
                 # types as composite index for further merging across samples
                 sample = adata.obs['id'].unique()[0]
+                # merge with previous samples on the cell type index, keeping all cell types seen in any sample
                 co_df = pd.DataFrame(co_occurrence,
                                      index=pd.MultiIndex.from_tuples([(sample, ct, coct) for coct in adata_cell_types],
-                                                                     names=['sample', 'cell_type', 'co_cell_type']))            # merge with previous samples on the cell type index, keeping all cell types seen in any sample
+                                     names=['sample', 'cell_type', 'co_cell_type']))
             if ct in ct_dict:
                 log.info(f"Merging co-occurrence data for cell type {ct} across samples.")
                 ct_dict[ct] = pd.concat([ct_dict[ct], co_df])
             else:
                 log.info(f"Initializing co-occurrence data for cell type {ct} with first sample.")
                 ct_dict[ct] = co_df
-    #return the dict of dataframes if no summary requested, otherwise mqc
+
+    #return combined df if no summary requested, otherwise mqc
     if not summary:
-        return ct_dict
+        return pd.concat([v for v in ct_dict.values()])
     
     for ct, df in ct_dict.items():
         df_summary = df.groupby(['co_cell_type']).agg(summary)
-        report = df_summary.to_dict(orient='index')
+        report_dict = df_summary.to_dict(orient='index')
+        # make list of points for each cell type, example {'stroma':[[0, 1.06],...[1, 0.95]]}
+        report = {k:[[i,report_dict[k][i]] for i in report_dict[k].keys()] for k in report_dict.keys()}
         reports.append(report)
 
     mqc_report = {
@@ -348,8 +352,8 @@ def co_occurrence_report(adatas, spotlight=None, uns_key='cell_type_co_occurrenc
         near other cell types more than average at a given distance.",
         "pconfig": {
             "title": "Cell type co-occurrence across samples",
-            "ylab": "Neighboring cell type share",
-            "xlab": "Sample",
+            "ylab": "Occurring / expected",
+            "xlab": "Interval",
             "data_labels": list(cell_types)
         },
         "data": reports
@@ -602,3 +606,19 @@ if __name__ == '__main__':
     #wrapup
     for adata in adatas:
         adata.file.close()
+
+
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots(figsize=(6, 4))
+
+# 1. Generate the line plot without passing vmax
+plt.figure(figsize=(6, 4))
+sq.pl.co_occurrence(
+    adatas[0],
+    cluster_key="cell_type"
+)
+
+fig = plt.gcf()
+plt.setp(fig.axes, ylim=(0, 2), xlim=(1, 3))
+
+plt.show()
