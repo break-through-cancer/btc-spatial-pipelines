@@ -211,6 +211,7 @@ def neighbors_report(adatas, spotlight=None):
     for cell_type in cell_types:
         sample_dict = {}
         for adata in adatas:
+            # cell type interactions counts of immediate neighbors
             if "cell_type_interactions" in adata.uns:
                 if cell_type not in adata.obs['cell_type'].cat.categories:
                     continue
@@ -288,6 +289,73 @@ def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_c
         }
         reports[score] = mqc_report
     return reports
+
+
+def co_occurrence_report(adatas, spotlight=None, uns_key='cell_type_co_occurrence', summary='mean'):
+    if spotlight:
+        cell_types = spotlight    
+    else:
+        cell_types = {}
+        for adata in adatas:
+            if "cell_type" in adata.obs:
+                ct_counts = adata.obs['cell_type'].value_counts()
+                for ct, count in ct_counts.items():
+                    if ct in cell_types:
+                        cell_types[ct] += count
+                    else:
+                        cell_types[ct] = count
+        cell_types = cell_types.keys()
+    
+    reports = []
+
+    ct_dict = {}
+    for ct in cell_types:
+        # gather co-occurence for ct from each adata
+        for adata in adatas:
+            if uns_key in adata.uns and ct in adata.obs['cell_type'].cat.categories:
+                # gather all cell types in this adata
+                adata_cell_types = adata.obs['cell_type'].cat.categories.tolist()
+                # get the index of ct in current anndata
+                ct_index = adata_cell_types.index(ct)
+                # get its co-occurrence with other cell types
+                co_occurrence = adata.uns[uns_key]['occ'][ct_index]
+                # init a pandas dataframe with this cell and partner cell 
+                # types as composite index for further merging across samples
+                sample = adata.obs['id'].unique()[0]
+                co_df = pd.DataFrame(co_occurrence,
+                                     index=pd.MultiIndex.from_tuples([(sample, ct, coct) for coct in adata_cell_types],
+                                                                     names=['sample', 'cell_type', 'co_cell_type']))            # merge with previous samples on the cell type index, keeping all cell types seen in any sample
+            if ct in ct_dict:
+                log.info(f"Merging co-occurrence data for cell type {ct} across samples.")
+                ct_dict[ct] = pd.concat([ct_dict[ct], co_df])
+            else:
+                log.info(f"Initializing co-occurrence data for cell type {ct} with first sample.")
+                ct_dict[ct] = co_df
+    #return the dict of dataframes if no summary requested, otherwise mqc
+    if not summary:
+        return ct_dict
+    
+    for ct, df in ct_dict.items():
+        df_summary = df.groupby(['co_cell_type']).agg(summary)
+        report = df_summary.to_dict(orient='index')
+        reports.append(report)
+
+    mqc_report = {
+        "id": "co_occurrence",
+        "plot_type": "linegraph",
+        "description": f"{summary} of Co-occurrence of cell types across samples. \
+        Values greater than 1 indicate that the cell type is found \
+        near other cell types more than average at a given distance.",
+        "pconfig": {
+            "title": "Cell type co-occurrence across samples",
+            "ylab": "Neighboring cell type share",
+            "xlab": "Sample",
+            "data_labels": list(cell_types)
+        },
+        "data": reports
+    }
+    return mqc_report
+
 
 
 def plot_hist(df_pair, title=None, save=True):
