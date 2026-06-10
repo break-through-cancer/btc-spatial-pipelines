@@ -608,17 +608,3 @@ if __name__ == '__main__':
         adata.file.close()
 
 
-import matplotlib.pyplot as plt
-fig, ax = plt.subplots(figsize=(6, 4))
-
-# 1. Generate the line plot without passing vmax
-plt.figure(figsize=(6, 4))
-sq.pl.co_occurrence(
-    adatas[0],
-    cluster_key="cell_type"
-)
-
-fig = plt.gcf()
-plt.setp(fig.axes, ylim=(0, 2), xlim=(1, 3))
-
-plt.show()
