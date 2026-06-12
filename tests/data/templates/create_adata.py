@@ -1,17 +1,16 @@
 #!/usr/bin/env python
+import argparse
+
 import anndata as ad
 import numpy as np
 import pandas as pd
 import squidpy as sq
 import scanpy as sc
+import argparse
 
-# set random seed for reproducibility
-np.random.seed(42)
 
-num_adatas = "${num_adatas}"
-with_metadata = "${with_metadata}".lower() == 'true'
-
-def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata=True):
+def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata=True, na_pct=0.1, seed=42):
+    np.random.seed(seed)
 
     # create anndata object n obs by m vars with random counts
     adata = ad.AnnData(X=np.random.poisson(1, (n, m)), 
@@ -105,21 +104,38 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata
     sq.gr.centrality_scores(adata, cluster_key='cell_type')
 
     # set a small number of cell types to NA for testing NA handling
-    na_sample_size = min(10, adata.obs.shape[0])
+    na_sample_size = min(int(na_pct * adata.obs.shape[0]), adata.obs.shape[0])
     na_indices = np.random.choice(adata.obs.shape[0], size=na_sample_size, replace=False)
     adata.obs.loc[adata.obs.index[na_indices], 'cell_type'] = np.nan
 
     return adata
 
 
-def make_many_adata(num_adatas=2, n=25, m=1000, pct_mito=0.1, with_metadata=True):
+def make_many_adata(num_adatas=2, n=25, m=1000, pct_mito=0.1, with_metadata=True, seeds=None):
     adatas = []
+    if seeds is None:
+        seeds = np.random.randint(0, 10000, size=num_adatas)  # different seed for each adata
+    else:
+        assert len(seeds) == num_adatas, "Length of seeds must match num_adatas"
+
     for i in range(num_adatas):
-        adata = make_one_adata(n=n, m=m, pct_mito=pct_mito, sample_id=f'sample_{i}', with_metadata=with_metadata)
+        adata = make_one_adata(n=n, m=m, pct_mito=pct_mito, sample_id=f'sample_{i}',
+                               with_metadata=with_metadata, na_pct=0.1, seed=seeds[i])
         adatas.append(adata)
     return adatas
 
 if __name__ == "__main__":
-    adatas = make_many_adata(num_adatas=int(num_adatas), n=25, m=1000, pct_mito=0.1, with_metadata=with_metadata)
+    # nf params
+    num_adatas = "${num_adatas}"
+    with_metadata = "${with_metadata}".lower() == 'true'
+    seeds = "${seeds}".split(',')
+    if len(seeds) == 1 and seeds[0] == '':  # handle empty string case
+        seeds = None
+    else:
+        seeds = [int(seed) for seed in seeds]
+
+    #compose adatas and write to disk
+    adatas = make_many_adata(num_adatas=int(num_adatas), n=25, m=1000,
+                             pct_mito=0.1, with_metadata=with_metadata, seeds=seeds)
     for i, adata in enumerate(adatas):
         adata.write_h5ad(f'{i}_adata.h5ad')

@@ -305,13 +305,16 @@ def co_occurrence_report(adatas, spotlight=None, uns_key='cell_type_co_occurrenc
                     else:
                         cell_types[ct] = count
         cell_types = cell_types.keys()
-    
+
+    # 'NA' may be present as added by pseudobulk rearlier, will cause error
+    cell_types = [ct for ct in cell_types if ct != 'NA']
+    adatas_filtered = [adata[adata.obs['cell_type'] != 'NA'] for adata in adatas]
     reports = []
 
     ct_dict = {}
     for ct in cell_types:
         # gather co-occurence for ct from each adata
-        for adata in adatas:
+        for adata in adatas_filtered:
             if uns_key in adata.uns and ct in adata.obs['cell_type'].cat.categories:
                 # gather all cell types in this adata
                 adata_cell_types = adata.obs['cell_type'].cat.categories.tolist()
@@ -334,8 +337,7 @@ def co_occurrence_report(adatas, spotlight=None, uns_key='cell_type_co_occurrenc
                 ct_dict[ct] = co_df
 
     #return combined df if no summary requested, otherwise mqc
-    if not summary:
-        return pd.concat([v for v in ct_dict.values()])
+    csv_report = pd.concat([v for v in ct_dict.values()])
     
     for ct, df in ct_dict.items():
         df_summary = df.groupby(['co_cell_type']).agg(summary)
@@ -358,7 +360,7 @@ def co_occurrence_report(adatas, spotlight=None, uns_key='cell_type_co_occurrenc
         },
         "data": reports
     }
-    return mqc_report
+    return mqc_report, csv_report
 
 
 
@@ -522,7 +524,7 @@ if __name__ == '__main__':
         pb_adata.write(f"{reports_dir}/pseudobulk.h5ad")
     
     # make reports
-    # if no cats found, just produce overall ligrec report
+    # if no cats found, just produce overall reports
     if cats is None or len(cats) == 0:
         try:
             res_mqc, res = heatmap_report(adatas, spotlight=spotlight, show=show, tool='squidpy_ligrec', filter=filter)
@@ -539,6 +541,11 @@ if __name__ == '__main__':
             save_reports(moran_mqc, moran, "moranI_overall")
         except Exception as e:
             log.warning(f"Could not generate overall Moran's I report: {e}")
+        try:
+            co_occ_mqc, co_occ_csv = co_occurrence_report(adatas, spotlight=spotlight)
+            save_reports(co_occ_mqc, co_occ_csv, "co_occurrence_overall", mqc_reports_dir, reports_dir)
+        except Exception as e:
+            log.warning(f"Could not generate overall co-occurrence report: {e}")
     else:
         # for variables with 2 groups, perform appropriate tests
         for var in cats.keys():
@@ -599,9 +606,22 @@ if __name__ == '__main__':
                 mqc_report = de_report(de_results, spotlight=spotlight, filter=filter, show=show, contrast=contrasts)
                 save_reports(mqc_report, None, f"deseq2_diff_{var}_results",
                                 mqc_reports_dir, reports_dir)
-
             except Exception as e:
                 log.warning(f"Could not perform DESeq2 analysis for variable {var}: {e}")
+
+            # co-occurence by groups (place each adata in the appropriate group based on its obs)
+            try:
+                g1_adatas = [a for a in adatas if a.obs[var].unique()[0] == groups[0]]
+                g2_adatas = [a for a in adatas if a.obs[var].unique()[0] == groups[1]]
+                log.info(f"Generating co-occurrence report for variable {var} with groups {groups}. Group 1 has {len(g1_adatas)} samples, group 2 has {len(g2_adatas)} samples.")
+                co_occ_g1_mqc, co_occ_g1_csv = co_occurrence_report(g1_adatas, spotlight=spotlight)
+                co_occ_g2_mqc, co_occ_g2_csv = co_occurrence_report(g2_adatas, spotlight=spotlight)
+                save_reports(co_occ_g1_mqc, co_occ_g1_csv, f"co_occurrence_{var}_{groups[0]}",
+                                mqc_reports_dir, reports_dir)
+                save_reports(co_occ_g2_mqc, co_occ_g2_csv, f"co_occurrence_{var}_{groups[1]}",
+                                mqc_reports_dir, reports_dir)
+            except Exception as e:
+                log.warning(f"Could not generate co-occurrence report for variable {var}: {e}")
 
     #wrapup
     for adata in adatas:
