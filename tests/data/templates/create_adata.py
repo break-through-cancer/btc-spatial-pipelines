@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-import argparse
 
 import anndata as ad
 import numpy as np
 import pandas as pd
-import squidpy as sq
 import scanpy as sc
-import argparse
+import squidpy as sq
 
 
 def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata=True, na_pct=0.1, seed=42):
@@ -116,8 +114,8 @@ def make_many_adata(num_adatas=2, n=25, m=1000, pct_mito=0.1, with_metadata=True
     if seeds is None:
         seeds = np.random.randint(0, 10000, size=num_adatas)  # different seed for each adata
     else:
-        assert len(seeds) == num_adatas, "Length of seeds must match num_adatas"
-
+        if len(seeds) != num_adatas:
+            raise ValueError("Length of seeds must match num_adatas")
     for i in range(num_adatas):
         adata = make_one_adata(n=n, m=m, pct_mito=pct_mito, sample_id=f'sample_{i}',
                                with_metadata=with_metadata, na_pct=0.1, seed=seeds[i])
@@ -128,12 +126,11 @@ if __name__ == "__main__":
     # nf params
     num_adatas = "${num_adatas}"
     with_metadata = "${with_metadata}".lower() == 'true'
-    seeds = "${seeds}".split(',')
+    seeds = [s.strip() for s in "${seeds}".split(',')]
     if len(seeds) == 1 and seeds[0] == '':  # handle empty string case
         seeds = None
     else:
         seeds = [int(seed) for seed in seeds]
-
     #compose adatas and write to disk
     adatas = make_many_adata(num_adatas=int(num_adatas), n=25, m=1000,
                              pct_mito=0.1, with_metadata=with_metadata, seeds=seeds)

@@ -306,7 +306,7 @@ def co_occurrence_report(adatas, spotlight=None, uns_key='cell_type_co_occurrenc
                         cell_types[ct] = count
         cell_types = cell_types.keys()
 
-    # 'NA' may be present as added by pseudobulk rearlier, will cause error
+    # 'NA' may be present as added by pseudobulk earlier, will cause error
     cell_types = [ct for ct in cell_types if ct != 'NA']
     adatas_filtered = [adata[adata.obs['cell_type'] != 'NA'] for adata in adatas]
     reports = []
@@ -315,20 +315,29 @@ def co_occurrence_report(adatas, spotlight=None, uns_key='cell_type_co_occurrenc
     for ct in cell_types:
         # gather co-occurence for ct from each adata
         for adata in adatas_filtered:
-            if uns_key in adata.uns and ct in adata.obs['cell_type'].cat.categories:
-                # gather all cell types in this adata
-                adata_cell_types = adata.obs['cell_type'].cat.categories.tolist()
-                # get the index of ct in current anndata
-                ct_index = adata_cell_types.index(ct)
-                # get its co-occurrence with other cell types
-                co_occurrence = adata.uns[uns_key]['occ'][ct_index]
-                # init a pandas dataframe with this cell and partner cell 
-                # types as composite index for further merging across samples
-                sample = adata.obs['id'].unique()[0]
-                # merge with previous samples on the cell type index, keeping all cell types seen in any sample
-                co_df = pd.DataFrame(co_occurrence,
-                                     index=pd.MultiIndex.from_tuples([(sample, ct, coct) for coct in adata_cell_types],
-                                     names=['sample', 'cell_type', 'co_cell_type']))
+            if uns_key not in adata.uns:
+                continue
+            if ct not in adata.obs['cell_type'].cat.categories:
+                continue
+
+            # gather all cell types in this adata
+            adata_cell_types = adata.obs['cell_type'].cat.categories.tolist()
+            # get the index of ct in current anndata
+            ct_index = adata_cell_types.index(ct)
+            # get its co-occurrence with other cell types
+            co_occurrence = adata.uns[uns_key]['occ'][ct_index]
+            # init a pandas dataframe with this cell and partner cell
+            # types as composite index for further merging across samples
+            sample = adata.obs['id'].unique()[0]
+            # merge with previous samples on the cell type index, keeping all cell types seen in any sample
+            co_df = pd.DataFrame(
+                co_occurrence,
+                index=pd.MultiIndex.from_tuples(
+                    [(sample, ct, coct) for coct in adata_cell_types],
+                    names=['sample', 'cell_type', 'co_cell_type'],
+                ),
+            )
+
             if ct in ct_dict:
                 log.info(f"Merging co-occurrence data for cell type {ct} across samples.")
                 ct_dict[ct] = pd.concat([ct_dict[ct], co_df])
