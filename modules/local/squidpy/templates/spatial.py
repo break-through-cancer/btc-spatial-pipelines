@@ -18,6 +18,7 @@ seed = ${params.seed}
 nperms = ${params.sq_gr_spatial_autocorr_nperms}
 n_jobs = ${task.cpus}
 filter = ${params.analyze.filter}
+interval = "${params.sq_gr_co_occurrence_interval}"
 
 
 os.makedirs(out, exist_ok=True)
@@ -108,8 +109,14 @@ sq.pl.interaction_matrix(adata,
 
 #Plot the co-occurence
 clusters = adata.obs[cell_type].unique()
+#check if interval is number of bins or distances
+split_int = interval.split(",")
+if len(split_int) == 1:
+    interval = int(split_int[0])
+else:
+    interval = [int(i) for i in split_int]
 sq.gr.spatial_neighbors(adata)
-sq.gr.co_occurrence(adata, cluster_key=cell_type)
+sq.gr.co_occurrence(adata, cluster_key=cell_type, interval=interval)
 
 for c in clusters:
     sq.pl.co_occurrence(adata,

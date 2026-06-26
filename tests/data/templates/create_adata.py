@@ -1,26 +1,23 @@
 #!/usr/bin/env python
+
 import anndata as ad
 import numpy as np
 import pandas as pd
-import squidpy as sq
 import scanpy as sc
+import squidpy as sq
 
-#set random seed for reproducibility
-np.random.seed(42)
 
-num_adatas = "${num_adatas}"
-with_metadata = "${with_metadata}".lower() == 'true'
-
-def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata=True):
+def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata=True, na_pct=0.1, seed=42):
+    np.random.seed(seed)
 
     # create anndata object n obs by m vars with random counts
     adata = ad.AnnData(X=np.random.poisson(1, (n, m)), 
                     obs=pd.DataFrame(index=[f'obs_{i}' for i in range(n)]), 
                     var=pd.DataFrame(index=[f'var_{j}' for j in range(m)]))
-    #make sparse 
+    # make sparse 
     adata.X = adata.X.astype(np.float32)
 
-    #mark a percentage of the genes as mitochondrial by name prefix
+    # mark a percentage of the genes as mitochondrial by name prefix
     mito_genes = np.random.choice(adata.var_names, size=int(pct_mito*m), replace=False)
     adata.var_names = ['MT-' + name if name in mito_genes else name for name in adata.var_names]
 
@@ -67,7 +64,7 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata
     # add a continuous variable for testing
     adata.obs['age'] = np.random.randint(20, 100)
 
-    #simulate staple behavior of added metadata from samplesheet
+    # simulate staple behavior of added metadata from samplesheet
     if with_metadata:
         adata.uns['staple_meta_fields'] = ['response', 'id', 'age']
     
@@ -98,25 +95,44 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata
     # the stored interaction matrix and centrality scores stay in sync
     sq.gr.interaction_matrix(adata, cluster_key='cell_type')
 
-    #add centrality measures
+    # add co-occurence scores testing
+    sq.gr.co_occurrence(adata, cluster_key='cell_type')
+
+    # add centrality measures
     sq.gr.centrality_scores(adata, cluster_key='cell_type')
 
-    #set a small number of cell types to NA for testing NA handling
-    na_sample_size = min(10, adata.obs.shape[0])
+    # set a small number of cell types to NA for testing NA handling
+    na_sample_size = min(int(na_pct * adata.obs.shape[0]), adata.obs.shape[0])
     na_indices = np.random.choice(adata.obs.shape[0], size=na_sample_size, replace=False)
     adata.obs.loc[adata.obs.index[na_indices], 'cell_type'] = np.nan
 
     return adata
 
 
-def make_many_adata(num_adatas=2, n=25, m=1000, pct_mito=0.1, with_metadata=True):
+def make_many_adata(num_adatas=2, n=25, m=1000, pct_mito=0.1, with_metadata=True, seeds=None):
     adatas = []
+    if seeds is None:
+        seeds = np.random.randint(0, 10000, size=num_adatas)  # different seed for each adata
+    else:
+        if len(seeds) != num_adatas:
+            raise ValueError("Length of seeds must match num_adatas")
     for i in range(num_adatas):
-        adata = make_one_adata(n=n, m=m, pct_mito=pct_mito, sample_id=f'sample_{i}', with_metadata=with_metadata)
+        adata = make_one_adata(n=n, m=m, pct_mito=pct_mito, sample_id=f'sample_{i}',
+                               with_metadata=with_metadata, na_pct=0.1, seed=seeds[i])
         adatas.append(adata)
     return adatas
 
 if __name__ == "__main__":
-    adatas = make_many_adata(num_adatas=int(num_adatas), n=25, m=1000, pct_mito=0.1, with_metadata=with_metadata)
+    # nf params
+    num_adatas = "${num_adatas}"
+    with_metadata = "${with_metadata}".lower() == 'true'
+    seeds = [s.strip() for s in "${seeds}".split(',')]
+    if len(seeds) == 1 and seeds[0] == '':  # handle empty string case
+        seeds = None
+    else:
+        seeds = [int(seed) for seed in seeds]
+    #compose adatas and write to disk
+    adatas = make_many_adata(num_adatas=int(num_adatas), n=25, m=1000,
+                             pct_mito=0.1, with_metadata=with_metadata, seeds=seeds)
     for i, adata in enumerate(adatas):
         adata.write_h5ad(f'{i}_adata.h5ad')

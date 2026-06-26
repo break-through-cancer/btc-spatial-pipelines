@@ -14,6 +14,7 @@ nextflow_process{
             """
             input[0] = 10
             input[1] = false // create adata without added metadata
+            input[2] = ''  // create with any seeds
             """
             }
         }
@@ -50,6 +51,7 @@ nextflow_process{
             assert file("${outputDir}/staple/reports/mqc/moranI_overall_mqc.json").exists()
             assert file("${outputDir}/staple/reports/mqc/neighbors_mqc.json").exists()
             assert file("${outputDir}/staple/reports/pseudobulk.h5ad").exists()
+            assert file("${outputDir}/staple/reports/mqc/co_occurrence_overall_mqc.json").exists()
         }
     }
 }
