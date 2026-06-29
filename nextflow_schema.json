@@ -1,5 +1,5 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema",
+    "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/btc/spatial/master/nextflow_schema.json",
     "title": "btc/spatial pipeline parameters",
     "description": "BTC spatial pipeline",
