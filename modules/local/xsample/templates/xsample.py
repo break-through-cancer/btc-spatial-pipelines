@@ -306,15 +306,21 @@ def co_occurrence_report(adatas, spotlight=None, uns_key='cell_type_co_occurrenc
                         cell_types[ct] = count
         cell_types = cell_types.keys()
 
-    # 'NA' may be present as added by pseudobulk earlier, will cause error
-    cell_types = [ct for ct in cell_types if ct != 'NA']
-    adatas_filtered = [adata[adata.obs['cell_type'] != 'NA'] for adata in adatas]
+    # check that number of cell types matches the co-occurrence matrix shape
+    for adata in adatas:
+        if len(adata.obs['cell_type'].cat.categories) != adata.uns[uns_key]['occ'].shape[0]:
+            raise ValueError(f"Cell type categories do not match co-occurrence matrix dimensions for sample {adata.obs['id'].unique()[0]}")
+    # check that the co-occurence intervals are same
+    intervals = [adata.uns[uns_key]['interval'] for adata in adatas]
+    if len(set(map(tuple, intervals))) > 1:
+        log.warning(f"Co-occurrence intervals have mismatched dimensions: {intervals}")
+
     reports = []
 
     ct_dict = {}
     for ct in cell_types:
         # gather co-occurence for ct from each adata
-        for adata in adatas_filtered:
+        for adata in adatas:
             if uns_key not in adata.uns:
                 continue
             if ct not in adata.obs['cell_type'].cat.categories:
