@@ -4,10 +4,22 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+### Hardware requirements
+Enough RAM and cpu to run spatial transcriptomics datasets that you have.
+
+### Software requirements
+Linux/mac OS with Docker, a slurm cluster with Docker or Singularity/Apptainer, or Cirro (https://cirro.bio/) is required to run STAPLE.
+
+### STAPLE has been tested on
+```
+macOS 26.3.1 (a)
+Cirro web platform (https://cirro.bio/)
+slurm 23.11.6
+github Ubuntu runners
+```
 
 ## Just trying
- Run with test data in under 10 minutes on your laptop (needs docker installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/staple/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. 
+ Run with test data in under 10 minutes on your laptop (needs docker and nextflow installed)! Use [this link](https://download-directory.github.io/?url=https://github.com/break-through-cancer/staple/tree/main/tests) to download ~30Mb of test data, then use the below commands in the terminal. Note that running STAPLE for the first time will trigger the download of the docker images, thus the actual time to run will be longer and will depend on the speed of your Internet connection. It may get up to 1h on slower speeds.
 
 ```
 # make a clean directory called tests
@@ -105,6 +117,17 @@ nextflow run break-through-cancer/staple \
    --analyze.<spacemarkers/squidpy> \
 ```
 
+Control squidpy [ligand-receptor interaction](https://squidpy.readthedocs.io/en/stable/notebooks/examples/graph/compute_ligrec.html) parameters:
+
+Run in mouse data (or any other organism via ortholog conversion):
+```bash
+--sq_gr_ligrec_interactions_params '{"organism":"10090"}'
+```
+
+Use only CellPhoneDB:
+```bash
+--sq_gr_ligrec_interactions_params '{"resources": "CellPhoneDB"}'
+```
 
 ### Updating the pipeline
 

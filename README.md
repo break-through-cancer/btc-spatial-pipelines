@@ -34,6 +34,12 @@ flowchart LR
 
 
 ## Usage
+>[!IMPORTANT]
+Since Nextflow [Version 26.0.4](https://github.com/nextflow-io/nextflow/releases/tag/v26.04.1), released on May-11, if running that or a later version while we are making refactoring changes to support the strict syntax, turn the strict syntax off:
+```
+export NXF_SYNTAX_PARSER=v1
+```
+
 
 >[!note]
 If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
