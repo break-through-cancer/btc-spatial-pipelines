@@ -55,6 +55,18 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata
     adata.obs['cell_type'] = np.random.choice(cell_types, size=n)
     adata.obs['cell_type'] = pd.Categorical(adata.obs['cell_type'], categories=cell_types)
 
+    # make some genes differentially expressed in stroma vs tumor for testing
+    stroma = adata.obs['cell_type'] == 'stroma'
+    tumor = adata.obs['cell_type'] == 'tumor'
+    adata.X[stroma, :50] += np.random.poisson(5, (stroma.sum(), 50))
+    adata.X[tumor, :50] += np.random.poisson(1, (tumor.sum(), 50))
+
+    # set a small number of cell types to NA (as category since sq.gr needs that)
+    na_sample_size = min(int(na_pct * adata.obs.shape[0]), adata.obs.shape[0])
+    na_indices = np.random.choice(adata.obs.shape[0], size=na_sample_size, replace=False)
+    adata.obs['cell_type'] = adata.obs['cell_type'].cat.add_categories('NA')
+    adata.obs.loc[adata.obs.index[na_indices], 'cell_type'] = 'NA'
+
     # add sample id for testing
     adata.obs['id'] = sample_id
 
@@ -67,12 +79,6 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata
     # simulate staple behavior of added metadata from samplesheet
     if with_metadata:
         adata.uns['staple_meta_fields'] = ['response', 'id', 'age']
-    
-    # make some genes differentially expressed in stroma vs tumor for testing
-    stroma = adata.obs['cell_type'] == 'stroma'
-    tumor = adata.obs['cell_type'] == 'tumor'
-    adata.X[stroma, :50] += np.random.poisson(5, (stroma.sum(), 50))
-    adata.X[tumor, :50] += np.random.poisson(1, (tumor.sum(), 50))
 
     # compute Moran's I (results stored in adata.uns['moranI']) for testing
     sq.gr.spatial_autocorr(adata, mode="moran", n_jobs=1)
@@ -100,11 +106,6 @@ def make_one_adata(n=25, m=1000, pct_mito=0.1, sample_id='sample', with_metadata
 
     # add centrality measures
     sq.gr.centrality_scores(adata, cluster_key='cell_type')
-
-    # set a small number of cell types to NA for testing NA handling
-    na_sample_size = min(int(na_pct * adata.obs.shape[0]), adata.obs.shape[0])
-    na_indices = np.random.choice(adata.obs.shape[0], size=na_sample_size, replace=False)
-    adata.obs.loc[adata.obs.index[na_indices], 'cell_type'] = np.nan
 
     return adata
 
