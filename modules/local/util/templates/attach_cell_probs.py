@@ -22,9 +22,10 @@ if('barcode' in cell_probs.columns):
     log.info("found barcode, setting as index")
     cell_probs.set_index('barcode', inplace=True)
 else:
-    log.warning("no barcode column found in cell_probs, assuming first column is barcode")
+    log.warning("no barcode column found in cell_probs, assuming first column is index")
     cell_probs.set_index(cell_probs.columns[0], inplace=True)
-    cell_probs.index.name = 'barcode'
+    cell_probs.index.name = 'index'
+    cell_probs.index = cell_probs.index.astype(str)
 
 #put cell types to uns
 adata.uns['cell_type_composition'] = cell_probs

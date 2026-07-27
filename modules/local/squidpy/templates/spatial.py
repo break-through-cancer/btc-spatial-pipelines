@@ -13,10 +13,12 @@ sample = "${sample}"
 out = "${prefix}"
 process = "${task.process}"
 cell_type = "cell_type"
-na_as_value = "${params.na_as_value}"
+na_as_value = "${params.na_as_value}".lower() == 'true'
 seed = ${params.seed}
 nperms = ${params.sq_gr_spatial_autocorr_nperms}
 n_jobs = ${task.cpus}
+filter = ${params.analyze.filter}
+interval = "${params.sq_gr_co_occurrence_interval}"
 
 
 os.makedirs(out, exist_ok=True)
@@ -31,14 +33,17 @@ if nperms <= 0:
     nperms = None
 sq.gr.spatial_neighbors(adata)
 sq.gr.spatial_autocorr(adata, mode="moran", seed=seed, n_perms=nperms, n_jobs=n_jobs)
+# transfer significant genes from uns to var for easier access
+adata.var['spatially_variable'] = adata.var.index.isin(adata.uns['moranI']\
+    .index[adata.uns['moranI']['pval_norm_fdr_bh'].fillna(1) <= filter])
 
-#get most abundant cell type from bayestme
+# get most abundant cell type from bayestme
 if cell_type not in adata.obs.columns:
     log.info("cell_type {} not found in adata.obs, calculating from bayestme_cell_type_counts")
     most_abundant = np.argmax(adata.obsm['bayestme_cell_type_counts'], axis=1)
     adata.obs[cell_type] = most_abundant.astype('str')
 
-#squidpy insists on dir naming, not creating outdir as usually
+# squidpy insists on dir naming, not creating outdir as usually
 main_dir = os.getcwd()
 os.chdir(out)
 
@@ -58,7 +63,7 @@ if 'spatial' in adata.uns:
     except IndexError:
         log.warning("no hires library found, using the first one")
         try:
-            lib_id = adata.uns["spatial"].keys()[0]
+            lib_id = [k for k in adata.uns["spatial"].keys()][0]
         except:
             log.error("no library data found in adata.uns['spatial']")
             raise
@@ -104,8 +109,14 @@ sq.pl.interaction_matrix(adata,
 
 #Plot the co-occurence
 clusters = adata.obs[cell_type].unique()
+#check if interval is number of bins or distances
+split_int = interval.split(",")
+if len(split_int) == 1:
+    interval = int(split_int[0])
+else:
+    interval = [int(i) for i in split_int]
 sq.gr.spatial_neighbors(adata)
-sq.gr.co_occurrence(adata, cluster_key=cell_type)
+sq.gr.co_occurrence(adata, cluster_key=cell_type, interval=interval)
 
 for c in clusters:
     sq.pl.co_occurrence(adata,

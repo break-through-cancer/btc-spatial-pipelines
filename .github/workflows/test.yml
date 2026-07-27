@@ -8,6 +8,7 @@ on:
   pull_request:
       branches:
       - 'main'
+      - 'dev'
   workflow_dispatch:
 jobs:
   test:
@@ -33,5 +34,8 @@ jobs:
           wget -qO- https://get.nf-test.com | bash
           sudo mv nf-test /usr/local/bin
 
-      - name: run tests
-        run: nf-test test
+      - name: run unit tests
+        run: nf-test test --tag process
+
+      - name: run integration tests
+        run: nf-test test --tag pipeline

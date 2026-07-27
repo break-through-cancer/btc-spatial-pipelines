@@ -2,7 +2,7 @@
 
 ## Introduction
 
-**STAPLE** is a bioinformatics pipeline for 10X Visium and Visium HD spatial data that puts the scientific question first. Features are pre-computed on a per-sample basis, then contrasted across samples using metadata provided through the sample sheet, and finally combined in a comprehensive MultiQC report for downstream analysis compatible with LLMs. Learn more in the [preprint](https://www.biorxiv.org/content/10.64898/2026.03.30.715127v1), see the interactive examples on the supplement [mini web-site](https://fertiglab.github.io/staple-paper/).
+**STAPLE** (Spatial Transcriptomics Analysis Pipeline) is a bioinformatics pipeline data that puts the scientific question first. Features are pre-computed on a per-sample basis, then contrasted across samples using metadata provided through the sample sheet, and finally combined in a comprehensive MultiQC report for downstream analysis compatible with LLMs. STAPLE reads 10X Visium, Visium HD, and Xenium ranger outputs, and can be also used with generic spatial Anndata inputs.
 
 
 ```mermaid
@@ -52,13 +52,13 @@ Check out the [usage documentation](docs/usage.md) for instructions on how to ru
 
 Not all the tools support all the formats. Use these guidelines to pick parameters in case the fully functioning defaults (RCTD + Squidpy) are not desired.
 
-| tool/format | Visium SD | Visium HD | HD segmented | MultiQC |
-| ----------- | --------- | --------- | ------------ | ---------- |
-| RCTD | OK | OK | OK | OK |
-| Squidpy | OK | OK | OK | OK |
-| CoGAPS | OK | reduce gene N | reduce gene N | samples not integrated |
-| BayesTME | OK | | | |
-| SpaceMarkers | OK | OK | | OK |
+| tool/format | Visium SD | Visium HD | HD segmented | Xenium | Generic Anndata | Cross-sample |
+| ----------- | --------- | --------- | ------------ | ------ | --------------- | ------------- |
+| RCTD | OK | OK | OK | OK | OK | OK |
+| Squidpy | OK | OK | OK | OK | OK | OK |
+| CoGAPS | OK | reduce gene N | reduce gene N | OK | OK | samples not integrated |
+| BayesTME | OK | | | | | samples not integrated |
+| SpaceMarkers | OK | OK | | | | OK |
 
 
 SpaceMarkers for SD reports IMscores for gene names and undirected cell type interactions (cell_type1 near cell_type2 is no different to cell_type2 near cell_type1)

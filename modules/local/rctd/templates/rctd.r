@@ -12,6 +12,7 @@ adata_st_path <- '${adata_st}'
 ncores <- ${task.cpus}
 outdir <- '${prefix}'
 process <- '${task.process}'
+umi_min <- ${params.umi_min}
 
 set.seed(${params.seed})
 
@@ -49,13 +50,13 @@ if (is.null(adata_sc[["raw"]])) {
   message('no raw data, using X from adata_sc')
   gene_names <-rownames(adata_sc[["var"]])
   select_genes <- which(gene_names %in% names(top_genes))
-  counts_sc <- Matrix::t(adata_sc[["X"]][, select_genes - 1]) # -1 for 0-based index
+  counts_sc <- Matrix::t(adata_sc[["X"]][, select_genes - 1L]) # -1 for 0-based index
   rownames(counts_sc) <- gene_names[select_genes]
 } else {
   message('using raw.X from adata_sc')
   gene_names <- rownames(adata_sc[["raw"]][["var"]])
   select_genes <- which(gene_names %in% names(top_genes))
-  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][, select_genes - 1]) # -1 for 0-based index
+  counts_sc <- Matrix::t(adata_sc[["raw"]][["X"]][, select_genes - 1L]) # -1 for 0-based index
   rownames(counts_sc) <- gene_names[select_genes]
 }
 
@@ -92,20 +93,24 @@ celltypes_sc <- droplevels(celltypes_sc)
 counts_sc <- as(counts_sc, "CsparseMatrix")
 
 #4. create reference object and cleanup
-ref <- spacexr::Reference(cell_types=celltypes_sc, counts=counts_sc)
+ref <- spacexr::Reference(cell_types=celltypes_sc, counts=counts_sc, min_UMI = umi_min)
 counts_sc <- NULL
 gc()
 
 message('run rctd')
 rctd_res <- tryCatch({
-  spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores),
-                    doublet_mode = doublet_mode)
+  spacexr::run.RCTD(
+    spacexr::create.RCTD(spatialRNA=query, reference=ref,
+                         max_cores = ncores, UMI_min = umi_min),
+    doublet_mode = doublet_mode)
 }, error = function(e) {
   message('RCTD threw error: "',e[["message"]],'"')
   if (grepl(pattern = "UMI_min_sigma", x = e[["message"]])) {
     message('RCTD error caught, retrying with UMI_min_sigma=1')
-    spacexr::run.RCTD(spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores, UMI_min_sigma = 1),
-                      doublet_mode = doublet_mode)
+    spacexr::run.RCTD(
+      spacexr::create.RCTD(spatialRNA=query, reference=ref, max_cores = ncores, 
+                           UMI_min_sigma = 1, UMI_min = umi_min),
+      doublet_mode = doublet_mode)
   } else {
     stop("Could not catch the error")
   }

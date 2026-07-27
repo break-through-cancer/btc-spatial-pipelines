@@ -1,7 +1,7 @@
 process RCTD {
     tag "$meta.id"
     label 'process_high'
-    container 'ghcr.io/break-through-cancer/btc-containers/rctd:main'
+    container 'ghcr.io/break-through-cancer/btc-containers/rctd@sha256:145facedacf5198ff97e7fdca314e24e3890d290b3fb9015ce44b710f5ecd95e'
 
     input:
     tuple val(meta), path(adata_sc), path(adata_st)

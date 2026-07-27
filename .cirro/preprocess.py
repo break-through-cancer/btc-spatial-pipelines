@@ -22,6 +22,22 @@ def is_url(string):
 
 def prepare_samplesheet(ds: PreprocessDataset) -> pd.DataFrame:
     ds.logger.info([ds.params])
+
+    format_name = ds.params.get('format')
+    visium_hd_value = ds.params.get('visium_hd')
+
+    for param_name in ('visium', 'anndata', 'xenium', 'visium_hd'):
+        if param_name in ds.params:
+            ds.remove_param(param_name)
+
+    if format_name == 'visium':
+        ds.add_param('visium', True)
+    elif format_name == 'anndata':
+        ds.add_param('anndata', True)
+    elif format_name == 'xenium':
+        ds.add_param('xenium', True)
+    elif format_name == 'visium_hd' and visium_hd_value:
+        ds.add_param('visium_hd', visium_hd_value)
     
     # If the reference_scrna is not a URL, we assume it is a file mask string
     # to look for in the data directory downstream
