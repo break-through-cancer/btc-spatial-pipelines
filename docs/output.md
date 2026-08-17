@@ -22,10 +22,10 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 <summary>Output files</summary>
 
 - `adata/`
-  - `sample/`
+  - `<sample>/`
     - `adata.h5ad`: AnnData object containing the spatial dataset.
 - `atlas/`
-  - `sample/`
+  - `<sample>/`
     - `adata.h5ad`: AnnData object matched to the single-cell reference dataset, if provided.
   - `atlas.h5ad`: AnnData object containing the single-cell reference dataset, if provided.
 
@@ -38,7 +38,7 @@ Load dataset uses [spatialdata.io](https://spatialdata.scverse.org/projects/io/e
 <summary>Output files</summary>
 
 - `<tool>/`
-  - `sample/`
+  - `<sample>/`
     - `<tool>.h5ad`: AnnData object containing cell type annotation in `.obs`.
 
 </details>
@@ -54,7 +54,7 @@ QC module does not produce any output files, but the results of the QC checks ar
 <summary>Output files</summary>
 
 - `squidpy/`
-  - `sample/`
+  - `<sample>/`
       - `<tool>/`
         - `squidpy.h5ad`: object containing the spatial analyses in `.obs` and `.uns`.
         - `figures/`: directory containing spatial analysis static per-sample images
@@ -62,7 +62,7 @@ QC module does not produce any output files, but the results of the QC checks ar
           - `figures/`: figures directory containing ligand-receptor analysis static per-sample images
           - `ligrec-interactions.pickle`: Pickle object containing the results of the ligand-receptor analysis.
 - `spacemarkers/`
-  - `sample/`
+  - `<sample>/`
       - `<tool>/`
         - `spaceMarkersObject.rds`: object containing SpaceMarkers results.
         - `IMScores.rds`: SpaceMarkers interaction scores (undirected)
@@ -77,15 +77,17 @@ Spatial metrics are computed using [Squidpy](https://squidpy.readthedocs.io/en/s
 <summary>Output files</summary>
 
 - `staple/`
-  - `sample/`
+  - `<sample>/`
     - `staple.h5ad`: AnnData object containing all results in `.obs` and `.uns`.
   - `reports/`
     - `mqc/`
-      - `ligrec_diff_response_results.json`: a standalone JSON file containing the results of the ligand-receptor differential response analysis.
-      - `Moran_I_diff_response_results.csv`: a standalone CSV file containing the results of the Moran's I differential response analysis.
-      - `neighbors_mqc.json`: a standalone JSON file containing the results of the neighborhood analysis.
-    - `ligrec_diff_response_results.csv`: a standalone CSV file containing the results of the ligand-receptor differential response analysis.
-    - `Moran_I_diff_response_results.csv`: a standalone CSV file containing the results of the Moran's I differential response analysis.
+      - `ligrec_diff_response_results.json`: results of the ligand-receptor differential response analysis.
+      - `neighbors_mqc.json`: results of the neighborhood analysis.
+      - `dese2_diff_response_results.json`: results of the DESeq2 differential response analysis. All strata (cell types) are included in the same report, with the strata name included in the ID of each result.
+    - `ligrec_diff_response_results.csv`: results of the ligand-receptor differential response analysis.
+    - `Moran_I_diff_response_results.csv`: results of the Moran's I differential response analysis.
+    - `deseq2_diff_response_results_<strata>.csv`: results of the DESeq2 differential response analysis for a specific strata (cell_type).
+    - `pseudobulk.h5ad` - AnnData object containing the pseudobulked data used for the DESeq2 differential response analysis for downstream contrasts.
 
 </details>
 The `staple/` directory contains the final integrated results of the pipeline, including the final AnnData objects containing all results in `.obs` and `.uns`.

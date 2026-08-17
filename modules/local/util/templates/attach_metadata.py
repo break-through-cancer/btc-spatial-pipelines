@@ -34,8 +34,8 @@ for key in fdict:
 
 #save added fields to uns
 field_list = list(fdict.keys())
-adata.uns['added_metadata_fields'] = field_list
-log.info(f"added metadata fields: {field_list} to '.obs' and recorded in '.uns[added_metadata_fields]'")
+adata.uns['staple_meta_fields'] = field_list
+log.info(f"added metadata fields: {field_list} to '.obs' and recorded in '.uns[staple_meta_fields]'")
 
 #save
 log.info(f"saving adata with attached metadata to {sample}/adata.h5ad")

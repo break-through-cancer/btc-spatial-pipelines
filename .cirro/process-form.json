@@ -4,6 +4,12 @@
         "title": "STAPLE: BTC 10X Visium Pipeline",
         "type": "object",
         "properties": {
+            "format": {
+                "type": "string",
+                "title": "Data format",
+                "enum": ["visium", "visium_hd", "xenium", "anndata"],
+                "default": "visium"
+             },
             "data": {
                 "title": "Data format options",
                 "type": "object",
@@ -11,7 +17,7 @@
                     "hd": {
                         "type": "string",
                         "title": "Table name if Visium HD format",
-                        "default": "square_008um"
+                        "default": ""
                     }
                 }
             },

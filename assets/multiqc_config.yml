@@ -16,7 +16,7 @@ custom_data:
   atlas:
     plot_type: 'table'
     section_name: 'Atlas Summary'
-    description: 'Summary of the cells and genes in the atlas. If same atlas is used for multiple samples, table rows will be repeated.'
+    description: 'Summary of the cells and genes in the atlas.'
   atlas_ct:
     parent: 'atlas'
     plot_type: 'table'
@@ -34,7 +34,7 @@ custom_data:
     parent: 'deconvolved'
     plot_type: 'table'
     section_name: 'Output Cell Types'
-    description: 'Assigned cell types based on deconvolution / cell typing results.'
+    description: 'Assigned cell types based on deconvolution / cell typing results. Unassigned counts appear in a nameless column.'
   deconvolved_probs:
     parent: 'deconvolved'
     plot_type: 'table'
