@@ -34,18 +34,12 @@ flowchart LR
 
 
 ## Usage
->[!IMPORTANT]
-Since Nextflow [Version 26.0.4](https://github.com/nextflow-io/nextflow/releases/tag/v26.04.1), released on May-11, if running that or a later version while we are making refactoring changes to support the strict syntax, turn the strict syntax off:
-```
-export NXF_SYNTAX_PARSER=v1
-```
-
 
 >[!note]
 If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
 to set-up Nextflow. 
 
-Check out the [usage documentation](docs/usage.md) for instructions on how to run the pipeline on your data. Once you have run the pipeline, jump straight to `multiqc/multiqc_report.html` to see the results of your analysis. Use MultiQC's interactive features to explore the results.
+Check out the [usage documentation](docs/usage.md) for instructions on how to run the pipeline on your data. Once you have run the pipeline, jump straight to `multiqc/multiqc_report.html` to see the results of your analysis. Use MultiQC's interactive features to explore the results, check out some examples [here](https://fertiglab.github.io/staple-paper/).
 
 
 ## Limitations
