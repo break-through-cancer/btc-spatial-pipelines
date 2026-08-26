@@ -474,7 +474,8 @@ if __name__ == '__main__':
     adata_paths = collected.split(" ")
     adatas = [ad.read_h5ad(path, backed="r") for path in adata_paths]
     spotlight = "${params.analyze.spotlight}"  # this is a comma-separated string of cell type pairs to spotlight
-    spotlight = [s.strip() for s in spotlight.split(',')]
+    if spotlight:
+        spotlight = [s.strip() for s in spotlight.split(',')]
 
     #place all mqc reports here
     reports_dir = "reports"
