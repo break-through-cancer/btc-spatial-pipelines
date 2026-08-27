@@ -192,7 +192,8 @@ def de_report(de_dict, spotlight=None, filter=0.05, show=100, contrast=None, p='
 
 
 
-def neighbors_report(adatas, spotlight=None):
+def neighbors_report(adatas, spotlight=None, ignore_self=True):
+    self_type = "omitted" if ignore_self else "included"
     if spotlight:
         cell_types = spotlight    
     else:
@@ -221,6 +222,8 @@ def neighbors_report(adatas, spotlight=None):
                 other_cell_types = adata.obs['cell_type'].cat.categories.tolist()
                 interaction_dict = {}
                 for i, other_cell_type in enumerate(other_cell_types):
+                    if ignore_self and other_cell_type == cell_type:
+                        continue
                     interaction_dict[other_cell_type] = interactions[i]
                 sample_dict[adata.obs['id'].unique()[0]] = interaction_dict
         reports.append(sample_dict)
@@ -228,10 +231,10 @@ def neighbors_report(adatas, spotlight=None):
     mqc_report = {
         "id": "spatial_neighbors",
         "plot_type": "bar",
-        "description": "Cell type immediate neighborhood across samples. \
-        The rate of self-neighborhood indicates clustering of a cell type. \
-        The rate of neighbors with other cell types (self omitted) indicates \
-            how these clusters interact with each other.",
+        "description": f"Cell type neighborhood across samples.\
+The rate of self-neighborhood indicates clustering of a cell type. The rate of neighbors \
+with other cell types (self omitted) indicates how these clusters interact with each \
+other. Self is {self_type} in this report based on the pipeline settings.",
         "pconfig": {
             "title": "Cell type neighborhood across samples",
             "ylab": "Neighboring cell type share",
@@ -469,13 +472,15 @@ if __name__ == '__main__':
     filter        = float("${params.analyze.filter}")    # p-value or adjusted p-value threshold for significance
     pb_vars       = "${params.analyze.pb_vars}"          # vars to use for pseudobulk grouping, comma-separated string
     only_spatial  = "${params.analyze.only_spatial}"\
-                                    .lower() == 'true'   # only use spatially variable genes for ligrec and pseudobulk 
+                                    .lower() == 'true'   # only use spatially variable genes for ligrec and pseudobulk
+    ignore_self   = "${params.analyze.ignore_self}"\
+                                    .lower() == 'true'   # if true, ignore self interactions in neighbor analysis
+    spotlight = "${params.analyze.spotlight}"            # a comma-separated string of cell type pairs to spotlight
+    if spotlight:
+        spotlight = [s.strip() for s in spotlight.split(',')]
 
     adata_paths = collected.split(" ")
     adatas = [ad.read_h5ad(path, backed="r") for path in adata_paths]
-    spotlight = "${params.analyze.spotlight}"  # this is a comma-separated string of cell type pairs to spotlight
-    if spotlight:
-        spotlight = [s.strip() for s in spotlight.split(',')]
 
     #place all mqc reports here
     reports_dir = "reports"
@@ -486,7 +491,7 @@ if __name__ == '__main__':
     # generate neighbors report
     try:
         log.info("Generating neighbors report.")
-        neighbors = neighbors_report(adatas, spotlight=spotlight)
+        neighbors = neighbors_report(adatas, spotlight=spotlight, ignore_self=ignore_self)
         with open(f"{mqc_reports_dir}/neighbors_mqc.json","w") as f:
             json.dump(neighbors, f, indent=4)
     except Exception as e:
