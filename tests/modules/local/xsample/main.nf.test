@@ -153,4 +153,35 @@ nextflow_process{
             assert file("${outputDir}/staple/reports/mqc/co_occurrence_response_responder_mqc.json").exists()
         }
     }
+    test("Run Xsample with self neighborhood included") {
+
+        tag     'xsample'
+        tag     'self-neighbors'
+        tag     'process'
+
+        when {
+            params {
+                max_memory = '8 GB'
+                outdir = 'output'
+                analyze {
+                    xsample = true
+                    filter = 1
+                    show_top = 100
+                    spotlight = 'tumor'   // specify cell types to spotlight
+                    ignore_self = false   // include self neighborhood in the analysis
+                }
+            }
+            process {
+                """
+                input[0] = CREATE_TEST_ADATA.out.adata.collect()
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def lines = file("${outputDir}/staple/reports/mqc/neighbors_mqc.json").readLines()
+            assert lines.any { it.contains("\"tumor\":") }
+        }
+    }
 }
