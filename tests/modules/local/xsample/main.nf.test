@@ -123,4 +123,34 @@ nextflow_process{
             assert file("${outputDir}/staple/reports/mqc/co_occurrence_response_non-responder_mqc.json").exists()
         }
     }
+
+    test("Run Xsample with spotlight option") {
+
+        tag     'xsample'
+        tag     'spotlight'
+        tag     'process'
+
+        when {
+            params {
+                max_memory = '8 GB'
+                outdir = 'output'
+                analyze {
+                    xsample = true
+                    filter = 1
+                    show_top = 100
+                    spotlight = 'tumor'   // specify cell types to spotlight
+                }
+            }
+            process {
+                """
+                input[0] = CREATE_TEST_ADATA.out.adata.collect()
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert file("${outputDir}/staple/reports/mqc/co_occurrence_response_responder_mqc.json").exists()
+        }
+    }
 }
