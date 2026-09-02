@@ -167,7 +167,6 @@ nextflow_process{
                     xsample = true
                     filter = 1
                     show_top = 100
-                    spotlight = 'tumor'   // specify cell types to spotlight
                     ignore_self = false   // include self neighborhood in the analysis
                 }
             }
