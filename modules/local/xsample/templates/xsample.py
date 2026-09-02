@@ -229,11 +229,9 @@ def neighbors_report(adatas, spotlight=None, ignore_self=True):
         sample_dict['cell_type'] = cell_type
         reports.append(sample_dict)
 
-    # construct a df for export and analysis
-    csv_report = pd.concat([pd.DataFrame(r).\
-        set_index('cell_type', append=True) for r in reports])
+    # construct a df for export
+    csv_report = pd.concat([pd.DataFrame(r).set_index('cell_type', append=True) for r in reports])
     csv_report.index.names = ['neighbor', 'cell_type']
-    csv_report.reset_index(inplace=True)
 
     # recycle cell type as not needed in mqc report
     _cell_type = [r.pop('cell_type') for r in reports]
