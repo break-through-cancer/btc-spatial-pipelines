@@ -250,6 +250,17 @@ def neighbors_report(adatas, spotlight=None, ignore_self=True):
     }
     return mqc_report, csv_report
 
+def diff_neighbors_report(neighbors_df:pd.DataFrame, group1=None, group2=None):
+    # ALR transform using self neighborhood as the reference and pad for 0s
+    alr_report = neighbors_df.copy()
+    for neighbor, cell_type in neighbors_df.index:
+        self_value = alr_report.loc[(cell_type, cell_type)]
+        alr_report.loc[(neighbor, cell_type)] = np.log((alr_report.loc[(neighbor, cell_type)] + 1e-10) / (self_value + 1e-10))
+    
+    # run ttest across samples for each neighbor-cell_type pair
+    diff_neighbors = xsample_ttest(alr_report, group1, group2)
+    return diff_neighbors
+
 def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_centrality_scores'):
     #separately for each score as multiqc does not support data_labels for heatmaps
     memos = {
@@ -576,6 +587,15 @@ if __name__ == '__main__':
             groups = [x for x in cats[var]]
             group1 = cats[var][groups[0]].tolist()
             group2 = cats[var][groups[1]].tolist()
+            
+            #diff neighbors report
+            try:
+                log.info("Generating differential neighbors report.")
+                res_mqc, res_csv = neighbors_report(adatas, spotlight=spotlight, ignore_self=False)
+                diff_res = diff_neighbors_report(res_csv, group1=group1, group2=group2)
+                save_reports(None, diff_res, f"neighbors_diff_{var}_results")
+            except Exception as e:
+                log.warning(f"Could not generate neighbors report for variable {var}: {e}")
             
             #squidpy ligrec
             try:
