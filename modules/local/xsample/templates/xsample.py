@@ -206,7 +206,7 @@ def neighbors_report(adatas, spotlight=None, ignore_self=True):
                         cell_types[ct] += count
                     else:
                         cell_types[ct] = count
-        cell_types = cell_types.keys()
+        cell_types = list(cell_types.keys())
     
     reports = []
     for cell_type in cell_types:
@@ -226,24 +226,31 @@ def neighbors_report(adatas, spotlight=None, ignore_self=True):
                         continue
                     interaction_dict[other_cell_type] = interactions[i]
                 sample_dict[adata.obs['id'].unique()[0]] = interaction_dict
+        sample_dict['cell_type'] = cell_type
         reports.append(sample_dict)
+
+    # construct a df for export and analysis
+    csv_report = pd.concat([pd.DataFrame(r).\
+        set_index('cell_type', append=True) for r in reports])
+    csv_report.index.names = ['neighbor', 'cell_type']
+    csv_report.reset_index(inplace=True)
+
+    # recycle cell type as not needed in mqc report
+    _cell_type = [r.pop('cell_type') for r in reports]
 
     mqc_report = {
         "id": "spatial_neighbors",
         "plot_type": "bar",
-        "description": f"Cell type neighborhood across samples.\
-The rate of self-neighborhood indicates clustering of a cell type. The rate of neighbors \
-with other cell types (self omitted) indicates how these clusters interact with each \
-other. Self is {self_type} in this report based on the pipeline settings.",
+        "description": f"Cell type neighborhood across samples.The rate of self-neighborhood indicates clustering of a cell type. The rate of neighbors with other cell types (self omitted) indicates how these clusters interact with each other. Self is {self_type} in this report based on the pipeline settings.",
         "pconfig": {
             "title": "Cell type neighborhood across samples",
             "ylab": "Neighboring cell type share",
             "xlab": "Sample",
-            "data_labels": list(cell_types)
-        },
+            "data_labels": cell_types
+            },
         "data": reports
     }
-    return mqc_report
+    return mqc_report, csv_report
 
 def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_centrality_scores'):
     #separately for each score as multiqc does not support data_labels for heatmaps
@@ -491,9 +498,8 @@ if __name__ == '__main__':
     # generate neighbors report
     try:
         log.info("Generating neighbors report.")
-        neighbors = neighbors_report(adatas, spotlight=spotlight, ignore_self=ignore_self)
-        with open(f"{mqc_reports_dir}/neighbors_mqc.json","w") as f:
-            json.dump(neighbors, f, indent=4)
+        neigh_mqc, neigh_csv = neighbors_report(adatas, spotlight=spotlight, ignore_self=ignore_self)
+        save_reports(neigh_mqc, neigh_csv, "neighbors")
     except Exception as e:
         log.warning(f"Could not generate neighbors report: {e}")
 
