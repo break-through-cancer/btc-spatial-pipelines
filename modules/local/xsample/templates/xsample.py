@@ -49,6 +49,7 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
         ligrecs = ligrec_from_adatas(adatas, type='moranI', spotlight=None, samples=samples)
         #pick only the Moran's I value index
         ligrecs = ligrecs[ligrecs.index.get_level_values(-1) == 'I']
+        ligrecs = ligrecs.droplevel(-1)
 
     if pvalues is not None:
         # filter sample ligrec pairs by p-value to reduce multiple testing
