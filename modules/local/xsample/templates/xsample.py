@@ -656,15 +656,35 @@ if __name__ == '__main__':
 
             # co-occurence by groups (place each adata in the appropriate group based on its obs)
             try:
-                g1_adatas = [a for a in adatas if a.obs[var].unique()[0] == groups[0]]
-                g2_adatas = [a for a in adatas if a.obs[var].unique()[0] == groups[1]]
-                log.info(f"Generating co-occurrence report for variable {var} with groups {groups}. Group 1 has {len(g1_adatas)} samples, group 2 has {len(g2_adatas)} samples.")
-                co_occ_g1_mqc, co_occ_g1_csv = co_occurrence_report(g1_adatas, spotlight=spotlight)
-                co_occ_g2_mqc, co_occ_g2_csv = co_occurrence_report(g2_adatas, spotlight=spotlight)
-                save_reports(co_occ_g1_mqc, co_occ_g1_csv, f"co_occurrence_{var}_{groups[0]}",
-                                mqc_reports_dir, reports_dir)
-                save_reports(co_occ_g2_mqc, co_occ_g2_csv, f"co_occurrence_{var}_{groups[1]}",
-                                mqc_reports_dir, reports_dir)
+                co_occ_mqc, co_occ_csv = co_occurrence_report(adatas, spotlight=spotlight)
+                co_occ_csv.insert(0, 'group', np.where(co_occ_csv.index.get_level_values('sample').isin(group1), groups[0], groups[1]))
+                reports = []
+                cell_types = co_occ_csv.index.get_level_values('cell_type').unique()
+                for ct in cell_types:
+                    ct_df = co_occ_csv.xs(ct, level='cell_type')
+                    group1_df = ct_df[ct_df['group'] == groups[0]].drop(columns='group')
+                    group2_df = ct_df[ct_df['group'] == groups[1]].drop(columns='group')
+                    # compute median distance between groups for each co-occurring cell type
+                    g1 = group1_df.groupby(['co_cell_type']).median()
+                    g2 = group2_df.groupby(['co_cell_type']).median()
+                    common_index = g1.index.intersection(g2.index)
+                    g1, g2 = g1.loc[common_index], g2.loc[common_index]
+                    z_diff = (g1 - g2)
+                    z_diff_report = z_diff.to_dict()
+                    reports.append(z_diff_report)
+                mqc_report = {
+                    "id": f"co_occurrence_diff_{var}",
+                    "plot_type": "line",
+                    "description": f"Median difference of co-occurrence across groups of variable {var}.",
+                    "pconfig": {
+                        "title": f"Co-occurrence difference for {ct} by {var}",
+                        "ylab": "Median difference",
+                        "xlab": "Co-occurring cell type",
+                        "data_labels": list(cell_types)
+                    },
+                    "data": reports
+                }
+                save_reports(mqc_report, co_occ_csv, f"co_occurrence_diff_{var}", mqc_reports_dir, reports_dir)
             except Exception as e:
                 log.warning(f"Could not generate co-occurrence report for variable {var}: {e}")
 
