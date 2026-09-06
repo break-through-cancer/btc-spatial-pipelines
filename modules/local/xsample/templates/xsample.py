@@ -263,7 +263,7 @@ def diff_neighbors_report(neighbors_df:pd.DataFrame, group1=None, group2=None):
     diff_neighbors = xsample_ttest(report, group1, group2)
     return diff_neighbors
 
-def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_centrality_scores'):
+def centrality_reports(adatas, spotlight=None, groups=None, uns_key='cell_type_centrality_scores'):
     #separately for each score as multiqc does not support data_labels for heatmaps
     memos = {
         'closeness_centrality': "This graph measure reflects how close the group is to other nodes.",
@@ -274,11 +274,7 @@ def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_c
     adatas_scores = [a.uns[uns_key].keys().tolist() for a in adatas if uns_key in a.uns]
     if not adatas_scores:
         return {}
-    all_scores = set.union(*[set(s) for s in adatas_scores])
-    if scores:
-        scores = all_scores.intersection(set(scores))
-    else:
-        scores = all_scores
+    scores = set.union(*[set(s) for s in adatas_scores])
     reports = {}
     for score in scores:
         sample_dict = {}
@@ -296,6 +292,14 @@ def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_c
                 if cell_type in cell_types:
                     centrality_dict[cell_type] = centrality_scores.iloc[i]
             sample_dict[adata.obs['id'].unique()[0]] = centrality_dict
+            # differential scores if groups are provided
+            csv_report = pd.DataFrame(sample_dict)
+            if groups:
+                try:
+                    group1, group2 = groups
+                    csv_report = xsample_ttest(csv_report, group1, group2)
+                except Exception as e:
+                    log.warning(f"Could not perform t-test for score {score}: {e}")
 
         mqc_report = {
             "id": f"{score}",
@@ -308,7 +312,7 @@ def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_c
             },
             "data": sample_dict
         }
-        reports[score] = mqc_report
+        reports[score] = [mqc_report, csv_report]
     return reports
 
 
@@ -519,8 +523,7 @@ if __name__ == '__main__':
         log.info("Generating centrality report.")
         centrality = centrality_reports(adatas, spotlight=spotlight)
         for score, report in centrality.items():
-            with open(f"{mqc_reports_dir}/{score}_mqc.json","w") as f:
-                json.dump(report, f, indent=4)
+            save_reports(report[0], report[1], f"centrality_{score}")
     except Exception as e:
         log.warning(f"Could not generate centrality report: {e}")
 
@@ -585,7 +588,7 @@ if __name__ == '__main__':
                 log.info("Generating differential neighbors report.")
                 res_mqc, res_csv = neighbors_report(adatas, spotlight=spotlight, ignore_self=False)
                 diff_res = diff_neighbors_report(res_csv, group1=group1, group2=group2)
-                save_reports(None, diff_res, f"neighbors_diff_{var}_results")
+                save_reports(None, diff_res, f"neighbors_diff_{var}")
             except Exception as e:
                 log.warning(f"Could not generate neighbors report for variable {var}: {e}")
             
@@ -594,9 +597,18 @@ if __name__ == '__main__':
                 try:
                     res_mqc, res = heatmap_report(adatas, groups=[group1,group2],
                                                   spotlight=spotlight, show=show, tool=r, filter=filter)
-                    save_reports(res_mqc, res, f"{r}_diff_{var}_results")
+                    save_reports(res_mqc, res, f"{r}_diff_{var}")
                 except Exception as e:
                     log.warning(f"Could not generate {r} report for variable {var}: {e}")
+
+            # differential centrality reports
+            try:
+                log.info("Generating differential centrality reports.")
+                centrality_reports_res = centrality_reports(adatas, spotlight=spotlight, groups=[group1, group2])
+                for score, report in centrality_reports_res.items():
+                    save_reports(report[0], report[1], f"centrality_{score}_diff_{var}")
+            except Exception as e:
+                log.warning(f"Could not generate centrality report for variable {var}: {e}")
 
             # deseq2 on pseudobulks split by cell type
             try:
@@ -623,9 +635,9 @@ if __name__ == '__main__':
                     else:
                         log.info(f"Deseq2 results for {ct} cell type with variable {var}:{deseq_res.shape[0]} significant genes found.")
                         de_results[ct] = deseq_res
-                        deseq_res.to_csv(f"{reports_dir}/deseq2_diff_{var}_results_{ct}.csv")
+                        deseq_res.to_csv(f"{reports_dir}/deseq2_diff_{var}_{ct}.csv")
                 mqc_report = de_report(de_results, spotlight=spotlight, filter=filter, show=show, contrast=contrasts)
-                save_reports(mqc_report, None, f"deseq2_diff_{var}_results",
+                save_reports(mqc_report, None, f"deseq2_diff_{var}",
                                 mqc_reports_dir, reports_dir)
             except Exception as e:
                 log.warning(f"Could not perform DESeq2 analysis for variable {var}: {e}")
