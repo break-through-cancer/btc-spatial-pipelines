@@ -49,6 +49,7 @@ nextflow_process{
             assert process.out.multiqc_files
             assert file("${outputDir}/staple/reports/deseq2_diff_response_tumor.csv").exists()
             assert file("${outputDir}/staple/reports/Moran_I_diff_response.csv").exists()
+            assert file("${outputDir}/staple/reports/neighbors_diff_response.csv").exists()
             assert file("${outputDir}/staple/reports/pseudobulk.h5ad").exists()
         }
     }

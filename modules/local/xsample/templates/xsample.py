@@ -255,8 +255,8 @@ def diff_neighbors_report(neighbors_df:pd.DataFrame, group1=None, group2=None):
     # ALR transform using self neighborhood as the reference and pad for 0s
     report = neighbors_df.copy()
     for neighbor, cell_type in neighbors_df.index:
-        self_value = report.loc[(cell_type, cell_type)]
-        alr = np.log((report.loc[(neighbor, cell_type)] + 1e-10) / (self_value + 1e-10))
+        self_value = neighbors_df.loc[(cell_type, cell_type)]
+        alr = np.log((neighbors_df.loc[(neighbor, cell_type)] + 1e-10) / (self_value + 1e-10))
         report.loc[(neighbor, cell_type)] = alr
     
     # run ttest across samples for each neighbor-cell_type pair
@@ -658,14 +658,18 @@ if __name__ == '__main__':
                     common_index = g1.index.intersection(g2.index)
                     g1, g2 = g1.loc[common_index], g2.loc[common_index]
                     z_diff = (g1 - g2)
-                    z_diff_report = z_diff.to_dict()
+                    report_dict = z_diff.to_dict(orient='index')
+                    z_diff_report = {
+                        k: [[i, report_dict[k][i]] for i in report_dict[k].keys()]
+                        for k in report_dict.keys()
+                    }
                     reports.append(z_diff_report)
                 mqc_report = {
                     "id": f"co_occurrence_diff_{var}",
-                    "plot_type": "line",
+                    "plot_type": "linegraph",
                     "description": f"Median difference of co-occurrence across groups of variable {var}.",
                     "pconfig": {
-                        "title": f"Co-occurrence difference for {ct} by {var}",
+                        "title": f"Co-occurrence difference by {var}",
                         "ylab": "Median difference",
                         "xlab": "Co-occurring cell type",
                         "data_labels": list(cell_types)
@@ -679,5 +683,4 @@ if __name__ == '__main__':
     #wrapup
     for adata in adatas:
         adata.file.close()
-
 
