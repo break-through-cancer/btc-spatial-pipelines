@@ -193,7 +193,7 @@ def de_report(de_dict, spotlight=None, filter=0.05, show=100, contrast=None, p='
 
 
 
-def neighbors_report(adatas, spotlight=None, ignore_self=True):
+def neighbors_report(adatas, spotlight=None, groups=None, ignore_self=True):
     self_type = "omitted" if ignore_self else "included"
     if spotlight:
         cell_types = spotlight    
@@ -240,7 +240,7 @@ def neighbors_report(adatas, spotlight=None, ignore_self=True):
     mqc_report = {
         "id": "spatial_neighbors",
         "plot_type": "bar",
-        "description": f"Cell type neighborhood across samples.The rate of self-neighborhood indicates clustering of a cell type. The rate of neighbors with other cell types (self omitted) indicates how these clusters interact with each other. Self is {self_type} in this report based on the pipeline settings.",
+        "description": f"Cell type neighborhood across samples. The rate of self-neighborhood indicates clustering of a cell type. The rate of neighbors with other cell types (self omitted) indicates how these clusters interact with each other. Self is {self_type} in this report based on the pipeline settings.",
         "pconfig": {
             "title": "Cell type neighborhood across samples",
             "ylab": "Neighboring cell type share",
@@ -253,13 +253,14 @@ def neighbors_report(adatas, spotlight=None, ignore_self=True):
 
 def diff_neighbors_report(neighbors_df:pd.DataFrame, group1=None, group2=None):
     # ALR transform using self neighborhood as the reference and pad for 0s
-    alr_report = neighbors_df.copy()
+    report = neighbors_df.copy()
     for neighbor, cell_type in neighbors_df.index:
-        self_value = alr_report.loc[(cell_type, cell_type)]
-        alr_report.loc[(neighbor, cell_type)] = np.log((alr_report.loc[(neighbor, cell_type)] + 1e-10) / (self_value + 1e-10))
+        self_value = report.loc[(cell_type, cell_type)]
+        alr = np.log((report.loc[(neighbor, cell_type)] + 1e-10) / (self_value + 1e-10))
+        report.loc[(neighbor, cell_type)] = alr
     
     # run ttest across samples for each neighbor-cell_type pair
-    diff_neighbors = xsample_ttest(alr_report, group1, group2)
+    diff_neighbors = xsample_ttest(report, group1, group2)
     return diff_neighbors
 
 def centrality_reports(adatas, spotlight=None, scores=None, uns_key='cell_type_centrality_scores'):
@@ -499,7 +500,7 @@ if __name__ == '__main__':
     adata_paths = collected.split(" ")
     adatas = [ad.read_h5ad(path, backed="r") for path in adata_paths]
 
-    #place all mqc reports here
+    #place all csv and mqc reports here
     reports_dir = "reports"
     os.makedirs(reports_dir, exist_ok=True)
     mqc_reports_dir = "reports/mqc"
@@ -535,12 +536,8 @@ if __name__ == '__main__':
     # prepare pseudobulk adata for deseq2, with all variables as grouping variables
     if pb_vars:
         # split comma-separated variables, trim whitespace, and preserve order without duplicates
-        raw_vars = pb_vars.split(",")
-        pb_vars = []
-        for v in raw_vars:
-            v = v.strip()
-            if v and v not in pb_vars:
-                pb_vars.append(v)
+        raw_vars = [v.strip() for v in pb_vars.split(",")]
+        pb_vars = [v for v in dict.fromkeys(raw_vars) if v]
         log.info(f"Using specified variables for pseudobulk grouping: {pb_vars}")
     else:
         # start from all_vars as a list, preserving order and removing duplicates
@@ -560,30 +557,24 @@ if __name__ == '__main__':
         pb_adata.write(f"{reports_dir}/pseudobulk.h5ad")
     
     # make reports
+    supported_heatmap_tools = ['squidpy_ligrec', 'spacemarkers_LRscores', 'Moran_I']
     # if no cats found, just produce overall reports
     if cats is None or len(cats) == 0:
-        try:
-            res_mqc, res = heatmap_report(adatas, spotlight=spotlight, show=show, tool='squidpy_ligrec', filter=filter)
-            save_reports(res_mqc, res, "ligrec_overall")
-        except Exception as e:
-            log.warning(f"Could not generate overall ligand-receptor report: {e}")
-        try:
-            lrs_mqc, lrs = heatmap_report(adatas, spotlight=spotlight, show=show, tool='spacemarkers_LRscores', filter=filter)
-            save_reports(lrs_mqc, lrs, "lrscores_overall")
-        except Exception as e:
-            log.warning(f"Could not generate overall LR scores report: {e}")
-        try:
-            moran_mqc, moran = heatmap_report(adatas, spotlight=spotlight, show=show, tool='Moran_I', filter=filter)
-            save_reports(moran_mqc, moran, "moranI_overall")
-        except Exception as e:
-            log.warning(f"Could not generate overall Moran's I report: {e}")
+        # cycle through tools with supported heatmap reports
+        for r in supported_heatmap_tools:
+            try:
+                res_mqc, res = heatmap_report(adatas, spotlight=spotlight, show=show, tool=r, filter=filter)
+                save_reports(res_mqc, res, f"{r}_overall")
+            except Exception as e:
+                log.warning(f"Could not generate overall report for {r}: {e}")
         try:
             co_occ_mqc, co_occ_csv = co_occurrence_report(adatas, spotlight=spotlight)
-            save_reports(co_occ_mqc, co_occ_csv, "co_occurrence_overall", mqc_reports_dir, reports_dir)
+            save_reports(co_occ_mqc, co_occ_csv, "co_occurrence_overall")
         except Exception as e:
             log.warning(f"Could not generate overall co-occurrence report: {e}")
+
+    # for variables with 2 groups, perform contrast tests
     else:
-        # for variables with 2 groups, perform appropriate tests
         for var in cats.keys():
             groups = [x for x in cats[var]]
             group1 = cats[var][groups[0]].tolist()
@@ -598,29 +589,14 @@ if __name__ == '__main__':
             except Exception as e:
                 log.warning(f"Could not generate neighbors report for variable {var}: {e}")
             
-            #squidpy ligrec
-            try:
-                res_mqc, res = heatmap_report(adatas, groups=[group1,group2],
-                                              spotlight=spotlight, show=show, tool="squidpy_ligrec", filter=filter)
-                save_reports(res_mqc, res, f"ligrec_diff_{var}_results")
-            except Exception as e:
-                log.warning(f"Could not generate ligand-receptor report for variable {var}: {e}")
-            # SpaceMarkers LR scores
-            try:
-                lrs_mqc, lrs = heatmap_report(adatas, groups=[group1,group2],
-                                              spotlight=spotlight, show=show, tool='spacemarkers_LRscores', filter=filter)
-                save_reports(lrs_mqc, lrs, f"lrscores_diff_{var}_results")
-            except Exception as e:
-                log.warning(f"Could not generate LR scores report for variable {var}: {e}")
-
-            # Moran's I
-            try:
-                moran_mqc, moran = heatmap_report(adatas, groups=[group1,group2],
-                                                  spotlight=spotlight, show=show, tool='Moran_I', filter=filter)
-                save_reports(moran_mqc, moran, f"Moran_I_diff_{var}_results")
-            except Exception as e:
-                log.warning(f"Could not generate Moran's I report for variable {var}: {e}")
-
+            # cycle through tools with supported heatmap reports for each variable
+            for r in supported_heatmap_tools:
+                try:
+                    res_mqc, res = heatmap_report(adatas, groups=[group1,group2],
+                                                  spotlight=spotlight, show=show, tool=r, filter=filter)
+                    save_reports(res_mqc, res, f"{r}_diff_{var}_results")
+                except Exception as e:
+                    log.warning(f"Could not generate {r} report for variable {var}: {e}")
 
             # deseq2 on pseudobulks split by cell type
             try:
