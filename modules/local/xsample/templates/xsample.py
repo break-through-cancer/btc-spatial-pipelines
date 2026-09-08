@@ -25,8 +25,9 @@ def ligrec_from_adatas(adatas, type='ligrec_means', axis=1,
 
     # look if spatial genes are present in ligrec indices (dash-separated) if only_spatial
     if only_spatial:
-        sp_indices = [x.var[x.var['spatially_variable']].index for x in adatas]
-        ligrec_indices = [x.index for x in ligrecs]
+        log.info(f"Filtering {type} to only spatially variable genes.")
+        sp_indices = [x.var[x.var['spatially_variable']].index.tolist() for x in adatas]
+        ligrec_indices = [x.index.tolist() for x in ligrecs]
         spatial_ligrec_indices = [idx for idx in ligrec_indices if any(sp in idx for sp in sp_indices)]
         ligrecs = [x.loc[x.index.isin(spatial_ligrec_indices)] for x in ligrecs]
 
@@ -583,7 +584,8 @@ if __name__ == '__main__':
         # cycle through tools with supported heatmap reports
         for r in supported_heatmap_tools:
             try:
-                res_mqc, res = heatmap_report(adatas, spotlight=spotlight, show=show, tool=r, filter=filter)
+                res_mqc, res = heatmap_report(adatas, spotlight=spotlight, show=show,
+                                              tool=r, filter=filter, only_spatial=only_spatial)
                 save_reports(res_mqc, res, f"{r}_overall")
             except Exception as e:
                 log.warning(f"Could not generate overall report for {r}: {e}")
@@ -613,7 +615,9 @@ if __name__ == '__main__':
             for r in supported_heatmap_tools:
                 try:
                     res_mqc, res = heatmap_report(adatas, groups=[group1,group2],
-                                                  spotlight=spotlight, show=show, tool=r, filter=filter)
+                                                  spotlight=spotlight, show=show,
+                                                  tool=r, filter=filter,
+                                                  only_spatial=only_spatial)
                     save_reports(res_mqc, res, f"{r}_diff_{var}")
                 except Exception as e:
                     log.warning(f"Could not generate {r} report for variable {var}: {e}")
