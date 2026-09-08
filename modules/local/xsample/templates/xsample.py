@@ -18,10 +18,17 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
 
 def ligrec_from_adatas(adatas, type='ligrec_means', axis=1,
-                            samples=None, spotlight=None):
+                            samples=None, spotlight=None, only_spatial=False):
 
     # extract stat from each adata
     ligrecs = [x.uns[type] for x in adatas if type in x.uns]
+
+    # look if spatial genes are present in ligrec indices (dash-separated) if only_spatial
+    if only_spatial:
+        sp_indices = [x.var[x.var['spatially_variable']].index for x in adatas]
+        ligrec_indices = [x.index for x in ligrecs]
+        spatial_ligrec_indices = [idx for idx in ligrec_indices if any(sp in idx for sp in sp_indices)]
+        ligrecs = [x.loc[x.index.isin(spatial_ligrec_indices)] for x in ligrecs]
 
     # combine sample level
     combined = pd.concat(ligrecs, keys=samples, axis=axis)
@@ -36,12 +43,13 @@ def ligrec_from_adatas(adatas, type='ligrec_means', axis=1,
 
     return res
 
-def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, tool=None):
+def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, tool=None, only_spatial=False):
     samples = [a.obs['id'].unique()[0] for a in adatas]
     pvalues = None
+    # squipy ligrec is not spatial by default, so let's filter that to only spatial if requested
     if tool =='squidpy_ligrec':
-        ligrecs = ligrec_from_adatas(adatas, type='ligrec_means', spotlight=spotlight, samples=samples)
-        pvalues = ligrec_from_adatas(adatas, type='ligrec_pvalues', spotlight=spotlight, samples=samples)
+        ligrecs = ligrec_from_adatas(adatas, type='ligrec_means', spotlight=spotlight, samples=samples, only_spatial=only_spatial)
+        pvalues = ligrec_from_adatas(adatas, type='ligrec_pvalues', spotlight=spotlight, samples=samples, only_spatial=only_spatial)
     elif tool =='spacemarkers_LRscores':
         ligrecs = ligrec_from_adatas(adatas, type='LRscores', spotlight=spotlight, samples=samples)
     elif tool =='Moran_I':
@@ -85,6 +93,9 @@ def heatmap_report(adatas, spotlight=None, groups=None, show=100, filter=0.05, t
         res = ligrecs.sort_values('mean', ascending=False)
         memo = f"Top {show} mean interactions across samples shown as no groups \
                  were specified in the sample sheet."
+
+    if tool == 'squidpy_ligrec' and only_spatial:
+        memo += " Only spatially variable genes included."
 
     res_show = res[samples][:show]
     res_dict = res_show.to_dict()
@@ -144,6 +155,8 @@ def pseudobulk_adatas(adatas, vars=None, only_spatial=False):
         counts[np.isnan(counts)] = 0
     pb_adata.X = counts
     del pb_adata.layers['sum']
+    #record spatial filter
+    pb_adata.uns['only_spatial'] = only_spatial
 
     return pb_adata
 
@@ -155,7 +168,8 @@ def pydeseq_results(pb_adata, spotlight=None, cpus=1, design=None, contrast=None
                        design=design,
                        inference=inference)
     dds.deseq2()
-    de = DeseqStats(dds, contrast=contrast)
+    de = {'only_spatial': pb_adata.uns['only_spatial'], 
+          'results': DeseqStats(dds, contrast=contrast)}
 
     return de
 
@@ -166,13 +180,16 @@ def de_report(de_dict, spotlight=None, filter=0.05, show=100, contrast=None, p='
     # show_p is mainly for testng purposes to allow plotting
     reports = []
     for de in de_dict.values():
-        res_sig = de[de[p] <= filter]
+        res_sig = de['results'][de['results'][p] <= filter]
         res_sig_show = res_sig.sort_values(p).head(show)
         res_sig_show.rename(columns={"log2FoldChange": "x", p: "y"}, inplace=True)
         res_sig_show['y'] = -np.log10(res_sig_show['y'])
         res_dict = res_sig_show.loc[:, ['x','y']].to_dict(orient='index')
         reports.append(res_dict)
     memo = f"DESeq2 results for {contrast[0]} variable with significant DE genes ({p}<={filter}) between {contrast[1]} and {contrast[2]}. Log2 fold change (X) and -log10 adjusted p-value (Y) shown."
+    if any(de['only_spatial'] for de in de_dict.values()):
+        memo += " Only spatially variable genes shown."
+
     mqc_report = {
         "id": f"deseq2_{contrast[0]}",
         "description": memo,
@@ -627,8 +644,8 @@ if __name__ == '__main__':
                                         cpus=cpus, 
                                         design=f"~{var}", 
                                         contrast= contrasts)
-                    de.summary()
-                    deseq_res = de.results_df
+                    de['results'].summary()
+                    deseq_res = de['results'].results_df
                     deseq_res = deseq_res[deseq_res['padj'] <= filter]
                     if(deseq_res.empty):
                         log.warning(f"No significant DE genes found for {ct} cell type with variable {var}.")
@@ -664,10 +681,13 @@ if __name__ == '__main__':
                         for k in report_dict.keys()
                     }
                     reports.append(z_diff_report)
+                memo = f"Median difference of co-occurrence across groups of variable {var} ({groups[0]} - {groups[1]})."
+                if spotlight:
+                    memo += f" Spotlight mode on {spotlight}"
                 mqc_report = {
                     "id": f"co_occurrence_diff_{var}",
                     "plot_type": "linegraph",
-                    "description": f"Median difference of co-occurrence across groups of variable {var}.",
+                    "description": memo,
                     "pconfig": {
                         "title": f"Co-occurrence difference by {var}",
                         "ylab": "Median difference",
